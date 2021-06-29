@@ -8,8 +8,8 @@ import { TextInput } from "react-native-gesture-handler";
 type TextInputBoxProps = {
     style?: ViewStyle,
     textStyle?: TextStyle,
-    extraBoxProps?: View['props'],
-    extraTextProps?: TextInput['props']
+    boxProps?: View['props'],
+    textProps?: TextInput['props']
 }
 
 type State = {}
@@ -19,16 +19,16 @@ export default class TextInputBox extends Component<TextInputBoxProps, State> {
     render() {
         return (
             <View
-                {...this.props.extraBoxProps}
+                {...this.props.boxProps}
                 style={[defaults.inputBox, this.props.style]}
             >
                 <TextInput
-                    {...this.props.extraTextProps}
                     style={[defaults.inputText, this.props.textStyle]}
                     disableFullscreenUI={true}
                     focusable={true}
                     textAlign={"center"}
                     textAlignVertical={"center"}
+                    {...this.props.textProps}
                 >
                     {this.props.children}
                 </TextInput>

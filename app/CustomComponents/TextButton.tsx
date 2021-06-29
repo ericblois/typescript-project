@@ -14,24 +14,20 @@ type Props = {
     rightIconSource?: number,
     rightIconStyle?: ImageStyle,
     buttonStyle?: ViewStyle,
-    buttonFunc?: (event?: GestureResponderEvent) => void
+    buttonFunc?: (event?: GestureResponderEvent) => void,
+    textProps?: Text['props'],
+    subtextProps?: Text['props'],
+    touchableProps?: TouchableOpacity['props']
 }
 
 type State = {}
 
 export default class TextButton extends Component<Props, State> {
 
-    static createButtons(buttonData: Props[]) {
-        const buttons = buttonData.map((button: Props, index) => {
-        return <TextButton text={button.text} buttonFunc={button.buttonFunc} key={index}/>;
-        })
-        return buttons;
-    }
-
     renderSubtext() {
         if (this.props.subtext) {
             return (
-                <Text style = {[styles.subtextStyle, this.props.subtextStyle]}>
+                <Text style = {[styles.subtextStyle, this.props.subtextStyle]} {...this.props.subtextProps}>
                     {this.props.subtext!}
                 </Text>
             )
@@ -72,9 +68,10 @@ export default class TextButton extends Component<Props, State> {
             <TouchableOpacity
             style={{...styles.buttonStyle, ...this.props.buttonStyle}}
             onPress={this.props.buttonFunc}
+            {...this.props.touchableProps}
             >
                 <View style={{alignItems: "center", justifyContent: "center"}}>
-                    <Text style = {[styles.textStyle, this.props.textStyle]}>
+                    <Text style = {[styles.textStyle, this.props.textStyle]} {...this.props.textProps}>
                         {this.props.text}
                     </Text>
                     {this.renderSubtext()}

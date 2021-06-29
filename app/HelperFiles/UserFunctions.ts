@@ -19,7 +19,7 @@ export default abstract class UserFunctions {
             const docPath = "/userData/".concat(id)
             const docRef = firestore.doc(docPath)
             const userData = await ServerData.getDoc(docRef)
-            return userData
+            return userData as UserData
         } catch(e) {
             throw e;
         }
@@ -35,8 +35,8 @@ export default abstract class UserFunctions {
             throw e;
         }
     }
-
-    static async createNewBusiness() {
+    // Create a new business, returns business id
+    static async createNewBusiness(country: string) {
         try {
             // Get user's data
             const userData = (await UserFunctions.getUserDoc()) as UserData
@@ -54,10 +54,17 @@ export default abstract class UserFunctions {
             // Create a new document for the public data
             let publicBusinessData: PublicBusinessData = {
                 id: businessID,
+                country: country
             }
             const publicDocPath = "/publicBusinessData/".concat(userData.country).concat("/businesses")
             const publicColRef = firestore.collection(publicDocPath)
             const publicDocRef = await ServerData.addDoc(publicBusinessData, publicColRef, businessID)
+
+            let newBusinessIDs = userData.businessIDs
+            newBusinessIDs.push(businessID)
+            UserFunctions.updateUserDoc({businessIDs: newBusinessIDs})
+
+            return businessID
         } catch(e) {
             throw e;
         }

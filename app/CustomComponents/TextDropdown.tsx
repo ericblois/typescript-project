@@ -4,9 +4,10 @@ import PropTypes from 'prop-types';
 import { NavigationProp, useNavigation } from "@react-navigation/native"
 import { styleValues, defaults } from "../HelperFiles/StyleSheet";
 import { TextInput } from "react-native-gesture-handler";
-import DropDownPicker from 'react-native-dropdown-picker';
+import DropDownPicker, { DropDownPickerProps } from 'react-native-dropdown-picker';
 
 type TextDropdownProps = {
+    items: DropDownPickerProps["items"],
     style?: ViewStyle,
     extraProps?: (typeof DropDownPicker)['defaultProps'],
 }
@@ -26,7 +27,7 @@ export default class TextDropdown extends Component<TextDropdownProps, State> {
                 searchableStyle={defaults.dropdownText}
                 activeLabelStyle={defaults.dropdownText}
                 selectedLabelStyle={defaults.dropdownText}
-                items={[]}
+                items={this.props.items}
                 {...this.props.extraProps}
             />
         )

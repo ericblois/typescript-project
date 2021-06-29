@@ -10,42 +10,65 @@ import { BusinessMainStackParamList } from "../HelperFiles/Navigation"
 import TextInputBox from "../CustomComponents/TextInputBox";
 import { PublicBusinessData } from "../HelperFiles/DataTypes";
 import * as Permissions from 'expo-permissions';
-import { ImageSliderSelector, MapPopup } from "../HelperFiles/CompIndex";
+import { ImageSliderSelector, MapPopup, MenuBar } from "../HelperFiles/CompIndex";
+import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 
-type BusinessEditInfoNavigationProp = StackNavigationProp<BusinessMainStackParamList, "businessEditInfo">;
+type BusinessEditInfoNavigationProp = StackNavigationProp<BusinessMainStackParamList, "editInfo">;
 
-type BusinessEditInfoRouteProp = RouteProp<BusinessMainStackParamList, "businessEditInfo">;
+type BusinessEditInfoRouteProp = RouteProp<BusinessMainStackParamList, "editInfo">;
 
 type BusinessEditInfoProps = {
     navigation: BusinessEditInfoNavigationProp,
     route: BusinessEditInfoRouteProp,
-    businessInfo?: PublicBusinessData
+    businessFuncs: BusinessFunctions
 }
 
 type State = {
-    galleryImages: string[]
+    publicData?: PublicBusinessData,
+    saved: boolean
 }
 
 export default class BusinessEditInfoPage extends Component<BusinessEditInfoProps, State> {
 
-    state = {
-        galleryImages: new Array<string>()
-    }
-
     constructor(props: BusinessEditInfoProps) {
         super(props)
+        this.state = {
+          publicData: undefined,
+          saved: true
+        }
+    }
 
+    componentDidMount() {
+      this.props.businessFuncs.getPublicData().then((publicData) => {
+        this.setState({publicData: publicData})
+      })
     }
 
   render() {
     return (
       <ScrollView contentContainerStyle={defaults.pageContainer}>
-          <ImageSliderSelector uris={this.state.galleryImages}/>
+          <ImageSliderSelector
+            uris={this.state.publicData?.galleryImages ? this.state.publicData.galleryImages : []}
+            onChange={(images) => {
+              let newPublicData = this.state.publicData
+              if (newPublicData) {
+                newPublicData.galleryImages = images
+              }
+              this.setState({publicData: newPublicData, saved: false})
+            }}
+          />
           {/* Title */}
           <TextInputBox
             extraTextProps={{
-                defaultValue: this.props.businessInfo?.name,
-                placeholder: "Business Title"
+                defaultValue: this.state.publicData?.name,
+                placeholder: "Business Title",
+                onChangeText: (text) => {
+                  let newPublicData = this.state.publicData
+                  if (newPublicData) {
+                    newPublicData.name = text
+                  }
+                  this.setState({publicData: newPublicData, saved: false})
+                }
             }}
           ></TextInputBox>
           {/* Description */}
@@ -53,11 +76,32 @@ export default class BusinessEditInfoPage extends Component<BusinessEditInfoProp
             style={styles.descriptionBox}
             textStyle={{fontSize: styleValues.smallerTextSize}}
             extraTextProps={{
-                defaultValue: this.props.businessInfo?.description,
+                defaultValue: this.state.publicData?.description,
                 placeholder: "Description",
-                multiline: true
+                multiline: true,
+                onChangeText: (text) => {
+                  let newPublicData = this.state.publicData
+                  if (newPublicData) {
+                    newPublicData.description = text
+                  }
+                  this.setState({publicData: newPublicData, saved: false})
+                }
             }}
           ></TextInputBox>
+          <MenuBar
+            buttonProps={[
+                {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
+                {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? styleValues.validColor : styleValues.invalidColor}, buttonFunc: () => {
+                    if (this.state.publicData) {
+                        this.props.businessFuncs.updatePublicData(this.state.publicData).then(() => {
+                            this.setState({saved: true})
+                        }, (e) => {
+                            throw e;
+                        })
+                    }
+                }}
+              ]}
+        />
       </ScrollView>
     );
   }

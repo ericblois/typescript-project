@@ -12,6 +12,8 @@ import { initialWindowMetrics } from "react-native-safe-area-context";
 import { UserData } from "./HelperFiles/DataTypes";
 import IconButton from "./CustomComponents/IconButton";
 import ServerData from "./HelperFiles/ServerData";
+import UserFunctions from "./HelperFiles/UserFunctions";
+import { BusinessFunctions } from "./HelperFiles/BusinessFunctions";
 
 type UserSignupNavigationProp = StackNavigationProp<RootStackParamList, "userSignup">;
 
@@ -56,7 +58,13 @@ export default class UserSignupScreen extends Component<Props, State> {
             }
             if (this.accountType != undefined && this.email != undefined && this.password != undefined && this.userData != undefined) {
                 const navKey = this.accountType!.concat("Main")
-                ServerData.createNewUser(this.email, this.password, this.userData).then(() => this.props.navigation.navigate(navKey as keyof RootStackParamList), (e) => {throw e})
+                ServerData.createNewUser(this.email, this.password, this.userData).then(async (user) => {
+                    if (this.accountType === "business") {
+                        const businessID = await UserFunctions.createNewBusiness()
+                        this.props.navigation.navigate("businessMain", {businessFuncs: new BusinessFunctions(businessID)})
+                    }
+                    this.props.navigation.navigate(navKey as keyof RootStackParamList)
+                }, (e) => {throw e})
             } else {
                 console.error("A required value for account sign up is missing.")
             }

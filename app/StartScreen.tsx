@@ -130,7 +130,9 @@ export default class StartScreen extends Component<Props, State> {
         const user = this.state.userText;
         const pass = this.state.passText;
         this.setState({hideAll: true});
-        auth.signInWithEmailAndPassword(user, pass).then(() => {},
+        auth.signInWithEmailAndPassword(user, pass).then(() => {
+            this.props.navigation.navigate("customerMain")
+        },
         (e: any) => {
             console.error(e);
             this.setState({hideAll: false, responseText: "Invalid email/password."});

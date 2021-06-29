@@ -14,7 +14,7 @@ type ImageInfo = {
 
 type Props = {
     uris: string[],
-    loadResponse?: () => void,
+    onChange?: (images: string[]) => void
 }
 
 type State = {
@@ -80,7 +80,11 @@ export default class ImageSliderSelector extends Component<Props, State> {
             }
             currentImages.push({uri: uri, ratio: ratio})
             // Update the URIs and images
-            this.setState({images: currentImages})
+            this.setState({images: currentImages}, () => {
+                if (this.props.onChange) {
+                    this.props.onChange(currentImages.map(({uri}) => uri))
+                }
+            })
         })
     }
     // Remove an image based on its index
@@ -100,7 +104,11 @@ export default class ImageSliderSelector extends Component<Props, State> {
             this.galleryHeight = galleryHeight
         }
         // Update URIs and images
-        this.setState({images: currentImages})
+        this.setState({images: currentImages}, () => {
+            if (this.props.onChange) {
+                this.props.onChange(currentImages.map(({uri}) => uri))
+            }
+        })
     }
     // Get the images of the initial images
     setInitialRatios(uris: string[]) {

@@ -71,7 +71,7 @@ export default class ServerData {
       }
     }
 
-    // Create a new user from a UserData object
+    // Create a new user from a UserData object, returns UserCredential
     static createNewUser = async (email: string, pass: string, userData: UserData) => {
       try {
         // Create a new user account using email
@@ -82,7 +82,7 @@ export default class ServerData {
         const userDataCol = firestore.collection("/userData");
         const userDoc = await ServerData.addDoc(userData, userDataCol, cred.user?.uid)
         // Return the user document's reference
-        return userDoc;
+        return cred;
       } catch (e) {
         throw e;
       }

@@ -13,6 +13,9 @@ import UserSignupLocationPage from "../SignupPages/UserSignupLocationPage"
 import BusinessEditMainPage from "../BusinessEditPages/BusinessEditMainPage"
 import BusinessEditInfoPage from "../BusinessEditPages/BusinessEditInfoPage"
 import BusinessEditLocationPage from "../BusinessEditPages/BusinessEditLocationPage"
+import BusinessEditProductListPage from "../BusinessEditPages/BusinessEditProductListPage"
+import BusinessEditProductCategoryPage from "../BusinessEditPages/BusinessEditProductCategoryPage"
+import BusinessEditProductPage from "../BusinessEditPages/BusinessEditProductPage"
 import BusinessAccountPage from "../BusinessMainPages/BusinessAccountPage"
 
 export { 
@@ -29,5 +32,8 @@ export {
     BusinessEditMainPage,
     BusinessEditInfoPage,
     BusinessEditLocationPage,
+    BusinessEditProductListPage,
+    BusinessEditProductCategoryPage,
+    BusinessEditProductPage,
     BusinessAccountPage
 }

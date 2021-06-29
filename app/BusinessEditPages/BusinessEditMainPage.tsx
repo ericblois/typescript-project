@@ -43,6 +43,9 @@ export default class BusinessEditMainPage extends Component<BusinessEditMainProp
             textStyle={{fontSize: styleValues.smallTextSize}}
             rightIconSource={icons.chevron}
             rightIconStyle={{transform: [{scaleX: -1}]}}
+            buttonFunc={() => {
+              this.props.navigation.navigate("editProductList")
+          }}
         ></TextButton>
         <TextButton
             text={"Location & delivery options"}

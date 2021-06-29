@@ -75,7 +75,7 @@ export const styleValues = {
   iconMajorSize: winWidth * 0.2,
   statusBarHeight: StatusBar.currentHeight != null ? StatusBar.currentHeight : 20,
   roundedPadding: hasRoundCorners() ? winWidth * 0.05 : 0,
-  largestTextSize: winWidth/12,
+  largerTextSize: winWidth/12,
   largeTextSize: winWidth/16,
   mediumTextSize: winWidth/18,
   smallTextSize: winWidth/20,

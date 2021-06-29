@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { StyleSheet, StatusBar, AppState, ActivityIndicator, View } from "react-native";
-import { BusinessEditMainPage, BusinessEditInfoPage, BusinessEditLocationPage, NotificationsPage, BusinessAccountPage } from "./HelperFiles/PageIndex";
+import { BusinessEditMainPage, BusinessEditInfoPage, BusinessEditLocationPage, NotificationsPage, BusinessAccountPage, BusinessEditProductListPage, BusinessEditProductCategoryPage, BusinessEditProductPage } from "./HelperFiles/PageIndex";
 import { MenuBar } from "./HelperFiles/CompIndex"
 import { styleValues } from "./HelperFiles/StyleSheet"
 import { defaults, icons } from "./HelperFiles/StyleSheet";
@@ -19,8 +19,7 @@ type BusinessMainRouteProp = RouteProp<RootStackParamList, "businessMain">;
 
 type Props = {
     navigation: BusinessMainNavigationProp,
-    route: BusinessMainRouteProp,
-    businessID: string
+    route: BusinessMainRouteProp
 }
 
 type State = {
@@ -30,34 +29,14 @@ type State = {
 export default class BusinessMainScreen extends Component<Props, State> {
 
   businessFuncs: BusinessFunctions
-  privateData: PrivateBusinessData
-  publicData: PublicBusinessData
 
   constructor(props: Props) {
     super(props)
     this.state= {
       headerShown: true
     }
-    this.businessFuncs = new BusinessFunctions(props.businessID)
-    this.privateData = {userID: UserFunctions.getCurrentUser().uid}
-    this.publicData = {id: props.businessID}
+    this.businessFuncs = props.route.params.businessFuncs
   }
-
-  componentDidMount() {
-    this.loadBusinessData()
-  }
-
-  async loadBusinessData() {
-    try {
-      let privData = await this.businessFuncs.getPrivateData()
-      let pubData = await this.businessFuncs.getPublicData()
-      this.privateData = privData
-      this.publicData = pubData
-    } catch(e) {
-      throw e;
-    }
-  }
-  
 
   getEditButtons(props: StackHeaderProps) {
     return [
@@ -110,7 +89,9 @@ export default class BusinessMainScreen extends Component<Props, State> {
           />
           <BusinessMainStack.Screen
               name={"editInfo"}
-              component={BusinessEditInfoPage}
+              children={(props) => {
+                return <BusinessEditInfoPage {...props} businessFuncs={this.businessFuncs}/>
+              }}
               listeners={{
                 focus: (event) => {
                   this.setState({headerShown: false})
@@ -118,9 +99,27 @@ export default class BusinessMainScreen extends Component<Props, State> {
               }}
           />
           <BusinessMainStack.Screen
+              name={"editProductList"}
+              children={(props) => {
+                return <BusinessEditProductListPage {...props} businessFuncs={this.businessFuncs}/>
+              }}
+          />
+          <BusinessMainStack.Screen
+              name={"editProductCat"}
+              children={(props) => {
+                return <BusinessEditProductCategoryPage {...props} businessFuncs={this.businessFuncs}/>
+              }}
+          />
+          <BusinessMainStack.Screen
+              name={"editProduct"}
+              children={(props) => {
+                return <BusinessEditProductPage {...props} businessFuncs={this.businessFuncs}/>
+              }}
+          />
+          <BusinessMainStack.Screen
               name={"editLocation"}
               children={(props) => {
-                return <BusinessEditLocationPage {...props} privateBusinessData={this.privateData} businessFuncs={this.businessFuncs}/>
+                return <BusinessEditLocationPage {...props} businessFuncs={this.businessFuncs}/>
               }}
           />
           <BusinessMainStack.Screen

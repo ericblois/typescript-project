@@ -13,6 +13,10 @@ import MapPopup from "../CustomComponents/MapPopup";
 import { LatLng } from "react-native-maps";
 import MenuBar from "../CustomComponents/MenuBar";
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
+import ToggleSwitch from "../CustomComponents/ToggleSwitch";
+import TextInputBox from "../CustomComponents/TextInputBox";
+import DropDownPicker from "react-native-dropdown-picker";
+import TextDropdown from "../CustomComponents/TextDropdown";
 
 type BusinessEditLocationNavigationProp = StackNavigationProp<BusinessMainStackParamList, "editLocation">;
 
@@ -21,12 +25,12 @@ type BusinessEditLocationRouteProp = RouteProp<BusinessMainStackParamList, "edit
 type BusinessEditLocationProps = {
     navigation: BusinessEditLocationNavigationProp,
     route: BusinessEditLocationRouteProp,
-    privateBusinessData?: PrivateBusinessData,
     businessFuncs: BusinessFunctions
 }
 
 type State = {
-    businessCoords?: {latitude: number, longitude: number},
+    privateData?: PrivateBusinessData,
+    publicData?: PublicBusinessData,
     currentLocation?: {latitude: number, longitude: number},
     showCurrentLocation: boolean,
     showChooseLocation: boolean,
@@ -38,15 +42,28 @@ export default class BusinessEditLocationPage extends Component<BusinessEditLoca
     constructor(props: BusinessEditLocationProps) {
         super(props)
         this.state = {
-            businessCoords: props.privateBusinessData?.coords,
+            privateData: undefined,
+            publicData: undefined,
             showCurrentLocation: false,
             showChooseLocation: false,
             saved: true
         }
+        props.navigation.addListener("focus", (event) => {
+            this.refreshData()
+        })
+        this.refreshData()
+    }
+
+    refreshData() {
+        this.props.businessFuncs.getPrivateData().then((privateData) => {
+            this.props.businessFuncs.getPublicData().then((publicData) => {
+                this.setState({privateData: privateData, publicData: publicData})
+            })
+        })
     }
 
     renderViewLocationButton() {
-        if (this.state.businessCoords) {
+        if (this.state.privateData?.coords) {
             return (
                 <TextButton
                     text={"View current location"}
@@ -68,7 +85,7 @@ export default class BusinessEditLocationPage extends Component<BusinessEditLoca
         if (this.state.showCurrentLocation) {
             return (
                 <MapPopup
-                    initialLocation={this.state.businessCoords as LatLng}
+                    initialLocation={this.state.privateData?.coords as LatLng}
                     movableMarker={false}
                     onTapAway={() => {
                         this.setState({showCurrentLocation: false})
@@ -87,9 +104,13 @@ export default class BusinessEditLocationPage extends Component<BusinessEditLoca
                     initialLocation={{latitude: this.state.currentLocation.latitude, longitude: this.state.currentLocation.longitude}}
                     movableMarker={true}
                     onSaveLocation={(region) => {
+                        let newPrivateData = this.state.privateData
+                        if (newPrivateData) {
+                            newPrivateData.coords = {latitude: region.latitude, longitude: region.longitude}
+                        }
                         this.setState({
                             showChooseLocation: false, 
-                            businessCoords: {latitude: region.latitude, longitude: region.longitude}, saved: false})
+                            privateData: newPrivateData, saved: false})
                     }}
                     onTapAway={() => {
                         this.setState({showChooseLocation: false})
@@ -115,7 +136,11 @@ export default class BusinessEditLocationPage extends Component<BusinessEditLoca
                 rightIconStyle={{transform: [{scaleX: -1}]}}
                 buttonFunc={() => {
                     navigator.geolocation.getCurrentPosition((position) => {
-                        this.setState({businessCoords: {latitude: position.coords.latitude, longitude: position.coords.longitude}, saved: false})
+                        let newPrivateData = this.state.privateData
+                        if (newPrivateData) {
+                            newPrivateData.coords = {latitude: position.coords.latitude, longitude: position.coords.longitude}
+                        }
+                        this.setState({privateData: newPrivateData, saved: false})
                     }, (e) => {
                         throw e;
                     })
@@ -144,24 +169,102 @@ export default class BusinessEditLocationPage extends Component<BusinessEditLoca
                 }}
             />
         </View>
-        {this.renderCurrentLocationMap()}
-        {this.renderChooseLocationMap()}
+        <ToggleSwitch
+            text={"Offer local delivery"}
+        />
+        <ToggleSwitch
+            text={"Offer shipping (within country)"}
+        />
+        <ToggleSwitch
+            text={"Offer international shipping"}
+        />
+        <TextInputBox
+            textProps={{
+                placeholder: "Street address",
+                onChangeText: (text) => {
+                    let publicData = this.state.publicData
+                    if (publicData) {
+                        publicData.address = text
+                        this.setState({publicData: publicData, saved: false})
+                    }
+                }
+            }}
+        />
+        <TextInputBox
+            textProps={{
+                placeholder: "Postal code / ZIP",
+                onChangeText: (text) => {
+                    let publicData = this.state.publicData
+                    if (publicData) {
+                        publicData.postalCode = text
+                        this.setState({publicData: publicData, saved: false})
+                    }
+                }
+            }}
+        />
+        <TextInputBox
+            textProps={{
+                placeholder: "City",
+                onChangeText: (text) => {
+                    let publicData = this.state.publicData
+                    if (publicData) {
+                        publicData.city = text
+                        this.setState({publicData: publicData, saved: false})
+                    }
+                }
+            }}
+        />
+        <TextInputBox
+            textProps={{
+                placeholder: "Province / State",
+                onChangeText: (text) => {
+                    let publicData = this.state.publicData
+                    if (publicData) {
+                        publicData.region = text
+                        this.setState({publicData: publicData, saved: false})
+                    }
+                }
+            }}
+        />
+        <TextDropdown
+            items={[
+                {
+                    label: "Canada",
+                    value: "canada"
+                },
+                {
+                    label: "United States",
+                    value: "united_states"
+                }
+            ]}
+            extraProps={{
+                placeholder: "Country",
+                defaultValue: this.state.publicData?.country,
+                onChangeItem: (item) => {
+                    let publicData = this.state.publicData
+                    if (publicData) {
+                        publicData.country = item.value
+                        this.setState({publicData: publicData, saved: false})
+                    }
+                }
+            }}
+        />
         <MenuBar
             buttonProps={[
                 {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
                 {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? styleValues.validColor : styleValues.invalidColor}, buttonFunc: () => {
-                    if (this.state.businessCoords) {
-                        this.props.businessFuncs.updatePrivateData({
-                            coords: this.state.businessCoords
-                        }).then(() => {
-                            this.setState({saved: true})
-                        }, (e) => {
-                            throw e;
-                        })
+                    if (this.state.privateData && this.state.publicData) {
+                        this.props.businessFuncs.updatePrivateData(this.state.privateData).then(() => {
+                            this.props.businessFuncs.updatePublicData(this.state.publicData!).then(() => {
+                                this.setState({saved: true})
+                            }, (e) => {throw e})
+                        }, (e) => {throw e})
                     }
                 }}
               ]}
         />
+        {this.renderCurrentLocationMap()}
+        {this.renderChooseLocationMap()}
       </View>
     );
   }

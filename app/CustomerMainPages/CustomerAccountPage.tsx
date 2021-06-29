@@ -4,9 +4,11 @@ import { styleValues, defaults } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
 import { auth } from "../HelperFiles/Constants";
-import { CustomerMainTabParamList } from "../HelperFiles/Navigation";
+import { BusinessMainStackParamList, CustomerMainTabParamList, RootStackParamList } from "../HelperFiles/Navigation";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { RouteProp } from '@react-navigation/native';
+import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
+import UserFunctions from "../HelperFiles/UserFunctions";
 
 type CustomerAccountNavigationProp = BottomTabNavigationProp<CustomerMainTabParamList, "account">;
 
@@ -36,8 +38,9 @@ export default class CustomerAccountPage extends Component<CustomerAccountProps,
         <TextButton
           text={"Go to business"}
           textStyle={styles.signout}
-          buttonFunc={() => {
-            this.props.navigation.dangerouslyGetParent()?.navigate("businessMain")
+          buttonFunc={async () => {
+            const businessID = (await UserFunctions.getUserDoc()).businessIDs[0]
+            this.props.navigation.dangerouslyGetParent()?.navigate("businessMain" as keyof BusinessMainStackParamList, {businessFuncs: new BusinessFunctions(businessID)} as RootStackParamList["businessMain"])
           }}
         />
       </View>

@@ -31,11 +31,15 @@ type State = {
     confirmPassText: string,
     validConfirm: boolean,
     birthdayValue: Date,
-    birthdayText: string,
+    birthDayText: string,
+    birthMonthText: string,
+    birthYearText: string,
     ageValue: number,
     validBirthday: boolean,
     genderText: "male" | "female" | "nonbinary" | null,
     validGender: boolean,
+    countryText: "canada" | "united_states",
+    validCountry: boolean,
     responseText: string,
     lastInvalid: string,  
 }
@@ -61,10 +65,14 @@ export default class CustomerInfoPage extends Component<Props, State> {
         validConfirm: false,
         birthdayValue: this.today,
         ageValue: 0,
-        birthdayText: "",
+        birthDayText: "",
+        birthMonthText: "",
+        birthYearText: "",
         validBirthday: false,
         genderText: null,
         validGender: false,
+        countryText: "canada",
+        validCountry: false,
         responseText: "",
         lastInvalid: "",
     }
@@ -82,15 +90,21 @@ export default class CustomerInfoPage extends Component<Props, State> {
         } else if (!this.state.validBirthday) {
             this.setState({responseText: "You must be 13 years of age or older to use this service.", lastInvalid: "confirm"});
         } else if (!this.state.validGender) {
-            this.setState({responseText: "Please select your gender.", lastInvalid: "confirm"});
+            this.setState({responseText: "Please select a gender.", lastInvalid: "confirm"});
+        } else if (!this.state.validCountry) {
+            this.setState({responseText: "Please select a country.", lastInvalid: "confirm"});
         } else {
             const userData: UserData = {
                 name: this.state.nameText,
                 gender: this.state.genderText!,
                 age: this.state.ageValue,
-                birthday: this.state.birthdayText,
+                birthDay: this.state.birthDayText,
+                birthMonth: this.state.birthMonthText,
+                birthYear: this.state.birthYearText,
+                country: this.state.countryText,
                 businessIDs: [],
-                shippingAddress: []
+                defaultAddressIndex: 0,
+                shippingAddresses: []
             }
             // Send values up to navigator screen
             if (this.props.infoUpdateCallback) {
@@ -120,7 +134,7 @@ export default class CustomerInfoPage extends Component<Props, State> {
                 </Text>
                 <TextInputBox
                     style={{borderColor: this.state.validName ? styleValues.validColor : styleValues.darkColor}}
-                    extraTextProps={{...this.defaultTextProps, ...{
+                    textProps={{...this.defaultTextProps, ...{
                         onChangeText: async (text) => {
                             this.setState({nameText: text});
                             let validName = false
@@ -149,7 +163,7 @@ export default class CustomerInfoPage extends Component<Props, State> {
                 </Text>
                 <TextInputBox
                     style={{borderColor: this.state.validEmail ? styleValues.validColor : styleValues.invalidColor}}
-                    extraTextProps={{...this.defaultTextProps, ...{
+                    textProps={{...this.defaultTextProps, ...{
                         onChangeText: (text) => {
                             this.setState({emailText: text});
                             let validEmail = false
@@ -178,7 +192,7 @@ export default class CustomerInfoPage extends Component<Props, State> {
                 </Text>
                 <TextInputBox
                     style={{borderColor: this.state.validPass ? styleValues.validColor : styleValues.invalidColor}}
-                    extraTextProps={{...this.defaultTextProps, ...{
+                    textProps={{...this.defaultTextProps, ...{
                         onChangeText: (text) => {
                             this.setState({passText: text});
                             let validPass = false
@@ -203,7 +217,7 @@ export default class CustomerInfoPage extends Component<Props, State> {
                 </TextInputBox>
                 <TextInputBox
                     style={{borderColor: this.state.validConfirm ? styleValues.validColor : styleValues.invalidColor}}
-                    extraTextProps={{...this.defaultTextProps, ...{
+                    textProps={{...this.defaultTextProps, ...{
                         onChangeText: (text) => {
                             this.setState({confirmPassText: text});
                             let validConfirm = false
@@ -238,13 +252,16 @@ export default class CustomerInfoPage extends Component<Props, State> {
                                 throw new Error("No date object given when date changed");
                             }
                             const dateString = date.toLocaleDateString();
+                            const dateDay = date.getDay().toString()
+                            const dateMonth = date.getMonth().toString()
+                            const dateYear = date.getFullYear().toString()
                             const today = new Date();
                             // Get number of days between today and birthday
                             const timeDiff = (today.getTime() - date.getTime())/(86400000);
                             // Check if this birthday is more than 13 years old (365.24*13=4748.12)
                             const isValid = timeDiff >= 4748.12
                             const age = Math.floor(timeDiff/365.24)
-                            this.setState({birthdayText: dateString, birthdayValue: date, ageValue: age, validBirthday: isValid}, this.sendBackValues)
+                            this.setState({birthDayText: dateDay, birthMonthText: dateMonth, birthYearText: dateYear, birthdayValue: date, ageValue: age, validBirthday: isValid}, this.sendBackValues)
                         }
                     }}
                 ></DateScrollPicker>
@@ -253,12 +270,12 @@ export default class CustomerInfoPage extends Component<Props, State> {
                 </Text>
                 <TextDropdown
                     style={{borderColor: this.state.validGender ? styleValues.validColor : styleValues.invalidColor}}
+                    items={[
+                        {label: "Male", value: "male"},
+                        {label: "Female", value: "female"},
+                        {label: "Nonbinary", value: "nonbinary"}
+                    ]}
                     extraProps={{
-                        items: [
-                            {label: "Male", value: "male"},
-                            {label: "Female", value: "female"},
-                            {label: "Nonbinary", value: "nonbinary"}
-                        ],
                         placeholder: "Gender",
                         onChangeItem: (item) => {
                             const value = item.value;
@@ -268,6 +285,25 @@ export default class CustomerInfoPage extends Component<Props, State> {
                         },
                     }}
                 ></TextDropdown>
+                <TextDropdown
+                    style={{borderColor: this.state.validCountry ? styleValues.validColor : styleValues.invalidColor}}
+                    items={[
+                        {
+                            label: "Canada",
+                            value: "canada"
+                        },
+                        {
+                            label: "United States",
+                            value: "united_states"
+                        }
+                    ]}
+                    extraProps={{
+                        placeholder: "Country",
+                        onChangeItem: (item) => {
+                            this.setState({countryText: item.value, validCountry: true})
+                        }
+                    }}
+                />
                 <Text style={styles.inputDescription}>
                     {this.state.responseText}
                 </Text>
@@ -286,7 +322,7 @@ const styles = StyleSheet.create({
         height: "100%",
     },
     signupHeader: {
-        fontSize: styleValues.largestTextSize,
+        fontSize: styleValues.largerTextSize,
     },
     inputElement: {
         width: styleValues.winWidth-2*styleValues.mediumPadding,

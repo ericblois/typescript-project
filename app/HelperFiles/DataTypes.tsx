@@ -15,7 +15,7 @@ export type UserData = {
   birthDay: string,
   birthMonth: string,
   birthYear: string,
-  country: string,
+  country: "canada" | "united_states",
   shippingAddresses: ShippingInfo[],
   defaultAddressIndex: number,
   businessIDs: string[]
@@ -34,19 +34,21 @@ options: ProductOption[]
 
 export type ProductData = {
 businessID: string,
+productID: string,
 category: string,
 name: string,
-price: number,
-description: string,
-images: string[],
-optionTypes: ProductOptionType[],
-ratings: number[],
-extraInfo: string
+price?: number,
+description?: string,
+images?: string[],
+optionTypes?: ProductOptionType[],
+ratings?: number[],
+extraInfo?: string,
+isVisible: boolean
 }
 
 export type ProductCategory = {
-category: string,
-products: ProductData[]
+name: string,
+productIDs: string[]
 }
 
 export type ProductRefCategory = {
@@ -65,7 +67,7 @@ description?: string,
 address?: string,
 city?: string,
 region?: string,
-country?: string,
+country: string,
 postalCode?: string,
 geohash?: string,
 keywords?: string[],

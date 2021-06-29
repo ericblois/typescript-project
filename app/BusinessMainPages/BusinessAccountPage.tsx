@@ -35,10 +35,10 @@ export default class BusinessAccountPage extends Component<BusinessAccountProps,
           }}
         />
         <TextButton
-          text={"Go to business"}
+          text={"Go to customer screen"}
           textStyle={styles.signout}
           buttonFunc={() => {
-            this.props.navigation.dangerouslyGetParent()?.navigate("businessMain")
+            this.props.navigation.dangerouslyGetParent()?.navigate("customerMain")
           }}
         />
         <MenuBar
