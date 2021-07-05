@@ -4,17 +4,23 @@ import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { auth } from "../HelperFiles/Constants";
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp } from '@react-navigation/native';
-import { BusinessMainStackParamList } from "../HelperFiles/Navigation"
+import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
+import { BusinessMainStackParamList, RootStackParamList } from "../HelperFiles/Navigation"
 import { ImageProfileSelector, TextButton, MenuBar } from "../HelperFiles/CompIndex";
+import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
+import UserFunctions from "../HelperFiles/UserFunctions";
 
-type BusinessEditMainNavigationProp = StackNavigationProp<BusinessMainStackParamList, "businessEdit">;
+type BusinessEditMainNavigationProp = CompositeNavigationProp<
+  StackNavigationProp<BusinessMainStackParamList, "businessEdit">,
+  StackNavigationProp<RootStackParamList>
+>
 
 type BusinessEditMainRouteProp = RouteProp<BusinessMainStackParamList, "businessEdit">;
 
 type BusinessEditMainProps = {
     navigation: BusinessEditMainNavigationProp,
-    route: BusinessEditMainRouteProp
+    route: BusinessEditMainRouteProp,
+    businessFuncs: BusinessFunctions
 }
 
 type State = {
@@ -55,6 +61,16 @@ export default class BusinessEditMainPage extends Component<BusinessEditMainProp
             rightIconStyle={{transform: [{scaleX: -1}]}}
             buttonFunc={() => {
               this.props.navigation.navigate("editLocation")
+            }}
+        ></TextButton>
+        <TextButton
+            text={"Delete this business"}
+            buttonStyle={defaults.textButtonNoColor}
+            textStyle={{fontSize: styleValues.smallTextSize, color: "red"}}
+            buttonFunc={() => {
+              UserFunctions.deleteBusiness(this.props.businessFuncs.businessID).then(() => {
+                this.props.navigation.navigate("customerMain")
+              })
             }}
         ></TextButton>
         <MenuBar

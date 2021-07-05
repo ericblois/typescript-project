@@ -8,7 +8,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { BusinessMainStackParamList } from "../HelperFiles/Navigation"
 import TextInputBox from "../CustomComponents/TextInputBox";
-import { ProductCategory, PublicBusinessData } from "../HelperFiles/DataTypes";
+import { ProductCategory, ProductData, PublicBusinessData } from "../HelperFiles/DataTypes";
 import * as Permissions from 'expo-permissions';
 import { ImageSliderSelector, MapPopup, MenuBar } from "../HelperFiles/CompIndex";
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
@@ -26,6 +26,7 @@ type BusinessEditProductProps = {
 
 type State = {
     publicData?: PublicBusinessData,
+    productData?: ProductData,
     saved: boolean
 }
 
@@ -35,22 +36,28 @@ export default class BusinessEditProductPage extends Component<BusinessEditProdu
         super(props)
         this.state = {
           publicData: undefined,
+          productData: undefined,
           saved: true
         }
+        this.refreshData()
     }
 
-    componentDidMount() {
-      this.props.businessFuncs.getPublicData().then((publicData) => {
-        this.setState({publicData: publicData})
-      })
+    async refreshData() {
+      const publicData = await this.props.businessFuncs.getPublicData()
+      const productData = await this.props.businessFuncs.getProduct(this.props.route.params.productID)
+      this.setState({productData: productData})
     }
 
-    renderCategoryCard(cat: ProductCategory) {
+    renderDeleteButton() {
       return (
         <TextButton
-          text={cat.name}
-          buttonFunc={() => {
-            this.props.navigation.navigate("editProductCat")
+          text={"Delete this product"}
+          buttonStyle={defaults.textButtonNoColor}
+          textStyle={{color: "red"}}
+          buttonFunc={async () => {
+            await this.props.businessFuncs.deleteProduct(this.props.route.params.productID).then(() => {
+              this.props.navigation.goBack()
+            })
           }}
         />
       )
@@ -59,20 +66,10 @@ export default class BusinessEditProductPage extends Component<BusinessEditProdu
   render() {
     return (
       <View style={defaults.pageContainer}>
-        <FlatList
-          style={styles.list}
-          data={this.state.publicData?.productList ? this.state.publicData.productList : []}
-          renderItem={({item}) => {
-            return this.renderCategoryCard(item)
-          }}
-          ListHeaderComponent={(
-            <TextButton
-              text={"Create a new category"}
-              buttonStyle={{...defaults.textButtonNoColor, ...{width: "100%", justifyContent: "space-between"}}}
-              rightIconSource={icons.plus}
-            />
-          )}
+        <ImageSliderSelector
+          uris={this.state.productData?.images ? this.state.productData.images : []}
         />
+        {this.renderDeleteButton()}
         <MenuBar
           buttonProps={[
             {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},

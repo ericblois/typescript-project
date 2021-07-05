@@ -13,6 +13,7 @@ export type RootStackParamList = {
     businessShop: {
         businessData: PrivateBusinessData
     },
+    businessCreation: undefined,
     productShop: {
         productData: ProductData,
         productType: string
@@ -58,7 +59,9 @@ export const BusinessShopTab = createBottomTabNavigator<BusinessShopTabParamList
 
 export type UserSignupStackParamList = {
     accountType: undefined,
-    customerInfo: undefined
+    customerInfo: {
+        accountType: "customer" | "business"
+    }
 }
 
 export const UserSignupStack = createStackNavigator<UserSignupStackParamList>();

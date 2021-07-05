@@ -2,7 +2,7 @@ import React, { Component, Fragment } from "react";
 import { View, TouchableOpacity, Text, StyleSheet, TextStyle, ViewStyle, Image, GestureResponderEvent, ImageStyle } from "react-native";
 import PropTypes from 'prop-types';
 import { NavigationProp, useNavigation } from "@react-navigation/native"
-import { styleValues } from "../HelperFiles/StyleSheet";
+import { defaults, styleValues } from "../HelperFiles/StyleSheet";
 
 type Props = {
     text: string,
@@ -42,7 +42,7 @@ export default class TextButton extends Component<Props, State> {
                     source={this.props.leftIconSource}
                     style = {{...styles.iconStyle, ...this.props.leftIconStyle}}
                     resizeMethod={"scale"}
-                    resizeMode={"center"}
+                    resizeMode={"contain"}
                 />
             )
         }
@@ -66,10 +66,11 @@ export default class TextButton extends Component<Props, State> {
     render() {
         return (
             <TouchableOpacity
-            style={{...styles.buttonStyle, ...this.props.buttonStyle}}
+            style={{...defaults.textButtonNoColor, ...this.props.buttonStyle}}
             onPress={this.props.buttonFunc}
             {...this.props.touchableProps}
             >
+                {this.renderLeftIcon()}
                 <View style={{alignItems: "center", justifyContent: "center"}}>
                     <Text style = {[styles.textStyle, this.props.textStyle]} {...this.props.textProps}>
                         {this.props.text}
@@ -101,11 +102,5 @@ const styles = StyleSheet.create({
         tintColor: styleValues.darkGreyColor,
         alignSelf: "center",
         flexWrap: "wrap"
-    },
-    buttonStyle: {
-        alignContent: "center",
-        justifyContent: "space-between",
-        width: "100%",
-        height: styleValues.winWidth*0.15
     },
 });

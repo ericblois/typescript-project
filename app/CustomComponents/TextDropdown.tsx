@@ -20,7 +20,6 @@ export default class TextDropdown extends Component<TextDropdownProps, State> {
         return (
             <DropDownPicker
                 containerStyle={[defaults.dropdownContainer, this.props.style]}
-                style={defaults.dropdown}
                 // Text Styles
                 placeholderStyle={[defaults.dropdownText, {color: styleValues.minorTextColor}]}
                 labelStyle={defaults.dropdownText}

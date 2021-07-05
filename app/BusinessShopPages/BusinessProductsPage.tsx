@@ -2,12 +2,11 @@ import React, { Component, ReactNode } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity } from "react-native";
 import { styleValues, defaults } from "../HelperFiles/StyleSheet";
 import { ProductCard } from "../HelperFiles/CompIndex";
-import { prefetchImages, isProductList, isProductData, isProductOption, isProductOptionType, isProductCategory } from "../HelperFiles/Constants";
+import { prefetchImages } from "../HelperFiles/Constants";
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { BusinessShopTabParamList } from "../HelperFiles/Navigation";
 import { RouteProp } from '@react-navigation/native';
 import { PrivateBusinessData, ProductCategory } from "../HelperFiles/DataTypes";
-import BusinessDataHandler from "../HelperFiles/BusinessDataHandler";
 
 type BusinessProductsNavigationProp = BottomTabNavigationProp<BusinessShopTabParamList, "products">;
 

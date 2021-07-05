@@ -1,16 +1,20 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, } from "react-native";
-import { styleValues, defaults } from "../HelperFiles/StyleSheet";
+import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
 import { auth } from "../HelperFiles/Constants";
 import { BusinessMainStackParamList, CustomerMainTabParamList, RootStackParamList } from "../HelperFiles/Navigation";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
-import { RouteProp } from '@react-navigation/native';
+import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 import UserFunctions from "../HelperFiles/UserFunctions";
+import { StackNavigationProp } from "@react-navigation/stack";
 
-type CustomerAccountNavigationProp = BottomTabNavigationProp<CustomerMainTabParamList, "account">;
+type CustomerAccountNavigationProp = CompositeNavigationProp<
+  BottomTabNavigationProp<CustomerMainTabParamList, "account">,
+  StackNavigationProp<RootStackParamList>
+>
 
 type CustomerAccountRouteProp = RouteProp<CustomerMainTabParamList, "account">;
 
@@ -20,29 +24,99 @@ type CustomerAccountProps = {
 }
 
 type CustomerAccountState = {
+  businessButtons: JSX.Element[]
 }
 
 export default class CustomerAccountPage extends Component<CustomerAccountProps, CustomerAccountState> {
 
+  constructor(props: CustomerAccountProps) {
+    super(props)
+    this.state = {
+      businessButtons: []
+    }
+    this.props.navigation.addListener("focus", (event) => {
+      this.getBusinesses()
+    })
+    this.getBusinesses()
+  }
+
+  async getBusinesses() {
+    const userData = await UserFunctions.getUserDoc()
+    const buttons = await Promise.all(userData.businessIDs.map(async (businessID, index) => {
+      const businessFuncs = new BusinessFunctions(businessID)
+      const businessName = (await businessFuncs.getPublicData()).name
+      return (
+        <TextButton
+          text={businessName ? businessName : "Unnamed business"}
+          subtext={businessID}
+          buttonStyle={defaults.textButtonNoColor}
+          buttonFunc={() => {
+            this.props.navigation.navigate("businessMain", {businessFuncs: businessFuncs})
+          }}
+          key={index.toString()}
+        />
+      )
+    }))
+    this.setState({businessButtons: buttons})
+  }
+
+  renderCreateBusinessButton() {
+    return (
+      <TextButton
+        text={"Create a new business"}
+        buttonStyle={{...defaults.textButtonNoColor, ...{justifyContent: "space-between"}}}
+        rightIconSource={icons.plus}
+        buttonFunc={async () => {
+          // Create a new business
+          const businessID = await UserFunctions.createNewBusiness()
+          const businessFuncs = new BusinessFunctions(businessID)
+          this.props.navigation.navigate("businessMain", {businessFuncs: businessFuncs})
+        }}
+      />
+    )
+  }
+
+  renderDeleteAccountButton() {
+    return (
+      <TextButton
+        text={"Delete this account"}
+        buttonStyle={defaults.textButtonNoColor}
+        textStyle={{color: "red"}}
+        buttonFunc={() => {
+          UserFunctions.deleteAccount().then(() => {
+            this.props.navigation.navigate("start")
+          })
+        }}
+      />
+    )
+  }
+
   render() {
     return (
       <View style={defaults.pageContainer}>
-        <Text>account</Text>
+        <Text
+          style={{
+            fontSize: styleValues.largeTextSize
+          }}
+        >
+          Your Account
+        </Text>
         <TextButton
           text={"Sign Out"}
-          textStyle={styles.signout}
           buttonFunc={() => {
-            auth.signOut().then(() => this.props.navigation.dangerouslyGetParent()?.navigate("start"));
+            auth.signOut().then(() => this.props.navigation.navigate("start"));
           }}
-        />
-        <TextButton
-          text={"Go to business"}
-          textStyle={styles.signout}
-          buttonFunc={async () => {
-            const businessID = (await UserFunctions.getUserDoc()).businessIDs[0]
-            this.props.navigation.dangerouslyGetParent()?.navigate("businessMain" as keyof BusinessMainStackParamList, {businessFuncs: new BusinessFunctions(businessID)} as RootStackParamList["businessMain"])
+        ></TextButton>
+        <Text
+          style={{
+            fontSize: styleValues.largeTextSize
           }}
-        />
+        >
+          Businesses
+        </Text>
+        {this.state.businessButtons}
+        {this.renderCreateBusinessButton()}
+        {this.renderDeleteAccountButton()}
       </View>
     );
   }

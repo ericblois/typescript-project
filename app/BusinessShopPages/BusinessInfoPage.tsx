@@ -8,7 +8,6 @@ import { PrivateBusinessData } from "../HelperFiles/DataTypes"
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { BusinessShopTabParamList } from "../HelperFiles/Navigation";
 import { RouteProp } from '@react-navigation/native';
-import BusinessDataHandler from "../HelperFiles/BusinessDataHandler";
 
 type BusinessInfoNavigationProp = BottomTabNavigationProp<BusinessShopTabParamList, "info">;
 
@@ -118,7 +117,7 @@ const styles = StyleSheet.create({
         padding: styleValues.minorPadding
     },
     businessTitle: {
-        fontSize: styleValues.largestTextSize,
+        fontSize: styleValues.largerTextSize,
         color: styleValues.majorTextColor,
     },
     businessType: {

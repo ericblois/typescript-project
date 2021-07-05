@@ -29,6 +29,7 @@ type BusinessEditProductCategoryProps = {
 
 type State = {
     productCategory: ProductCategory,
+    products: ProductData[],
     showPopup: boolean,
     saved: boolean
 }
@@ -42,15 +43,22 @@ export default class BusinessEditProductCategoryPage extends Component<BusinessE
             name: props.route.params.productCategory,
             productIDs: []
           },
+          products: [],
           showPopup: false,
           saved: true
         }
+        props.navigation.addListener("focus", (event) => {
+          this.refreshData()
+        })
+        this.refreshData()
     }
 
-    componentDidMount() {
-      this.props.businessFuncs.getProductCategory(this.props.route.params.productCategory).then((productCat) => {
-        this.setState({productCategory: productCat})
-      })
+    async refreshData() {
+      const productCat = await this.props.businessFuncs.getProductCategory(this.props.route.params.productCategory)
+      let products = await Promise.all(productCat.productIDs.map((productID) => {
+        return this.props.businessFuncs.getProduct(productID)
+      }))
+      this.setState({productCategory: productCat, products: products})
     }
 
     renderTextPopup() {
@@ -66,12 +74,13 @@ export default class BusinessEditProductCategoryPage extends Component<BusinessE
                 name: text,
                 isVisible: false
               }
-              this.props.businessFuncs.addProduct(newProduct)
-              const newProductCat = await this.props.businessFuncs.getProductCategory(this.props.route.params.productCategory)
-              this.setState({productCategory: newProductCat, showPopup: false})
+              await this.props.businessFuncs.createProduct(newProduct)
+              this.refreshData().then(() => {
+                this.setState({showPopup: false})
+              })
             }}
             textInputProps={{
-              extraTextProps: {
+              textProps: {
                 placeholder: "Name of new product",
               }
             }}
@@ -80,8 +89,9 @@ export default class BusinessEditProductCategoryPage extends Component<BusinessE
       }
     }
 
-    async renderProductCard(params: RenderItemParams<string>) {
-      let product = await this.props.businessFuncs.getProduct(params.item)
+    renderProductCard(params: RenderItemParams<ProductData>) {
+      const product = params.item
+      console.log(product.name)
       return (
         <TextButton
           text={product.name}
@@ -106,7 +116,7 @@ export default class BusinessEditProductCategoryPage extends Component<BusinessE
           textStyle={{color: "red"}}
           buttonFunc={async () => {
             await this.props.businessFuncs.deleteProductCategory(this.props.route.params.productCategory).then(() => {
-              this.props.navigation.navigate("editProductList")
+              this.props.navigation.goBack()
             })
           }}
         />
@@ -123,14 +133,19 @@ export default class BusinessEditProductCategoryPage extends Component<BusinessE
         </Text>
         <DraggableFlatList
           containerStyle={styles.list}
-          data={this.state.productCategory.productIDs}
+          data={this.state.products}
           keyExtractor={(item, index) => index.toString()}
           renderItem={(params) => {return this.renderProductCard(params)}}
           ListFooterComponent={this.renderDeleteButton()}
           onDragEnd={(params) => {
+            const products = params.data
+            // Update the category's product ID list
+            const productIDs = products.map((product) => {
+              return product.productID
+            })
             let productCat = this.state.productCategory
-            productCat.productIDs = params.data
-            this.setState({productCategory: productCat, saved: false})
+            productCat.productIDs = productIDs
+            this.setState({productCategory: productCat, products: products, saved: false})
           }}
         />
         <MenuBar

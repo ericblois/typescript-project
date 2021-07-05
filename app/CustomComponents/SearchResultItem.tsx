@@ -3,8 +3,7 @@ import React, { Component } from "react";
 import { View, TouchableOpacity, Image, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { styleValues } from "../HelperFiles/StyleSheet";
 import {  useNavigation } from "@react-navigation/native";
-import { PublicBusinessData, PrivateBusinessData } from "../HelperFiles/Constants";
-import BusinessDataHandler from "../HelperFiles/BusinessDataHandler";
+import { PublicBusinessData, PrivateBusinessData } from "../HelperFiles/DataTypes";
 
 type Props = {
   navigation: ReturnType<typeof useNavigation>,
@@ -17,13 +16,8 @@ export default class SearchResultItem extends Component<Props, State> {
 
     businessInfo: PublicBusinessData | undefined;
 
-    getBusinessInfo = async () => {
-      await BusinessDataHandler.getBusinessInfo(this.props.businessData).catch((e) => console.error(e));
-      this.businessInfo = this.props.businessData.info!;
-    }
 
     componentDidMount() {
-      this.getBusinessInfo();
     }
 
     displayLoadingScreen() {

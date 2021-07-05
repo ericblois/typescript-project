@@ -1,27 +1,29 @@
 import React, { Component } from "react";
 import { View, ScrollView, Text, StyleSheet, TextInput, ActivityIndicator } from "react-native";
 import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
-import { TextInputBox, DateScrollPicker, TextDropdown } from "../HelperFiles/CompIndex";
-import { auth, googleAPIKey } from "../HelperFiles/Constants";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import { TextInputBox, DateScrollPicker, TextDropdown, MenuBar } from "../HelperFiles/CompIndex";
 import { StackNavigationProp } from '@react-navigation/stack';
-import { UserSignupStackParamList } from "../HelperFiles/Navigation";
-import { RouteProp } from '@react-navigation/native';
+import { RootStackParamList, UserSignupStackParamList } from "../HelperFiles/Navigation";
+import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
 import ServerData from "../HelperFiles/ServerData";
 import { UserData } from "../HelperFiles/DataTypes";
-import DropDownPicker from 'react-native-dropdown-picker';
+import UserFunctions from "../HelperFiles/UserFunctions";
+import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 
-type CustomerInfoNavigationProp = StackNavigationProp<UserSignupStackParamList, "customerInfo">;
+type CustomerInfoNavigationProp = CompositeNavigationProp<
+    StackNavigationProp<UserSignupStackParamList, "customerInfo">,
+    StackNavigationProp<RootStackParamList>
+>
 
 type CustomerInfoRouteProp = RouteProp<UserSignupStackParamList, "customerInfo">;
 
 type Props = {
     navigation: CustomerInfoNavigationProp,
     route: CustomerInfoRouteProp
-    infoUpdateCallback?: (email?: string, password?: string, userData?: UserData) => void
 }
 
 type State = {
+    isLoading: boolean,
     nameText: string,
     validName: boolean,
     emailText: string,
@@ -41,59 +43,77 @@ type State = {
     countryText: "canada" | "united_states",
     validCountry: boolean,
     responseText: string,
-    lastInvalid: string,  
 }
 
 
 export default class CustomerInfoPage extends Component<Props, State> {
 
-    defaultTextProps: TextInput['props'] = {
-        autoCorrect: false,
-        autoCapitalize: "none",
-        clearButtonMode: "while-editing",
-    }
-    today = new Date();
+    defaultTextProps: TextInput['props']
+    today: Date
 
-    state: Readonly<State> = {
-        nameText: "",
-        validName: false,
-        emailText: "",
-        validEmail: false,
-        passText: "",
-        validPass: false,
-        confirmPassText: "",
-        validConfirm: false,
-        birthdayValue: this.today,
-        ageValue: 0,
-        birthDayText: "",
-        birthMonthText: "",
-        birthYearText: "",
-        validBirthday: false,
-        genderText: null,
-        validGender: false,
-        countryText: "canada",
-        validCountry: false,
-        responseText: "",
-        lastInvalid: "",
+    constructor(props: Props) {
+        super(props)
+        this.defaultTextProps = {
+            autoCorrect: false,
+            autoCapitalize: "none",
+            clearButtonMode: "while-editing",
+        }
+        this.today = new Date();
+
+        this.state = {
+            isLoading: false,
+            nameText: "",
+            validName: false,
+            emailText: "",
+            validEmail: false,
+            passText: "",
+            validPass: false,
+            confirmPassText: "",
+            validConfirm: false,
+            birthdayValue: this.today,
+            ageValue: 0,
+            birthDayText: "",
+            birthMonthText: "",
+            birthYearText: "",
+            validBirthday: false,
+            genderText: null,
+            validGender: false,
+            countryText: "canada",
+            validCountry: false,
+            responseText: "",
+        }
     }
 
-    sendBackValues() {
+    isEnterValid() {
+        return (
+            this.state.validName &&
+            this.state.validEmail &&
+            this.state.validPass &&
+            this.state.validConfirm &&
+            this.state.validBirthday &&
+            this.state.validGender &&
+            this.state.validCountry
+        )
+    }
+
+    nextPage() {
         // Check for invalid inputs
         if (!this.state.validName) {
-            this.setState({responseText: "Please enter a name.", lastInvalid: "name"});
+            this.setState({responseText: "Please enter a name."});
         } else if (!this.state.validEmail) {
-            this.setState({responseText: "Please enter a valid email.", lastInvalid: "email"});
+            this.setState({responseText: "Please enter a valid email."});
         } else if (!this.state.validPass) {
-            this.setState({responseText: "Please enter a valid password.", lastInvalid: "pass"});
+            this.setState({responseText: "Please enter a valid password."});
         } else if (!this.state.validConfirm) {
-            this.setState({responseText: "Your password does not match the confirmation.", lastInvalid: "confirm"});
+            this.setState({responseText: "Your password does not match the confirmation."});
         } else if (!this.state.validBirthday) {
-            this.setState({responseText: "You must be 13 years of age or older to use this service.", lastInvalid: "confirm"});
+            this.setState({responseText: "You must be 13 years of age or older to use this service."});
         } else if (!this.state.validGender) {
-            this.setState({responseText: "Please select a gender.", lastInvalid: "confirm"});
+            this.setState({responseText: "Please select a gender."});
         } else if (!this.state.validCountry) {
-            this.setState({responseText: "Please select a country.", lastInvalid: "confirm"});
+            this.setState({responseText: "Please select a country."});
         } else {
+            this.setState({isLoading: true})
             const userData: UserData = {
                 name: this.state.nameText,
                 gender: this.state.genderText!,
@@ -106,29 +126,52 @@ export default class CustomerInfoPage extends Component<Props, State> {
                 defaultAddressIndex: 0,
                 shippingAddresses: []
             }
-            // Send values up to navigator screen
-            if (this.props.infoUpdateCallback) {
-                this.props.infoUpdateCallback(this.state.emailText, this.state.passText, userData)
-                return
-            }
-        }
-        // Send back no values to indicate there are invalid inputs
-        if (this.props.infoUpdateCallback) {
-            this.props.infoUpdateCallback(undefined, undefined, undefined)
+            // Create an account
+            ServerData.createNewUser(
+                this.state.emailText,
+                this.state.passText,
+                userData
+            ).then(async (cred) => {
+                switch (this.props.route.params.accountType) {
+                    case "business":
+                        // Create a new business
+                        const businessID = await UserFunctions.createNewBusiness()
+                        const businessFuncs = new BusinessFunctions(businessID)
+                        this.props.navigation.navigate("businessMain", {businessFuncs: businessFuncs})
+                        // Go to business creation page
+                        break;
+                    case "customer":
+                        // Go to main customer screen
+                        this.props.navigation.navigate("customerMain")
+                        break;
+                }
+                this.setState({isLoading: false})
+            }).catch((e) => {
+                this.setState({isLoading: false})
+                throw e
+            })
         }
     }
 
-  back = () => this.props.navigation.goBack();  
+    renderLoadingView() {
+        return !this.state.isLoading ? undefined : (
+            <View
+                style={{...defaults.pageContainer, ...{justifyContent: "center"}}}
+            >
+            <ActivityIndicator
+                size={"large"}
+            />
+            </View>
+        )
+    }
 
   render() {
         return (
-        <View>
+        <View style={defaults.pageContainer}>
             <Text style={styles.signupHeader}>
                 Sign Up
             </Text>
-            <ScrollView 
-                contentContainerStyle={defaults.pageContainer}
-            >
+            <ScrollView>
                 <Text style={styles.inputDescription}>
                     This will be used when messaging businesses.
                 </Text>
@@ -136,19 +179,8 @@ export default class CustomerInfoPage extends Component<Props, State> {
                     style={{borderColor: this.state.validName ? styleValues.validColor : styleValues.darkColor}}
                     textProps={{...this.defaultTextProps, ...{
                         onChangeText: async (text) => {
-                            this.setState({nameText: text});
-                            let validName = false
-                            if (text.length > 0) {
-                                validName = true
-                                if (this.state.lastInvalid == "name") {
-                                    this.setState({responseText: ""});
-                                }
-                            } else {
-                                if (this.state.lastInvalid == "name") {
-                                    this.setState({responseText: "Please enter a name."});
-                                }
-                            }
-                            this.setState({validName: validName}, this.sendBackValues)
+                            let validName = text.length > 0
+                            this.setState({nameText: text, validName: validName})
                         }},
                         placeholder: "Name",
                         autoCapitalize: "words",
@@ -165,20 +197,9 @@ export default class CustomerInfoPage extends Component<Props, State> {
                     style={{borderColor: this.state.validEmail ? styleValues.validColor : styleValues.invalidColor}}
                     textProps={{...this.defaultTextProps, ...{
                         onChangeText: (text) => {
-                            this.setState({emailText: text});
-                            let validEmail = false
                             // Regular expression for an email
-                            if (/^[a-z0-9\.\_\-]+@[a-z0-9\.\-]+\.[a-z0-9]+$/m.test(text.toLowerCase())) {
-                                validEmail = true
-                                if (this.state.lastInvalid == "email") {
-                                    this.setState({responseText: ""});
-                                }
-                            } else {
-                                if (this.state.lastInvalid == "email") {
-                                    this.setState({responseText: "Please enter a valid email."});
-                                }
-                            }
-                            this.setState({validEmail: validEmail}, this.sendBackValues)
+                            let validEmail = /^[a-z0-9\.\_\-]+@[a-z0-9\.\-]+\.[a-z0-9]+$/m.test(text.toLowerCase())
+                            this.setState({emailText: text, validEmail: validEmail})
                         },
                         placeholder: "Email",
                         textContentType: "emailAddress",
@@ -194,19 +215,9 @@ export default class CustomerInfoPage extends Component<Props, State> {
                     style={{borderColor: this.state.validPass ? styleValues.validColor : styleValues.invalidColor}}
                     textProps={{...this.defaultTextProps, ...{
                         onChangeText: (text) => {
-                            this.setState({passText: text});
-                            let validPass = false
-                            if (text.length > 5) {
-                                validPass = true
-                                if (this.state.lastInvalid == "pass") {
-                                    this.setState({responseText: ""});
-                                }
-                            } else {
-                                if (this.state.lastInvalid == "pass") {
-                                    this.setState({responseText: "Please enter a valid password."});
-                                }
-                            }
-                            this.setState({validPass: validPass}, this.sendBackValues);
+                            let validPass = text.length > 5
+                            let validConfirm = text === this.state.confirmPassText
+                            this.setState({passText: text, validPass: validPass, validConfirm: validConfirm});
                         },
                         placeholder: "Password",
                         textContentType: "newPassword",
@@ -219,19 +230,8 @@ export default class CustomerInfoPage extends Component<Props, State> {
                     style={{borderColor: this.state.validConfirm ? styleValues.validColor : styleValues.invalidColor}}
                     textProps={{...this.defaultTextProps, ...{
                         onChangeText: (text) => {
-                            this.setState({confirmPassText: text});
-                            let validConfirm = false
-                            if (text == this.state.passText) {
-                                validConfirm = true
-                                if (this.state.lastInvalid == "confirm") {
-                                    this.setState({responseText: ""});
-                                }
-                            } else {
-                                if (this.state.lastInvalid == "confirm") {
-                                    this.setState({responseText: "Your password does not match the confirmation."});
-                                }
-                            }
-                            this.setState({validConfirm: validConfirm}, this.sendBackValues);
+                            let validConfirm = text === this.state.passText
+                            this.setState({confirmPassText: text, validConfirm: validConfirm});
                         },
                         placeholder: "Confirm password",
                         textContentType: "newPassword",
@@ -261,53 +261,82 @@ export default class CustomerInfoPage extends Component<Props, State> {
                             // Check if this birthday is more than 13 years old (365.24*13=4748.12)
                             const isValid = timeDiff >= 4748.12
                             const age = Math.floor(timeDiff/365.24)
-                            this.setState({birthDayText: dateDay, birthMonthText: dateMonth, birthYearText: dateYear, birthdayValue: date, ageValue: age, validBirthday: isValid}, this.sendBackValues)
+                            this.setState({birthDayText: dateDay, birthMonthText: dateMonth, birthYearText: dateYear, birthdayValue: date, ageValue: age, validBirthday: isValid})
                         }
                     }}
                 ></DateScrollPicker>
                 <Text style={styles.inputDescription}>
                     Select a gender.
                 </Text>
-                <TextDropdown
-                    style={{borderColor: this.state.validGender ? styleValues.validColor : styleValues.invalidColor}}
-                    items={[
-                        {label: "Male", value: "male"},
-                        {label: "Female", value: "female"},
-                        {label: "Nonbinary", value: "nonbinary"}
-                    ]}
-                    extraProps={{
-                        placeholder: "Gender",
-                        onChangeItem: (item) => {
-                            const value = item.value;
-                            // Check if a gender has been selected, then update state
-                            const isValid = value === "male" || value === "female" || value === "nonbinary";
-                            this.setState({genderText: value, validGender: isValid}, this.sendBackValues);
-                        },
-                    }}
-                ></TextDropdown>
-                <TextDropdown
-                    style={{borderColor: this.state.validCountry ? styleValues.validColor : styleValues.invalidColor}}
-                    items={[
-                        {
-                            label: "Canada",
-                            value: "canada"
-                        },
-                        {
-                            label: "United States",
-                            value: "united_states"
-                        }
-                    ]}
-                    extraProps={{
-                        placeholder: "Country",
-                        onChangeItem: (item) => {
-                            this.setState({countryText: item.value, validCountry: true})
-                        }
-                    }}
-                />
+                <View style={{
+                    zIndex: 2
+                }}>
+                    <TextDropdown
+                        style={{borderColor: this.state.validGender ? styleValues.validColor : styleValues.invalidColor}}
+                        items={[
+                            {label: "Male", value: "male"},
+                            {label: "Female", value: "female"},
+                            {label: "Nonbinary", value: "nonbinary"}
+                        ]}
+                        extraProps={{
+                            placeholder: "Gender",
+                            onChangeItem: (item) => {
+                                const value = item.value;
+                                // Check if a gender has been selected, then update state
+                                const isValid = value === "male" || value === "female" || value === "nonbinary";
+                                this.setState({genderText: value, validGender: isValid});
+                            }
+                        }}
+                    ></TextDropdown>
+                </View>
+                <View style={{
+                    zIndex: 1
+                }}>
+                    <TextDropdown
+                        style={{borderColor: this.state.validCountry ? styleValues.validColor : styleValues.invalidColor}}
+                        items={[
+                            {
+                                label: "Canada",
+                                value: "canada"
+                            },
+                            {
+                                label: "United States",
+                                value: "united_states"
+                            }
+                        ]}
+                        extraProps={{
+                            placeholder: "Country",
+                            onChangeItem: (item) => {
+                                this.setState({countryText: item.value, validCountry: true})
+                            }
+                        }}
+                    ></TextDropdown>
+                </View>
                 <Text style={styles.inputDescription}>
                     {this.state.responseText}
                 </Text>
             </ScrollView>
+            {this.renderLoadingView()}
+            <MenuBar
+                menuBarStyle={{
+                    bottom: styleValues.mediumPadding
+                }}
+                buttonProps={[
+                    {
+                        iconSource: icons.backArrow,
+                        buttonFunc: () => this.props.navigation.goBack(),
+                    },
+                    {
+                        iconSource: icons.enter,
+                        iconStyle: {tintColor: this.isEnterValid() ? styleValues.darkGreyColor : styleValues.lightGreyColor},
+                        buttonFunc: () => this.nextPage(),
+                        buttonProps: {
+                            // When enter is disabled, don't change opacity when pressed
+                            activeOpacity: this.isEnterValid() ? 0.2 : 1,
+                        }
+                    }
+                ]}
+            ></MenuBar>
         </View>
         );
     }
@@ -356,9 +385,4 @@ const styles = StyleSheet.create({
         height: "100%",
         width: "100%",
     }
-})
-
-const pickerSelectStyles = StyleSheet.create({
-    inputIOS: styles.inputElement,
-    inputAndroid: styles.inputElement
 })

@@ -57,12 +57,12 @@ export default class TextInputPopup extends Component<Props, State> {
                     <TextInputBox
                         {...this.props.textInputProps}
                         style={{...defaults.textButtonNoColor, ...styles.textInput}}
-                        extraTextProps={{...{
+                        textProps={{...{
                             onChangeText: (text) => {
                                 this.setState({currentText: text})
                             }
 
-                        }, ...this.props.textInputProps?.extraTextProps}}
+                        }, ...this.props.textInputProps?.textProps}}
                     />
                 </TouchableOpacity>
                 {this.renderSaveButton()}

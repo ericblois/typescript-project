@@ -1,3 +1,4 @@
+export type Country = "canada" | "united_states"
 
 export type ShippingInfo = {
     name: string,
@@ -15,7 +16,7 @@ export type UserData = {
   birthDay: string,
   birthMonth: string,
   birthYear: string,
-  country: "canada" | "united_states",
+  country: Country,
   shippingAddresses: ShippingInfo[],
   defaultAddressIndex: number,
   businessIDs: string[]
@@ -57,25 +58,28 @@ products: firebase.default.firestore.DocumentReference[]
 }
 
 export type PublicBusinessData = {
-id: string,
-name?: string,
-profileImage?: string,
-galleryImages?: string[],
-businessType?: string,
-totalRating?: number,
-description?: string,
-address?: string,
-city?: string,
-region?: string,
-country: string,
-postalCode?: string,
-geohash?: string,
-keywords?: string[],
-productList?: ProductCategory[],
+  userID: string,
+  businessID: string,
+  name?: string,
+  profileImage?: string,
+  galleryImages?: string[],
+  businessType?: string,
+  totalRating?: number,
+  description?: string,
+  address?: string,
+  city?: string,
+  region?: string,
+  country: Country,
+  postalCode?: string,
+  geohash?: string,
+  keywords?: string[],
+  productList?: ProductCategory[],
 }
 
 export type PrivateBusinessData = {
-userID: string,
-coords?: {latitude: number, longitude: number},
-productListReference?: ProductRefCategory[],
+  userID: string,
+  businessID: string,
+  country: Country,
+  coords?: {latitude: number, longitude: number},
+  productListReference?: ProductRefCategory[],
 }

@@ -54,12 +54,13 @@ export default class BusinessEditInfoPage extends Component<BusinessEditInfoProp
               if (newPublicData) {
                 newPublicData.galleryImages = images
               }
+              this.props.businessFuncs.addImage(images[0])
               this.setState({publicData: newPublicData, saved: false})
             }}
           />
           {/* Title */}
           <TextInputBox
-            extraTextProps={{
+            textProps={{
                 defaultValue: this.state.publicData?.name,
                 placeholder: "Business Title",
                 onChangeText: (text) => {
@@ -75,7 +76,7 @@ export default class BusinessEditInfoPage extends Component<BusinessEditInfoProp
           <TextInputBox
             style={styles.descriptionBox}
             textStyle={{fontSize: styleValues.smallerTextSize}}
-            extraTextProps={{
+            textProps={{
                 defaultValue: this.state.publicData?.description,
                 placeholder: "Description",
                 multiline: true,

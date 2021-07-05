@@ -76,7 +76,9 @@ export default class BusinessMainScreen extends Component<Props, State> {
         >
           <BusinessMainStack.Screen
               name={"businessEdit"}
-              component={BusinessEditMainPage}
+              children={(props) => {
+                return <BusinessEditMainPage {...props} businessFuncs={this.businessFuncs}/>
+              }}
               listeners={{
                 beforeRemove: (event) => {
                   if (event.target) {

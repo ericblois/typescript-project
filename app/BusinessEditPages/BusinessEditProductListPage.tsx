@@ -16,6 +16,7 @@ import { FlatList } from "react-native-gesture-handler";
 import DraggableFlatList, { RenderItemParams } from 'react-native-draggable-flatlist'
 import SortableList from 'react-native-sortable-list';
 import Row from 'react-native-sortable-list';
+import UserFunctions from "../HelperFiles/UserFunctions";
 
 type BusinessEditProductListNavigationProp = StackNavigationProp<BusinessMainStackParamList, "editProductList">;
 
@@ -60,16 +61,12 @@ export default class BusinessEditProductListPage extends Component<BusinessEditP
           <TextInputPopup
             onTapAway={() => {this.setState({showPopup: false})}}
             onSaveText={async (text) => {
-              let productList = this.state.publicData?.productList ? this.state.publicData.productList : []
-              productList.push({
-                name: text,
-                productIDs: []
-              })
-              const newPublicData = await this.props.businessFuncs.updatePublicData({productList: productList})
-              this.setState({publicData: newPublicData, showPopup: false})
+              await this.props.businessFuncs.createProductCategory(text)
+              this.refreshData()
+              this.setState({showPopup: false})
             }}
             textInputProps={{
-              extraTextProps: {
+              textProps: {
                 placeholder: "Name of new category",
               }
             }}
@@ -109,8 +106,10 @@ export default class BusinessEditProductListPage extends Component<BusinessEditP
           keyExtractor={(item, index) => index.toString()}
           renderItem={(params) => {return this.renderCategoryCard(params)}}
           onDragEnd={(params) => {
-            let publicData = this.state.publicData ? this.state.publicData : {id: this.props.businessFuncs.businessID} as PublicBusinessData
-            publicData.productList = params.data
+            let publicData = this.state.publicData
+            if (publicData) {
+              publicData.productList = params.data
+            }
             this.setState({publicData: publicData, saved: false})
           }}
         />

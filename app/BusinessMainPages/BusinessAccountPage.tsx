@@ -5,11 +5,15 @@ import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
 import { auth } from "../HelperFiles/Constants";
 import { MenuBar } from "../HelperFiles/CompIndex";
-import { BusinessMainStackParamList } from "../HelperFiles/Navigation";
+import { BusinessMainStackParamList, RootStackParamList } from "../HelperFiles/Navigation";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
-import { RouteProp } from '@react-navigation/native';
+import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
+import { StackNavigationProp } from "@react-navigation/stack";
 
-type BusinessAccountNavigationProp = BottomTabNavigationProp<BusinessMainStackParamList, "account">;
+type BusinessAccountNavigationProp = CompositeNavigationProp<
+  BottomTabNavigationProp<BusinessMainStackParamList, "account">,
+  StackNavigationProp<RootStackParamList>
+>
 
 type BusinessAccountRouteProp = RouteProp<BusinessMainStackParamList, "account">;
 
@@ -31,14 +35,14 @@ export default class BusinessAccountPage extends Component<BusinessAccountProps,
           text={"Sign Out"}
           textStyle={styles.signout}
           buttonFunc={() => {
-            auth.signOut().then(() => this.props.navigation.dangerouslyGetParent()?.navigate("start"));
+            auth.signOut().then(() => this.props.navigation.navigate("start"));
           }}
         />
         <TextButton
           text={"Go to customer screen"}
           textStyle={styles.signout}
           buttonFunc={() => {
-            this.props.navigation.dangerouslyGetParent()?.navigate("customerMain")
+            this.props.navigation.navigate("customerMain")
           }}
         />
         <MenuBar

@@ -140,6 +140,7 @@ export const defaults = StyleSheet.create({
     
   },
   textButtonMainColor: {
+    width: "100%",
     padding: styleValues.mediumPadding,
     borderWidth: styleValues.minorBorderWidth,
     borderRadius: styleValues.bordRadius,
@@ -149,6 +150,7 @@ export const defaults = StyleSheet.create({
     marginVertical: styleValues.minorPadding
   },
   textButtonNoColor: {
+    width: "100%",
     padding: styleValues.mediumPadding,
     borderWidth: styleValues.minorBorderWidth,
     borderRadius: styleValues.bordRadius,

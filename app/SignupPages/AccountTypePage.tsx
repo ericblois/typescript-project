@@ -19,18 +19,20 @@ type AccountTypeRouteProp = RouteProp<UserSignupStackParamList, "accountType">;
 type Props = {
     navigation: AccountTypeNavigationProp,
     route: AccountTypeRouteProp,
-    selectCallback?: (typeSelection: string) => void
 }
 
 type State = {
-    typeSelection: string
+    typeSelection?: "customer" | "business"
 }
 
 
-export default class CustomerInfoPage extends Component<Props, State> {
+export default class AccountTypePage extends Component<Props, State> {
 
-    state: Readonly<State> = {
-        typeSelection: ""
+    constructor(props: Props) {
+        super(props)
+        this.state = {
+            typeSelection: undefined
+        }
     }
 
     render() {
@@ -45,12 +47,9 @@ export default class CustomerInfoPage extends Component<Props, State> {
                     buttonStyle={{
                         ...defaults.textButtonNoColor,
                         ...styles.accountTypeButton,
-                        ...{borderWidth: this.state.typeSelection == "customer" ? styleValues.majorBorderWidth : styleValues.minorBorderWidth}
+                        ...{borderWidth: this.state.typeSelection === "customer" ? styleValues.majorBorderWidth : styleValues.minorBorderWidth}
                     }}
                     buttonFunc={() => {
-                        if (this.props.selectCallback) {
-                            this.props.selectCallback!("customer")
-                        }
                         this.setState({typeSelection: "customer"})
                     }}
                 />
@@ -60,14 +59,33 @@ export default class CustomerInfoPage extends Component<Props, State> {
                     buttonStyle={{
                         ...defaults.textButtonNoColor,
                         ...styles.accountTypeButton,
-                        ...{borderWidth: this.state.typeSelection == "business" ? styleValues.majorBorderWidth : styleValues.minorBorderWidth}
+                        ...{borderWidth: this.state.typeSelection === "business" ? styleValues.majorBorderWidth : styleValues.minorBorderWidth}
                     }}
                     buttonFunc={() => {
-                        if (this.props.selectCallback) {
-                            this.props.selectCallback!("business")
-                        }
                         this.setState({typeSelection: "business"})
                     }}
+                />
+                <MenuBar
+                    buttonProps={[
+                        {
+                            iconSource: icons.backArrow,
+                            buttonFunc: this.props.navigation.goBack,
+                        },
+                        {
+                            iconSource: icons.enter,
+                            iconStyle: {tintColor: this.state.typeSelection ? styleValues.darkGreyColor : styleValues.lightGreyColor},
+                            buttonFunc: () => {
+                                if (this.state.typeSelection) {
+                                    this.props.navigation.navigate("customerInfo", {accountType: this.state.typeSelection})
+                                }
+                            },
+                            buttonProps: {
+                                // When enter is disabled, don't change opacity when pressed
+                                activeOpacity: this.state.typeSelection ? 0.2 : 1,
+                            }
+                        }
+                    ]}
+                    menuBarStyle={defaults.menuBarNoColor}
                 />
             </View>
         )
@@ -78,7 +96,7 @@ const styles = StyleSheet.create({
     titleText: {
         position: "absolute",
         top: styleValues.majorPadding,
-        fontSize: styleValues.largestTextSize
+        fontSize: styleValues.largerTextSize
     },
     accountTypeButton: {
         margin: styleValues.mediumPadding,
