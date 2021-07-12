@@ -4,7 +4,7 @@ import { icons, styleValues } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { useNavigation } from "@react-navigation/native";
 import IconButton from "../CustomComponents/IconButton";
-import { accessPhotos } from "../HelperFiles/ClientData"
+import { accessPhotos } from "../HelperFiles/ClientFunctions"
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Icon } from "react-native-elements";
 

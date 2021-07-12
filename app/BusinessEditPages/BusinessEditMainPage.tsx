@@ -6,7 +6,7 @@ import { auth } from "../HelperFiles/Constants";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
 import { BusinessMainStackParamList, RootStackParamList } from "../HelperFiles/Navigation"
-import { ImageProfileSelector, TextButton, MenuBar } from "../HelperFiles/CompIndex";
+import { ImageProfileSelector, TextButton, MenuBar, PageContainer } from "../HelperFiles/CompIndex";
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 import UserFunctions from "../HelperFiles/UserFunctions";
 
@@ -30,7 +30,7 @@ export default class BusinessEditMainPage extends Component<BusinessEditMainProp
 
   render() {
     return (
-      <View style={defaults.pageContainer}>
+      <PageContainer>
         <Text style={styles.editHeader}>Your Business Page</Text>
         <ImageProfileSelector></ImageProfileSelector>
         <TextButton
@@ -80,7 +80,7 @@ export default class BusinessEditMainPage extends Component<BusinessEditMainProp
             {iconSource: icons.profile, buttonFunc: () => {this.props.navigation.navigate("account")}}
           ]}
         />
-      </View>
+      </PageContainer>
     );
   }
 }

@@ -3,53 +3,37 @@ import ServerData from "./ServerData"
 import UserFunctions from "./UserFunctions"
 import { firestore, storage } from "./Constants"
 import uuid from 'react-native-uuid';
-import * as ImageManipulator from "expo-image-manipulator"
+import { getCompressedImage } from "./ClientFunctions"
 
 export class BusinessFunctions {
 
     businessID: Readonly<string>
-    private privateData?: PrivateBusinessData
-    private publicData?: PublicBusinessData
 
     constructor(businessID: string) {
         this.businessID = businessID
-        this.initializeData()
-    }
-    // Get local copies of private and public data on construction
-    async initializeData() {
-        this.privateData = await this.getPrivateData()
-        this.publicData = await this.getPublicData()
     }
 
     public async getPrivateData() {
-        if (this.privateData) {
-            return {...this.privateData} as PrivateBusinessData
-        } else {
-            try {
-                const userID = UserFunctions.getCurrentUser().uid
-                const privateDocPath = "/userData/".concat(userID).concat("/businesses/").concat(this.businessID)
-                const privateDocRef = firestore.doc(privateDocPath)
-                const privateData = (await ServerData.getDoc(privateDocRef))
-                return {...privateData} as PrivateBusinessData
-            } catch(e) {
-                throw e
-            }
+        try {
+            const userID = UserFunctions.getCurrentUser().uid
+            const privateDocPath = "/userData/".concat(userID).concat("/businesses/").concat(this.businessID)
+            const privateDocRef = firestore.doc(privateDocPath)
+            const privateData = (await ServerData.getDoc(privateDocRef))
+            return {...privateData} as PrivateBusinessData
+        } catch(e) {
+            throw e
         }
     }
 
     public async getPublicData() {
-        if (this.publicData) {
-            return {...this.publicData} as PublicBusinessData
-        } else {
-            try {
-                const userData = (await UserFunctions.getUserDoc()) as UserData
-                const publicDocPath = "/publicBusinessData/".concat(userData.country).concat("/businesses/").concat(this.businessID)
-                const publicDocRef = firestore.doc(publicDocPath)
-                const publicData = (await ServerData.getDoc(publicDocRef))
-                return {...publicData} as PublicBusinessData
-            } catch(e) {
-                throw e
-            }
+        try {
+            const userData = (await UserFunctions.getUserDoc()) as UserData
+            const publicDocPath = "/publicBusinessData/".concat(userData.country).concat("/businesses/").concat(this.businessID)
+            const publicDocRef = firestore.doc(publicDocPath)
+            const publicData = (await ServerData.getDoc(publicDocRef))
+            return {...publicData} as PublicBusinessData
+        } catch(e) {
+            throw e
         }
     }
 
@@ -59,8 +43,6 @@ export class BusinessFunctions {
             const privateDocPath = "/userData/".concat(userID).concat("/businesses/").concat(this.businessID)
             const privateDocRef = firestore.doc(privateDocPath)
             await ServerData.updateDoc(data, privateDocRef)
-            this.privateData = {...this.privateData, ...data} as PrivateBusinessData
-            return (await this.getPrivateData())
         } catch(e) {
             throw e
         }
@@ -72,8 +54,6 @@ export class BusinessFunctions {
             const publicDocPath = "/publicBusinessData/".concat(userData.country).concat("/businesses/").concat(this.businessID)
             const publicDocRef = firestore.doc(publicDocPath)
             await ServerData.updateDoc(data, publicDocRef)
-            this.publicData = {...this.publicData, ...data} as PublicBusinessData
-            return (await this.getPublicData())
         } catch(e) {
             throw e
         }
@@ -105,6 +85,11 @@ export class BusinessFunctions {
                   return true
                 }
             })
+            // Delete all products in category
+            await Promise.all(productList[catIndex].productIDs.map((productID) => {
+                return this.deleteProduct(productID)
+            }))
+            // Delete category
             productList.splice(catIndex, 1)
             publicData.productList = productList
             await this.updatePublicData(publicData)
@@ -157,16 +142,33 @@ export class BusinessFunctions {
             }
             // Add the product to this business' products collection
             const productColRef = firestore.collection("/publicBusinessData/".concat(country).concat("/businesses/").concat(this.businessID).concat("/products"))
-            const newDocRef = await ServerData.addDoc(productData, productColRef)
+            const newDocRef = productColRef.doc()
             // Update the product's product ID
             let newProductData = productData
             newProductData.productID = newDocRef.id
-            await ServerData.updateDoc(newProductData, newDocRef)
             // Update the corresponding product category
             let productCat = await this.getProductCategory(newProductData.category)
             productCat.productIDs.push(newProductData.productID)
-            await this.updateProductCategory(productCat.name, productCat)
-            return newProductData.productID
+            // Get product list
+            let productList = publicData.productList
+            // Find the index of the corresponding product category
+            const catIndex = productList.findIndex((productCat) => {
+                return productCat.name === productData.category
+            })
+            if (catIndex > -1) {
+                // Update the category
+                productList[catIndex] = productCat
+                // Send transaction to server in a batch
+                await firestore.runTransaction(async (transaction) => {
+                    transaction.set(productColRef.doc(), newProductData)
+                    const businessRef = firestore.doc("/publicBusinessData/".concat(country).concat("/businesses/").concat(this.businessID))
+                    const updateData: Partial<PublicBusinessData> = {productList: productList}
+                    transaction.update(businessRef, updateData)
+                })
+                return newProductData.productID
+            } else {
+                throw new Error("Could not find product category: ".concat(productData.category))
+            }
         } catch(e) {
             throw e
         }
@@ -206,29 +208,66 @@ export class BusinessFunctions {
             const publicData = await this.getPublicData()
             const country = publicData.country
             if (country === undefined) {
-                throw new Error("Tried to retrieve product ID ".concat(productID).concat(", could not find business' country."))
+                throw new Error("Tried to create new product, could not find business' country.")
             }
+            // Add the product to this business' products collection
             const productDocRef = firestore.doc("/publicBusinessData/".concat(country).concat("/businesses/").concat(this.businessID).concat("/products/").concat(productID))
-            await ServerData.deleteDoc(productDocRef)
+            // Get the product doc
+            const productData = await this.getProduct(productID)
+            // Update the corresponding product category
+            let productCat = await this.getProductCategory(productData.category)
+            // Get index of product
+            const productIndex = productCat.productIDs.findIndex((id) => {
+                return id === productID
+            })
+            if (productIndex > -1) {
+                productCat.productIDs.splice(productIndex, 1)
+                // Get product list
+                let productList = publicData.productList
+                // Find the index of the corresponding product category
+                const catIndex = productList.findIndex((productCat) => {
+                    return productCat.name === productData.category
+                })
+                if (catIndex > -1) {
+                    // Update the category
+                    productList[catIndex] = productCat
+                    // Send transaction to server in a batch
+                    await firestore.runTransaction(async (transaction) => {
+                        transaction.delete(productDocRef)
+                        const businessRef = firestore.doc("/publicBusinessData/".concat(country).concat("/businesses/").concat(this.businessID))
+                        const updateData: Partial<PublicBusinessData> = {productList: productList}
+                        transaction.update(businessRef, updateData)
+                    })
+                }
+            }
         } catch(e) {
             throw e
         }
     }
 
-    public async addImage(localImagePath: string) {
+    public async uploadImages(imagePaths: string[]) {
         try {
-            // Compress the image
-            const compressedImg = await ImageManipulator.manipulateAsync(localImagePath, [], {
-                compress: 0.75,
-                format: ImageManipulator.SaveFormat.JPEG
-            })
-            // Generate a new uuid to be used as the filename
-            const newID = uuid.v4() as string
-            const serverPath = "images/businessImages/".concat(this.businessID).concat("/").concat(newID).concat(".jpg")
-            const result = await ServerData.uploadFile(compressedImg.uri, serverPath)
-            console.log(result)
+            const downloadURLs = await Promise.all(imagePaths.map(async (localPath) => {
+                // Generate a new uuid to be used as the filename
+                const newID = uuid.v4() as string
+                const serverPath = "images/businessImages/".concat(this.businessID).concat("/").concat(newID).concat(".jpg")
+                const result = await ServerData.uploadFile(localPath, serverPath)
+                return result
+            }))
+            return downloadURLs
         } catch (e) {
             throw e
         }
     }
+
+    public async deleteImages(downloadURLs: string[]) {
+        try {
+            await Promise.all(downloadURLs.map((downloadURL) => {
+                return ServerData.deleteFile(downloadURL)
+            }))
+        } catch (e) {
+            throw e
+        }
+    }
+
 }

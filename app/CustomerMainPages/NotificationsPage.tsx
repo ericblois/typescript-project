@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { styleValues, defaults } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
+import PageContainer from "../CustomComponents/PageContainer";
 
 export default class NotificationsPage extends Component {
 
@@ -13,9 +14,9 @@ export default class NotificationsPage extends Component {
 
   render() {
     return (
-      <View style={defaults.pageContainer}>
+      <PageContainer>
         <Text>notifications</Text>
-      </View>
+      </PageContainer>
     );
   }
 }

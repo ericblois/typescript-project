@@ -1,5 +1,5 @@
 import { auth, firestore } from "./Constants"
-import { Country, PrivateBusinessData, PublicBusinessData, UserData } from "./DataTypes"
+import { Country, DefaultPrivateBusinessData, DefaultPublicBusinessData, PrivateBusinessData, PublicBusinessData, UserData } from "./DataTypes"
 import ServerData from "./ServerData"
 
 export default abstract class UserFunctions {
@@ -57,11 +57,10 @@ export default abstract class UserFunctions {
             const userData = (await UserFunctions.getUserDoc()) as UserData
             const userID = UserFunctions.getCurrentUser().uid
             // Create initial private business data
-            let privateBusinessData: PrivateBusinessData = {
+            let privateBusinessData: PrivateBusinessData = {...DefaultPrivateBusinessData, ...{
                 userID: userID,
-                businessID: "",
                 country: userData.country
-            }
+            }}
             // Create a new document for the private data
             const privateDocPath = "/userData/".concat(userID).concat("/businesses")
             const privateColRef = firestore.collection(privateDocPath)
@@ -71,11 +70,11 @@ export default abstract class UserFunctions {
             // Update private doc with business ID
             ServerData.updateDoc({businessID: businessID}, privateDocRef)
             // Create a new document for the public data
-            let publicBusinessData: PublicBusinessData = {
+            let publicBusinessData: PublicBusinessData = {...DefaultPublicBusinessData, ...{
                 userID: userID,
                 businessID: businessID,
                 country: userData.country
-            }
+            }}
             const publicDocPath = "/publicBusinessData/".concat(userData.country).concat("/businesses")
             const publicColRef = firestore.collection(publicDocPath)
             const publicDocRef = await ServerData.addDoc(publicBusinessData, publicColRef, businessID)
@@ -102,6 +101,10 @@ export default abstract class UserFunctions {
             // Get public data reference
             const publicDocPath = "/publicBusinessData/".concat(privateDocData.country).concat("/businesses/").concat(businessID)
             const publicDocRef = firestore.doc(publicDocPath)
+            // Get products collection
+            const productsColPath = publicDocPath.concat("/products")
+            const productsColRef = firestore.collection(productsColPath)
+            await ServerData.deleteCollection(productsColRef)
             // Delete private and public data docs
             await ServerData.deleteDoc(privateDocRef)
             await ServerData.deleteDoc(publicDocRef)

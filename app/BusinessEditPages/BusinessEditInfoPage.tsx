@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, Text, StyleSheet, ImageURISource, ScrollView } from "react-native";
+import { View, Text, StyleSheet, KeyboardAvoidingView, ScrollView, ActivityIndicator } from "react-native";
 import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
@@ -10,8 +10,9 @@ import { BusinessMainStackParamList } from "../HelperFiles/Navigation"
 import TextInputBox from "../CustomComponents/TextInputBox";
 import { PublicBusinessData } from "../HelperFiles/DataTypes";
 import * as Permissions from 'expo-permissions';
-import { ImageSliderSelector, MapPopup, MenuBar } from "../HelperFiles/CompIndex";
+import { ImageSliderSelector, MapPopup, MenuBar, PageContainer } from "../HelperFiles/CompIndex";
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
+import { extractKeywords, getCompressedImage, prefetchImages } from "../HelperFiles/ClientFunctions";
 
 type BusinessEditInfoNavigationProp = StackNavigationProp<BusinessMainStackParamList, "editInfo">;
 
@@ -25,6 +26,9 @@ type BusinessEditInfoProps = {
 
 type State = {
     publicData?: PublicBusinessData,
+    newImages: string[],
+    deletedImages: string[],
+    imagesLoaded: boolean,
     saved: boolean
 }
 
@@ -34,30 +38,60 @@ export default class BusinessEditInfoPage extends Component<BusinessEditInfoProp
         super(props)
         this.state = {
           publicData: undefined,
+          newImages: [],
+          deletedImages: [],
+          imagesLoaded: false,
           saved: true
         }
     }
 
     componentDidMount() {
+      this.refreshData()
+    }
+
+    refreshData() {
       this.props.businessFuncs.getPublicData().then((publicData) => {
         this.setState({publicData: publicData})
       })
     }
 
-  render() {
-    return (
-      <ScrollView contentContainerStyle={defaults.pageContainer}>
+    renderLoadScreen() {
+      if (this.state.publicData === undefined || !this.state.imagesLoaded) {
+        return (
+          <View 
+            style={{...defaults.pageContainer, ...{
+              justifyContent: "center",
+              position: "absolute",
+              top: 0,
+              left: 0
+            }}}
+          >
+            <ActivityIndicator
+              size={"large"}
+            />
+            <MenuBar
+              buttonProps={[
+                {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
+              ]}
+              />
+          </View>
+        )
+      }
+    }
+
+    renderUI() {
+      if (this.state.publicData) {
+        return (
+          <PageContainer>
           <ImageSliderSelector
-            uris={this.state.publicData?.galleryImages ? this.state.publicData.galleryImages : []}
-            onChange={(images) => {
-              let newPublicData = this.state.publicData
-              if (newPublicData) {
-                newPublicData.galleryImages = images
-              }
-              this.props.businessFuncs.addImage(images[0])
-              this.setState({publicData: newPublicData, saved: false})
+            uris={this.state.publicData ? this.state.publicData.galleryImages: []}
+            onChange={(uris) => {
+              this.setState({newImages: uris.new, deletedImages: uris.deleted, saved: false})
             }}
-          />
+            onImagesLoaded={() => {
+              this.setState({imagesLoaded: true})
+            }}
+          ></ImageSliderSelector>
           {/* Title */}
           <TextInputBox
             textProps={{
@@ -71,40 +105,83 @@ export default class BusinessEditInfoPage extends Component<BusinessEditInfoProp
                   this.setState({publicData: newPublicData, saved: false})
                 }
             }}
+            avoidKeyboard={true}
           ></TextInputBox>
-          {/* Description */}
+          {/* Business Type */}
           <TextInputBox
-            style={styles.descriptionBox}
-            textStyle={{fontSize: styleValues.smallerTextSize}}
             textProps={{
-                defaultValue: this.state.publicData?.description,
-                placeholder: "Description",
-                multiline: true,
+                defaultValue: this.state.publicData?.businessType,
+                placeholder: "Business Type (ex. 'Cafe')",
                 onChangeText: (text) => {
                   let newPublicData = this.state.publicData
                   if (newPublicData) {
-                    newPublicData.description = text
+                    newPublicData.businessType = text
                   }
                   this.setState({publicData: newPublicData, saved: false})
                 }
             }}
+            avoidKeyboard={true}
           ></TextInputBox>
+          {/* Description */}
+          <TextInputBox
+                  style={styles.descriptionBox}
+                  textStyle={{fontSize: styleValues.smallerTextSize}}
+                  textProps={{
+                      defaultValue: this.state.publicData?.description,
+                      placeholder: "Description",
+                      multiline: true,
+                      onChangeText: (text) => {
+                        let newPublicData = this.state.publicData
+                        if (newPublicData) {
+                          newPublicData.description = text
+                        }
+                        this.setState({publicData: newPublicData, saved: false})
+                      }
+                  }}
+                  avoidKeyboard={true}
+                ></TextInputBox>
           <MenuBar
             buttonProps={[
-                {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
-                {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? styleValues.validColor : styleValues.invalidColor}, buttonFunc: () => {
-                    if (this.state.publicData) {
-                        this.props.businessFuncs.updatePublicData(this.state.publicData).then(() => {
-                            this.setState({saved: true})
-                        }, (e) => {
-                            throw e;
-                        })
+              {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
+              {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? styleValues.validColor : styleValues.invalidColor}, buttonFunc: async () => {
+                if (this.state.publicData) {
+                  // Add new images
+                  let downloadURLs: string[] = await this.props.businessFuncs.uploadImages(this.state.newImages)
+                  // Delete images
+                  await this.props.businessFuncs.deleteImages(this.state.deletedImages)
+                  // Update public data
+                  const newPublicData = this.state.publicData
+                  // Delete URLs
+                  let prevURLs: string[] = []
+                  newPublicData.galleryImages.forEach((url) => {
+                    if (!this.state.deletedImages.includes(url)) {
+                      prevURLs.push(url)
                     }
-                }}
-              ]}
-        />
-      </ScrollView>
-    );
+                  })
+                  // Add new URLs
+                  newPublicData.galleryImages = prevURLs.concat(downloadURLs)
+                  newPublicData.keywords = extractKeywords(newPublicData.description)
+                  this.props.businessFuncs.updatePublicData(newPublicData).then(() => {
+                      this.setState({saved: true})
+                  }, (e) => {
+                      throw e;
+                  })
+                }
+              }}
+            ]}
+          ></MenuBar>
+      </PageContainer>
+        )
+      }
+    }
+
+  render() {
+    return (
+      <View>
+        {this.renderUI()}
+        {this.renderLoadScreen()}
+      </View>
+    )
   }
 }
 

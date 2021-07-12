@@ -3,7 +3,7 @@ import { View, Image, StyleSheet, FlatList, Text, ImageStyle } from "react-nativ
 import { defaults, icons, styleValues } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { useNavigation } from "@react-navigation/native";
-import { accessPhotos } from "../HelperFiles/ClientData"
+import { accessPhotos } from "../HelperFiles/ClientFunctions"
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Icon } from "react-native-elements";
 import MapView, { LatLng, Marker, Overlay, Region } from "react-native-maps"

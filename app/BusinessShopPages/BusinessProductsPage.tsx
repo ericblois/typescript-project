@@ -1,94 +1,54 @@
 import React, { Component, ReactNode } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity } from "react-native";
-import { styleValues, defaults } from "../HelperFiles/StyleSheet";
-import { ProductCard } from "../HelperFiles/CompIndex";
-import { prefetchImages } from "../HelperFiles/Constants";
+import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
+import { MenuBar, PageContainer, ProductCard } from "../HelperFiles/CompIndex";
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { BusinessShopTabParamList } from "../HelperFiles/Navigation";
+import { BusinessShopStackParamList } from "../HelperFiles/Navigation";
 import { RouteProp } from '@react-navigation/native';
-import { PrivateBusinessData, ProductCategory } from "../HelperFiles/DataTypes";
+import { ProductCategory, PublicBusinessData } from "../HelperFiles/DataTypes";
+import ProductCardList from "../CustomComponents/ProductCardList";
 
-type BusinessProductsNavigationProp = BottomTabNavigationProp<BusinessShopTabParamList, "products">;
+type BusinessProductsNavigationProp = BottomTabNavigationProp<BusinessShopStackParamList, "products">;
 
-type BusinessProductsRouteProp = RouteProp<BusinessShopTabParamList, "products">;
+type BusinessProductsRouteProp = RouteProp<BusinessShopStackParamList, "products">;
 
 type Props = {
     navigation: BusinessProductsNavigationProp,
     route: BusinessProductsRouteProp,
-    businessData: PrivateBusinessData
+    businessData: PublicBusinessData
 }
 
 type State = {
-    thumbnailsFetched: boolean,
-    currentProductList: ReactNode
+    currentCategory: ProductCategory
 }
 
 export default class BusinessProducts extends Component<Props, State> {
 
-    productLists: { [category: string]: ReactNode } = {};
-    productsToLoad = 0;
-    productsData: ProductCategory[] | undefined;
-
-    state: Readonly<State> = {
-        thumbnailsFetched: false,
-        currentProductList: <></>
-    }
-
-    componentDidMount() {
-        this.loadProductsData().then(() => {
-            //console.log(productList[0].products[0].optionTypes[0].options[0])
-            console.log(isProductCategory(this.props.businessData.productList![0]))
-        })
-    }
-
-    createListElements = (productsData: ProductCategory[]) => {
-        let thumbnailArray: string[] = [];
-        // Iterate through each category of products
-       productsData.forEach(({category, products}) => {
-            // Create list of category pages
-            this.productLists[category] = (
-                <View style={styles.productContainer}>
-                    <FlatList
-                        data={products}
-                        keyExtractor={(item, index) => index.toString()}
-                        renderItem={({item}) => (
-                            <ProductCard productData={item} onPress={() => this.props.navigation.navigate("product", {productData: item, productType: category})}/>
-                        )}
-                    />
-                </View>
-            )
-            // Prefetch all of the product thumbnail images
-            products.forEach(({images}) => {
-                thumbnailArray.push(images[0])
-            });
-        })
-        prefetchImages(thumbnailArray).then(() => {
-            this.setState({thumbnailsFetched: true})
-        });
-        this.setState({currentProductList: this.productLists[productsData[0].category]});
-    }
-
-    loadProductsData = async () => {
-        await BusinessDataHandler.getBusinessProductList(this.props.businessData).then(() => {
-            this.productsData = this.props.businessData.productList!;
-            this.createListElements(this.productsData);
-        }, (e) => {throw e});
+    constructor(props: Props) {
+        super(props)
+        const firstCat: ProductCategory = this.props.businessData.productList.length > 0 ? this.props.businessData.productList[0] : {
+            name: "",
+            productIDs: []
+        }
+        this.state = {
+            currentCategory: firstCat
+        }
     }
 
     renderCategoryBar() {
         return (
             <FlatList
                 style={styles.categoryBar}
-                data={this.productsData}
+                data={this.props.businessData.productList}
                 horizontal={true}
                 keyExtractor={(item, index) => index.toString()}
                 ItemSeparatorComponent={() => <View style={{width: styleValues.mediumPadding*3}}/>}
                 renderItem={({item, index}) => (
                     <TouchableOpacity
                         style={styles.barContent}
-                        onPress={() => this.setState({currentProductList: this.productLists[item.category]})}
+                        onPress={() => this.setState({currentCategory: item})}
                     >
-                        <Text style={styles.barText}>{item.category}</Text>
+                        <Text style={styles.barText}>{item.name}</Text>
                     </TouchableOpacity>
                 )}
             />
@@ -97,11 +57,21 @@ export default class BusinessProducts extends Component<Props, State> {
 
     render() {
         // Check if page is loaded
-        return !this.state.thumbnailsFetched ? <ActivityIndicator style={styles.loadingScreen} size={"large"}/> : (
-            <View style={defaults.pageContainer}>
-                {this.state.currentProductList}
+        return (
+            <PageContainer>
+                <ProductCardList
+                    businessID={this.props.businessData.businessID}
+                    productIDs={this.state.currentCategory.productIDs}
+                />
                 {this.renderCategoryBar()}
-            </View>
+                <MenuBar
+                    //buttonProps={this.state.inEditMode ? this.getEditButtons(props) : this.getMainButtons(props)}
+                    buttonProps={[
+                        {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
+                        {iconSource: icons.shoppingCart, buttonFunc: () => {this.props.navigation.navigate("products")}}
+                    ]}
+                />
+            </PageContainer>
         )
     }
 }

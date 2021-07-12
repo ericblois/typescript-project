@@ -1,9 +1,7 @@
 import MenuBar from "../CustomComponents/MenuBar";
-import PhotoSlider from "../CustomComponents/PhotoSlider";
+import ImageSlider from "../CustomComponents/ImageSlider";
 import IconButton from "../CustomComponents/IconButton";
 import RatingVisual from "../CustomComponents/RatingVisual";
-import SearchResults from "../CustomComponents/SearchResults";
-import SearchResultItem from "../CustomComponents/SearchResultItem";
 import TextButton from "../CustomComponents/TextButton";
 import ProductCard from "../CustomComponents/ProductCard";
 import TabIcon from "../CustomComponents/TabIcon";
@@ -15,14 +13,17 @@ import ImageSliderSelector from "../CustomComponents/ImageSliderSelector"
 import ImageProfileSelector from "../CustomComponents/ImageProfileSelector"
 import MapPopup from "../CustomComponents/MapPopup"
 import ToggleSwitch from "../CustomComponents/ToggleSwitch"
+import PageContainer from "../CustomComponents/PageContainer"
+import ScrollContainer from "../CustomComponents/ScrollContainer"
+import CurrencyInputBox from "../CustomComponents/CurrencyInputBox";
+import GradientView from "../CustomComponents/GradientView";
+import BusinessCard from "../CustomComponents/BusinessCard";
 
 export {
     MenuBar,
-    PhotoSlider,
+    ImageSlider,
     IconButton,
     RatingVisual,
-    SearchResults,
-    SearchResultItem,
     TextButton,
     ProductCard,
     TabIcon,
@@ -33,5 +34,10 @@ export {
     ImageSliderSelector,
     ImageProfileSelector,
     MapPopup,
-    ToggleSwitch
+    ToggleSwitch,
+    PageContainer,
+    ScrollContainer,
+    CurrencyInputBox,
+    GradientView,
+    BusinessCard
 };

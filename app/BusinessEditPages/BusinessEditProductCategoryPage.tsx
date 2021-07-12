@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, Text, StyleSheet, ImageURISource, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ImageURISource, ScrollView, ActivityIndicator } from "react-native";
 import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
@@ -8,9 +8,9 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { BusinessMainStackParamList } from "../HelperFiles/Navigation"
 import TextInputBox from "../CustomComponents/TextInputBox";
-import { ProductCategory, ProductData, PublicBusinessData } from "../HelperFiles/DataTypes";
+import { DefaultProductData, ProductCategory, ProductData, PublicBusinessData } from "../HelperFiles/DataTypes";
 import * as Permissions from 'expo-permissions';
-import { ImageSliderSelector, MapPopup, MenuBar, TextInputPopup } from "../HelperFiles/CompIndex";
+import { GradientView, ImageSliderSelector, MapPopup, MenuBar, PageContainer, TextInputPopup } from "../HelperFiles/CompIndex";
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 import { FlatList } from "react-native-gesture-handler";
 import DraggableFlatList, { RenderItemParams } from 'react-native-draggable-flatlist'
@@ -28,8 +28,8 @@ type BusinessEditProductCategoryProps = {
 }
 
 type State = {
-    productCategory: ProductCategory,
-    products: ProductData[],
+    productCategory?: ProductCategory,
+    products?: ProductData[],
     showPopup: boolean,
     saved: boolean
 }
@@ -39,18 +39,18 @@ export default class BusinessEditProductCategoryPage extends Component<BusinessE
     constructor(props: BusinessEditProductCategoryProps) {
         super(props)
         this.state = {
-          productCategory: {
-            name: props.route.params.productCategory,
-            productIDs: []
-          },
-          products: [],
+          productCategory: undefined,
+          products: undefined,
           showPopup: false,
           saved: true
         }
         props.navigation.addListener("focus", (event) => {
           this.refreshData()
         })
-        this.refreshData()
+    }
+
+    componentDidMount() {
+      this.refreshData()
     }
 
     async refreshData() {
@@ -68,11 +68,11 @@ export default class BusinessEditProductCategoryPage extends Component<BusinessE
             onTapAway={() => {this.setState({showPopup: false})}}
             onSaveText={async (text) => {
               let newProduct: ProductData = {
+                ...DefaultProductData,
                 businessID: this.props.businessFuncs.businessID,
-                productID: "",
                 category: this.props.route.params.productCategory,
                 name: text,
-                isVisible: false
+                isVisible: false,
               }
               await this.props.businessFuncs.createProduct(newProduct)
               this.refreshData().then(() => {
@@ -91,7 +91,6 @@ export default class BusinessEditProductCategoryPage extends Component<BusinessE
 
     renderProductCard(params: RenderItemParams<ProductData>) {
       const product = params.item
-      console.log(product.name)
       return (
         <TextButton
           text={product.name}
@@ -122,50 +121,92 @@ export default class BusinessEditProductCategoryPage extends Component<BusinessE
         />
       )
     }
+    // Render the UI once loading is complete
+    renderUI() {
+      if (this.state.productCategory && this.state.products) {
+        return (
+          <PageContainer>
+            <Text
+              style={styles.headerText}
+            >
+              {this.props.route.params.productCategory}
+            </Text>
+            <View style={{flex: 1}}>
+              <DraggableFlatList
+                containerStyle={styles.list}
+                data={this.state.products ? this.state.products : []}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={(params) => {return this.renderProductCard(params)}}
+                ListFooterComponent={this.renderDeleteButton()}
+                ListHeaderComponent={() => (<View style={{height: styleValues.mediumPadding}}/>)}
+                onDragEnd={(params) => {
+                  if (this.state.productCategory) {
+                    const products = params.data
+                    // Update the category's product ID list
+                    const productIDs = products.map((product) => {
+                      return product.productID
+                    })
+                    let productCat = this.state.productCategory
+                    productCat.productIDs = productIDs
+                    this.setState({productCategory: productCat, products: products, saved: false})
+                  }
+                }}
+              />
+              <GradientView/>
+            </View>
+            <MenuBar
+              buttonProps={[
+                {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
+                {iconSource: icons.plus, buttonFunc: () => {this.setState({showPopup: true})}},
+                {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? styleValues.validColor : styleValues.invalidColor}, buttonFunc: () => {
+                  if (this.state.productCategory) {
+                      this.props.businessFuncs.updateProductCategory(this.props.route.params.productCategory, this.state.productCategory).then(() => {
+                          this.setState({saved: true})
+                      }, (e) => {
+                          throw e;
+                      })
+                    }
+                }}
+              ]}
+            />
+            {this.renderTextPopup()}
+          </PageContainer>
+        )
+      }
+    }
+    // Render a loading indicator over the UI while images and data load
+    renderLoadScreen() {
+      if (this.state.productCategory === undefined) {
+        return (
+          <View 
+            style={{...defaults.pageContainer, ...{
+              justifyContent: "center",
+              position: "absolute",
+              top: 0,
+              left: 0
+            }}}
+          >
+            <ActivityIndicator
+              size={"large"}
+            />
+            <MenuBar
+              buttonProps={[
+                {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
+              ]}
+              />
+          </View>
+        )
+      }
+    }
 
-  render() {
-    return (
-      <View style={{...defaults.pageContainer, ...{paddingBottom: defaults.tabBar.height + styleValues.mediumPadding*2}}}>
-        <Text
-          style={styles.headerText}
-        >
-          {this.props.route.params.productCategory}
-        </Text>
-        <DraggableFlatList
-          containerStyle={styles.list}
-          data={this.state.products}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={(params) => {return this.renderProductCard(params)}}
-          ListFooterComponent={this.renderDeleteButton()}
-          onDragEnd={(params) => {
-            const products = params.data
-            // Update the category's product ID list
-            const productIDs = products.map((product) => {
-              return product.productID
-            })
-            let productCat = this.state.productCategory
-            productCat.productIDs = productIDs
-            this.setState({productCategory: productCat, products: products, saved: false})
-          }}
-        />
-        <MenuBar
-          buttonProps={[
-            {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
-            {iconSource: icons.plus, buttonFunc: () => {this.setState({showPopup: true})}},
-            {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? styleValues.validColor : styleValues.invalidColor}, buttonFunc: () => {
-                this.props.businessFuncs.updateProductCategory(this.props.route.params.productCategory, this.state.productCategory).then(() => {
-                    this.setState({saved: true})
-                }, (e) => {
-                    throw e;
-                })
-              }
-            }
-          ]}
-        />
-        {this.renderTextPopup()}
-      </View>
-    );
-  }
+    render() {
+      return (
+        <View>
+          {this.renderUI()}
+          {this.renderLoadScreen()}
+        </View>
+      )
+    }
 }
 
 const styles = StyleSheet.create({

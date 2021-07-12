@@ -1,16 +1,19 @@
 import React, { Component } from "react";
-import { View } from "react-native";
+import { View, LogBox } from "react-native";
 import * as firebase from "firebase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { auth, businessDB, firestore } from "./app/HelperFiles/Constants";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
-import { RootStack, CustomerMainTab } from "./app/HelperFiles/Navigation";
+import { RootStack, CustomerMainStack } from "./app/HelperFiles/Navigation";
 import StartScreen from "./app/StartScreen";
 import UserSignupScreen from "./app/UserSignupScreen";
 import CustomerMainScreen from "./app/CustomerMainScreen";
 import BusinessMainScreen from "./app/BusinessMainScreen";
-import BusinessShopScreen from "./app/BusinessShopScreen";
+import BusinessShopScreen from "./app/CustomerMainPages/BusinessShopScreen";
 import ProductShopScreen from "./app/ProductShopScreen";
+import { installWebGeolocationPolyfill } from "expo-location"
+
+LogBox.ignoreLogs(['Calling getNode()', 'VirtualizedLists should never be nested'])
 
 interface Props {
 
@@ -48,9 +51,9 @@ export default class App extends Component<Props, State> {
   }
 
   componentDidMount() {
+    installWebGeolocationPolyfill()
     // Load local persistent data
     this.getLocalData();
-    
   }
 
   render() {
@@ -65,7 +68,7 @@ export default class App extends Component<Props, State> {
           }}
         >
             <RootStack.Navigator
-              initialRouteName={auth.currentUser ? "businessMain" : "start"}
+              initialRouteName={auth.currentUser ? "customerMain" : "start"}
               screenOptions={{
                 headerShown: false,
               }}
@@ -74,8 +77,6 @@ export default class App extends Component<Props, State> {
               <RootStack.Screen name={"userSignup"} component={UserSignupScreen}/>
               <RootStack.Screen name={"customerMain"} component={CustomerMainScreen}/>
               <RootStack.Screen name={"businessMain"} component={BusinessMainScreen}/>
-              <RootStack.Screen name={"businessShop"} component={BusinessShopScreen}/>
-              <RootStack.Screen name={"productShop"} component={ProductShopScreen}/>
             </RootStack.Navigator>
         </NavigationContainer>
     );

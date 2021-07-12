@@ -3,7 +3,7 @@ import { StyleSheet, StatusBar, AppState, ActivityIndicator, View, Text } from "
 import { CustomerInfoPage, AccountTypePage } from "./HelperFiles/PageIndex";
 import { defaults, icons, styleValues } from "./HelperFiles/StyleSheet";
 import { NavigationContainer, ParamListBase, Route } from "@react-navigation/native";
-import { RootStack, CustomerMainTab, RootStackParamList } from "./HelperFiles/Navigation";
+import { RootStack, CustomerMainStack, RootStackParamList } from "./HelperFiles/Navigation";
 import { UserSignupStack, UserSignupStackParamList } from "./HelperFiles/Navigation";
 import { StackHeaderProps, StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';

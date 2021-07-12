@@ -6,11 +6,12 @@ import { Icon } from "react-native-elements";
 import { Switch } from "react-native-gesture-handler";
 
 type ToggleSwitchProps = {
+    style?: ViewStyle,
     text?: string,
     textStyle?: TextStyle,
     textProps?: Text["props"],
     switchStyle?: ViewStyle,
-    switchProps?: Switch["props"],
+    switchProps?: Switch['propTypes'],
     onToggle?: (value: boolean) => void
 }
 
@@ -42,7 +43,7 @@ export default class ToggleSwitch extends Component<ToggleSwitchProps, State> {
   render() {
     return (
         <View
-            style={styles.container}
+            style={{...styles.container, ...this.props.style}}
         >
             {this.renderText()}
             <Switch

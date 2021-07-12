@@ -3,7 +3,7 @@ import { View, Image, Text, StyleSheet, ActivityIndicator, ScrollView, SafeAreaV
 
 import PropTypes from 'prop-types';
 import { styleValues, defaults, icons } from "./HelperFiles/StyleSheet";
-import { PhotoSlider, RatingVisual, MenuBar, IconButton } from "./HelperFiles/CompIndex";
+import { PhotoSlider, RatingVisual, MenuBar, IconButton, PageContainer } from "./HelperFiles/CompIndex";
 import { productPropType, formatText, prefetchImages, currency } from "./HelperFiles/Constants";
 import { Picker } from "@react-native-picker/picker";
 import DropDownPicker from 'react-native-dropdown-picker';
@@ -98,8 +98,8 @@ export default class ProductShopScreen extends Component<Props, State> {
 
     render() {
         return (
-        <View style={defaults.screenContainer}>
-            <View style={defaults.pageContainer}>
+        <PageContainer>
+            <View>
             <ScrollView contentContainerStyle={styles.container}>
                 <PhotoSlider imgURLs={this.productData.images} loadResponse={this.galleryResponse}/>
                 <View style={styles.descriptionHeader}>
@@ -125,7 +125,7 @@ export default class ProductShopScreen extends Component<Props, State> {
                 {iconSource: icons.shoppingCart, buttonFunc: () => {}},
             ]}/>
             </View>
-        </View>
+        </PageContainer>
         )
     }
 }

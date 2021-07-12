@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import { StyleSheet, StatusBar, AppState, ActivityIndicator, View } from "react-native";
-import { SearchPage, FavouritesPage, NotificationsPage, CustomerAccountPage, ProductShopScreen } from "./HelperFiles/PageIndex";
-import BusinessShopScreen from "./BusinessShopScreen"
+import { CustomerTabScreen, ProductShopScreen } from "./HelperFiles/PageIndex";
+import BusinessShopScreen from "./CustomerMainPages/BusinessShopScreen"
 import { defaults, icons } from "./HelperFiles/StyleSheet";
-import { CustomerMainTab } from "./HelperFiles/Navigation";
+import { CustomerMainStack } from "./HelperFiles/Navigation";
 import TabIcon from "./CustomComponents/TabIcon";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from "./HelperFiles/Navigation";
@@ -27,43 +27,28 @@ export default class CustomerMainScreen extends Component<Props, State> {
 
   render() {
     return (
-        <CustomerMainTab.Navigator
-            tabBarOptions={{
-              style: defaults.tabBar,
-              showLabel: false,
-            }}
-            sceneContainerStyle={defaults.screenContainer}
-            initialRouteName={"search"}
+      <View style={defaults.screenContainer}>
+        <CustomerMainStack.Navigator
+          initialRouteName={"customerTab"}
+          screenOptions={(props) => ({
+            headerStatusBarHeight: 0,
+            headerShown: false,
+          })}
         >
-            <CustomerMainTab.Screen
-                name={"search"}
-                component={SearchPage}
-                options={{
-                  tabBarIcon: (options) => <TabIcon iconSource={icons.search} options={options}/>
-                }}
+            <CustomerMainStack.Screen
+              name={"customerTab"}
+              component={CustomerTabScreen}
             />
-            <CustomerMainTab.Screen
-                name={"fav"} 
-                component={FavouritesPage}
-                options={{
-                  tabBarIcon: (options) => <TabIcon iconSource={icons.star} options={options}/>
-                }}
+            <CustomerMainStack.Screen
+              name={"businessShop"}
+              component={BusinessShopScreen}
             />
-            <CustomerMainTab.Screen
-                name={"notif"} 
-                component={NotificationsPage}
-                options={{
-                  tabBarIcon: (options) => <TabIcon iconSource={icons.lines} options={options}/>
-                }}
+            <CustomerMainStack.Screen
+              name={"productShop"}
+                component={ProductShopScreen}
             />
-            <CustomerMainTab.Screen
-                name={"account"}
-                component={CustomerAccountPage}
-                options={{
-                  tabBarIcon: (options) => <TabIcon iconSource={icons.profile} options={options}/>
-                }}
-            />
-        </CustomerMainTab.Navigator>
+        </CustomerMainStack.Navigator>
+      </View>
     );
   }
 }

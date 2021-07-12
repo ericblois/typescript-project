@@ -54,16 +54,16 @@ export const styleValues = {
   majorPadding: winWidth/20,
   mediumPadding: winWidth/40,
   minorPadding: winWidth/100,
-  lightColor: "#ffa099",
-  mainColor: "#ff776e",
-  darkColor: "#db5148",
+  lightColor: "#9ff5cb",
+  mainColor: "#23de83",
+  darkColor: "#0bb05f",
   whiteColor: "#fff",
   lightGreyColor: "#bbb",
   greyColor: "#777",
   darkGreyColor: "#333",
   blackColor: "#000",
   bordColor: "#ccc",
-  minorBorderWidth: winWidth * 0.004,
+  minorBorderWidth: winWidth * 0.005,
   majorBorderWidth: winWidth * 0.008,
   bordRadius: winWidth * 0.025,
   iconSmallestSize: winWidth * 0.025,
@@ -72,7 +72,7 @@ export const styleValues = {
   iconMediumSize: winWidth * 0.1,
   iconLargeSize: winWidth * 0.125,
   iconLargerSize: winWidth * 0.15,
-  iconMajorSize: winWidth * 0.2,
+  iconLargestSize: winWidth * 0.2,
   statusBarHeight: StatusBar.currentHeight != null ? StatusBar.currentHeight : 20,
   roundedPadding: hasRoundCorners() ? winWidth * 0.05 : 0,
   largerTextSize: winWidth/12,
@@ -101,15 +101,38 @@ export const defaults = StyleSheet.create({
   pageContainer: {
       alignItems: "center",
       justifyContent: "flex-start",
-      width: "100%",
-      height: "100%",
+      width: winWidth,
+      height: winHeight,
       backgroundColor: "#fff",
-      padding: styleValues.mediumPadding
+      padding: styleValues.mediumPadding,
+      paddingBottom: styleValues.winWidth * 0.15 + styleValues.mediumPadding*2
   },
   smallTextHeader: {
     fontSize: styleValues.smallTextSize,
     textAlign: "center",
-    textAlignVertical: "center"
+    textAlignVertical: "center",
+    marginBottom: styleValues.mediumPadding
+  },
+  mediumTextHeader: {
+    fontSize: styleValues.mediumTextSize,
+    textAlign: "center",
+    textAlignVertical: "center",
+    marginBottom: styleValues.mediumPadding
+  },
+  largeTextHeader: {
+    fontSize: styleValues.largeTextSize,
+    textAlign: "center",
+    textAlignVertical: "center",
+    marginBottom: styleValues.mediumPadding
+  },
+  dividerBox: {
+    alignItems: "center",
+    borderWidth: styleValues.minorBorderWidth,
+    borderRadius: styleValues.bordRadius,
+    borderColor: styleValues.greyColor,
+    padding: styleValues.mediumPadding,
+    paddingBottom: 0,
+    marginBottom: styleValues.mediumPadding
   },
   tabBar: {
     position: "absolute",
@@ -141,23 +164,40 @@ export const defaults = StyleSheet.create({
   },
   textButtonMainColor: {
     width: "100%",
+    height: winWidth* 0.125,
     padding: styleValues.mediumPadding,
     borderWidth: styleValues.minorBorderWidth,
     borderRadius: styleValues.bordRadius,
     borderColor: styleValues.darkColor,
     backgroundColor: styleValues.mainColor,
     flexDirection: "row",
-    marginVertical: styleValues.minorPadding
+    marginBottom: styleValues.mediumPadding,
+    alignItems: "center",
+    justifyContent: "center"
   },
-  textButtonNoColor: {
+  textButtonLightColor: {
     width: "100%",
+    height: winWidth* 0.125,
     padding: styleValues.mediumPadding,
     borderWidth: styleValues.minorBorderWidth,
     borderRadius: styleValues.bordRadius,
     borderColor: styleValues.darkColor,
     backgroundColor: "white",
     flexDirection: "row",
-    marginVertical: styleValues.minorPadding,
+    marginBottom: styleValues.mediumPadding,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  textButtonNoColor: {
+    width: "100%",
+    height: winWidth* 0.125,
+    padding: styleValues.mediumPadding,
+    borderWidth: styleValues.minorBorderWidth,
+    borderRadius: styleValues.bordRadius,
+    borderColor: styleValues.greyColor,
+    backgroundColor: "white",
+    flexDirection: "row",
+    marginBottom: styleValues.mediumPadding,
     alignItems: "center",
     justifyContent: "center"
   },
@@ -181,7 +221,7 @@ export const defaults = StyleSheet.create({
     borderColor: styleValues.darkColor,
     marginBottom: styleValues.mediumPadding,
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   inputText: {
     width: "95%",
@@ -252,5 +292,6 @@ export const icons = {
   minus: require("../../assets/minusIcon.png"),
   edit: require("../../assets/editIcon.png"),
   location: require("../../assets/locationIcon.png"),
-  crosshair: require("../../assets/crosshairIcon.png")
+  crosshair: require("../../assets/crosshairIcon.png"),
+  image: require("../../assets/imageIcon.png")
 }

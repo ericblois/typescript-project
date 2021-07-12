@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { View, ScrollView, Text, StyleSheet, TextInput, ActivityIndicator } from "react-native";
 import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
-import { TextInputBox, DateScrollPicker, TextDropdown, MenuBar } from "../HelperFiles/CompIndex";
+import { TextInputBox, DateScrollPicker, TextDropdown, MenuBar, PageContainer } from "../HelperFiles/CompIndex";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList, UserSignupStackParamList } from "../HelperFiles/Navigation";
 import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
@@ -123,7 +123,6 @@ export default class CustomerInfoPage extends Component<Props, State> {
                 birthYear: this.state.birthYearText,
                 country: this.state.countryText,
                 businessIDs: [],
-                defaultAddressIndex: 0,
                 shippingAddresses: []
             }
             // Create an account
@@ -167,7 +166,7 @@ export default class CustomerInfoPage extends Component<Props, State> {
 
   render() {
         return (
-        <View style={defaults.pageContainer}>
+        <PageContainer>
             <Text style={styles.signupHeader}>
                 Sign Up
             </Text>
@@ -337,7 +336,7 @@ export default class CustomerInfoPage extends Component<Props, State> {
                     }
                 ]}
             ></MenuBar>
-        </View>
+        </PageContainer>
         );
     }
 }

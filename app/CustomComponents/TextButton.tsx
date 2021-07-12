@@ -7,6 +7,7 @@ import { defaults, styleValues } from "../HelperFiles/StyleSheet";
 type Props = {
     text: string,
     textStyle?: TextStyle,
+    appearance?: "light" | "color" | "no-color"
     subtext?: string,
     subtextStyle?: TextStyle,
     leftIconSource?: number,
@@ -64,15 +65,27 @@ export default class TextButton extends Component<Props, State> {
     }
 
     render() {
+        let defaultButtonStyle = {...defaults.textButtonNoColor}
+        if (this.props.appearance === "light") {
+            defaultButtonStyle = defaults.textButtonLightColor
+        } else if (this.props.appearance === "color") {
+            defaultButtonStyle = defaults.textButtonMainColor
+        }
+        let defaultTextStyle = {...styles.textStyle}
+        if (this.props.appearance === "color") {
+            defaultTextStyle.color = styleValues.whiteColor
+        }
         return (
             <TouchableOpacity
-            style={{...defaults.textButtonNoColor, ...this.props.buttonStyle}}
+            style={{...defaultButtonStyle, ...this.props.buttonStyle, ...{
+                justifyContent: this.props.rightIconSource != undefined || this.props.rightIconSource != undefined ? "space-between" : "center"
+            }}}
             onPress={this.props.buttonFunc}
             {...this.props.touchableProps}
             >
                 {this.renderLeftIcon()}
                 <View style={{alignItems: "center", justifyContent: "center"}}>
-                    <Text style = {[styles.textStyle, this.props.textStyle]} {...this.props.textProps}>
+                    <Text style = {[defaultTextStyle, this.props.textStyle]} {...this.props.textProps}>
                         {this.props.text}
                     </Text>
                     {this.renderSubtext()}
@@ -98,9 +111,9 @@ const styles = StyleSheet.create({
     iconStyle: {
         aspectRatio: 1,
         maxWidth: "10%",
-        maxHeight: "50%",
+        maxHeight: "75%",
         tintColor: styleValues.darkGreyColor,
         alignSelf: "center",
-        flexWrap: "wrap"
+        flexWrap: "wrap",
     },
 });

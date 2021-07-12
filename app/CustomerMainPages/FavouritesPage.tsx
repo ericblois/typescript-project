@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { View, Text, StyleSheet } from "react-native";
 
 import { styleValues, defaults } from "../HelperFiles/StyleSheet";
-import { MenuBar } from "../HelperFiles/CompIndex";
+import { MenuBar, PageContainer } from "../HelperFiles/CompIndex";
 import PropTypes from 'prop-types';
 
 export default class FavouritesPage extends Component {
@@ -15,9 +15,9 @@ export default class FavouritesPage extends Component {
 
   render() {
     return (
-      <View style={defaults.pageContainer}>
+      <PageContainer>
         <Text>favourites</Text>
-      </View>
+      </PageContainer>
     );
   }
 }

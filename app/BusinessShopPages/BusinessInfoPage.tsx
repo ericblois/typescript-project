@@ -1,61 +1,52 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, ScrollView } from "react-native";
 import PropTypes from 'prop-types';
-import { styleValues } from "../HelperFiles/StyleSheet";
-import { PhotoSlider, RatingVisual } from "../HelperFiles/CompIndex";
-import { businessPropType, formatText, prefetchImages } from "../HelperFiles/Constants";
-import { PrivateBusinessData } from "../HelperFiles/DataTypes"
+import { defaults, icons, styleValues } from "../HelperFiles/StyleSheet";
+import { ImageSlider, MenuBar, PageContainer, RatingVisual, ScrollContainer } from "../HelperFiles/CompIndex";
+import { businessPropType, formatText } from "../HelperFiles/Constants";
+import { PublicBusinessData } from "../HelperFiles/DataTypes"
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { BusinessShopTabParamList } from "../HelperFiles/Navigation";
+import { BusinessShopStackParamList } from "../HelperFiles/Navigation";
 import { RouteProp } from '@react-navigation/native';
 
-type BusinessInfoNavigationProp = BottomTabNavigationProp<BusinessShopTabParamList, "info">;
+type BusinessInfoNavigationProp = BottomTabNavigationProp<BusinessShopStackParamList, "info">;
 
-type BusinessInfoRouteProp = RouteProp<BusinessShopTabParamList, "info">;
+type BusinessInfoRouteProp = RouteProp<BusinessShopStackParamList, "info">;
 
 type Props = {
     navigation: BusinessInfoNavigationProp,
     route: BusinessInfoRouteProp,
-    businessData: PrivateBusinessData
+    businessData: PublicBusinessData
 }
 
 type State = {
-    imagesFetched: boolean,
-    galleryReady: boolean
+    loaded: boolean
 }
 
 export default class BusinessInfoPage extends Component<Props, State> {
 
-    galleryResponse = () => {
-        this.setState({galleryReady: true});
-    }
-
-    state: Readonly<State> = {
-        imagesFetched: false,
-        galleryReady: false,
-    }
-
-    static propTypes = {
-        navigation: PropTypes.object,
-        route: PropTypes.object,
-        businessData: businessPropType.isRequired
-    }
+    businessData = this.props.businessData
 
     constructor(props: Props) {
         super(props)
-        BusinessDataHandler.getBusinessInfo(this.props.businessData).catch((e) => console.error(e));
-    }
-
-    componentDidMount() {
-        prefetchImages(this.props.businessData.info!.galleryImages).then(() => {
-            this.setState({imagesFetched: true});
-        })
+        this.state = {
+            loaded: false
+        }
     }
 
     displayLoadingScreen() {
-        if (this.props.businessData.info!.galleryImages.length != 0 && !(this.state.imagesFetched && this.state.galleryReady)) {
+        if (!this.state.loaded) {
             return (
-                <ActivityIndicator style={styles.loadingScreen} size={"large"}/>
+                <View 
+                    style={{...defaults.pageContainer, ...{
+                        justifyContent: "center",
+                        position: "absolute",
+                        top: 0,
+                        left: 0
+                     }}}
+                >
+                    <ActivityIndicator size={"large"}/>
+                </View>
             );
         }
         return <></>
@@ -63,21 +54,35 @@ export default class BusinessInfoPage extends Component<Props, State> {
 
     render() {
         return (
-            <ScrollView contentContainerStyle={styles.container}>
-                <PhotoSlider imgURLs={this.props.businessData.info!.galleryImages} loadResponse={this.galleryResponse}/>
+        <PageContainer>
+            <ScrollContainer>
+                <ImageSlider
+                    uris={this.props.businessData.galleryImages}
+                    onImagesLoaded={() => {
+                        this.setState({loaded: true})
+                    }}
+                />
                 <View style={styles.descriptionHeader}>
-                    <Text style={styles.businessTitle} numberOfLines={2}>{this.props.businessData.info!.name}</Text>
-                    <Text style={styles.businessType}>{this.props.businessData.info!.businessType}</Text>
+                    <Text style={styles.businessTitle} numberOfLines={2}>{this.props.businessData.name}</Text>
+                    <Text style={styles.businessType}>{this.props.businessData.businessType}</Text>
                     <View style={styles.subHeader}>
-                        <Text style={styles.businessLocation}>{this.props.businessData.info!.city + ", " + this.props.businessData.info!.region}</Text>
-                        <RatingVisual rating={this.props.businessData.info!.totalRating}/>
+                        <Text style={styles.businessLocation}>{this.props.businessData.city + ", " + this.props.businessData.region}</Text>
+                        <RatingVisual rating={this.props.businessData.totalRating}/>
                     </View>
                 </View>
                 <View style={styles.descriptionBody}>
-                    <Text style={styles.description}>{formatText(this.props.businessData.info!.description)}</Text>
+                    <Text style={styles.description}>{formatText(this.props.businessData.description)}</Text>
                 </View>
                 {this.displayLoadingScreen()}
-            </ScrollView>
+            </ScrollContainer>
+            <MenuBar
+                //buttonProps={this.state.inEditMode ? this.getEditButtons(props) : this.getMainButtons(props)}
+                buttonProps={[
+                    {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
+                    {iconSource: icons.shoppingCart, buttonFunc: () => {this.props.navigation.navigate("products")}}
+                ]}
+            />
+        </PageContainer>
         )
     }
 }

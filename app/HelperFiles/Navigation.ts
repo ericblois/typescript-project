@@ -1,6 +1,6 @@
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { ProductData, PrivateBusinessData, ProductCategory } from "./DataTypes";
+import { ProductData, PublicBusinessData, PrivateBusinessData, ProductCategory } from "./DataTypes";
 import { BusinessFunctions } from "./BusinessFunctions";
 
 export type RootStackParamList = {
@@ -10,26 +10,31 @@ export type RootStackParamList = {
     businessMain: {
         businessFuncs: BusinessFunctions
     },
+}
+
+export const RootStack = createStackNavigator<RootStackParamList>();
+
+export type CustomerMainStackParamList = {
+    customerTab: undefined,
     businessShop: {
-        businessData: PrivateBusinessData
+        businessData: PublicBusinessData
     },
-    businessCreation: undefined,
     productShop: {
         productData: ProductData,
         productType: string
     }
 }
 
-export const RootStack = createStackNavigator<RootStackParamList>();
+export const CustomerMainStack = createStackNavigator<CustomerMainStackParamList>();
 
-export type CustomerMainTabParamList = {
+export type CustomerTabParamList = {
     search: undefined,
     fav: undefined,
     notif: undefined,
     account: undefined,
 }
 
-export const CustomerMainTab = createBottomTabNavigator<CustomerMainTabParamList>();
+export const CustomerTab = createBottomTabNavigator<CustomerTabParamList>();
 
 export type BusinessMainStackParamList = {
     businessEdit: undefined,
@@ -42,19 +47,28 @@ export type BusinessMainStackParamList = {
     editProduct: {
         productID: string
     },
+    editOptionType: {
+        productID: string,
+        productName: string,
+        optionType: string
+    },
+    editOption: {
+        productID: string,
+        optionType: string,
+        option: string
+    },
     notif: undefined,
     account: undefined,
 }
 
 export const BusinessMainStack = createStackNavigator<BusinessMainStackParamList>();
 
-export type BusinessShopTabParamList = {
-    back: undefined,
+export type BusinessShopStackParamList = {
     info: undefined,
     products: undefined,
 }
 
-export const BusinessShopTab = createBottomTabNavigator<BusinessShopTabParamList>();
+export const BusinessShopStack = createStackNavigator<BusinessShopStackParamList>();
 
 
 export type UserSignupStackParamList = {

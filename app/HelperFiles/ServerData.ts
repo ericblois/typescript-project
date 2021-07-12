@@ -1,7 +1,8 @@
-import { auth, firestore, locationDocString, storage } from "./Constants";
-import { UserData, PrivateBusinessData } from "./DataTypes";
+import { auth, firestore, geofire, locationDocString, storage } from "./Constants";
+import { UserData, PrivateBusinessData, PublicBusinessData } from "./DataTypes";
 import RNFetchBlob from 'rn-fetch-blob'
 import { Platform } from "react-native";
+import UserFunctions from "./UserFunctions";
 
 export default class ServerData {
 
@@ -78,6 +79,16 @@ export default class ServerData {
         throw e;
       }
     }
+    static async deleteCollection(targetCol: firebase.default.firestore.CollectionReference) {
+      try {
+        const collection = await targetCol.get()
+        const promises = await Promise.all(collection.docs.map((docSnap) => {
+          return ServerData.deleteDoc(docSnap.ref)
+        }))
+      } catch (e) {
+        throw e
+      }
+    }
     // Create a new user from a UserData object, returns UserCredential
     static createNewUser = async (email: string, pass: string, userData: UserData) => {
       try {
@@ -94,42 +105,69 @@ export default class ServerData {
         throw e;
       }
     }
-
-    static queryBusinesses = async (searchTerms: string[]) => {
-      try {
-        // Get the city's collection of business references
-        const cityCol = firestore.collection(locationDocString + "/ids");
-        // Get all business references matching the query terms
-        const queryResults = await cityCol.where('keywords', 'array-contains-any', searchTerms).get();
-        // Create a list of PrivateBusinessData objects
-        const businesses: PrivateBusinessData[] = [];
-        queryResults.forEach((refSnap) => {
-          businesses.push(BusinessDataHandler.create(refSnap.id, refSnap));
-        })
-        return businesses;
-      } catch (e) {
-        throw e;
-      }
-    }
-
+    // Uploads a file then returns the download URL 
     static async uploadFile(localDataPath: string, serverPath: string) {
       try {
         const fileURI = Platform.OS === "ios" ? localDataPath.replace("file://", "") : localDataPath
-        const Blob = RNFetchBlob.polyfill.Blob
-        const fs = RNFetchBlob.fs
-        window.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest
-        window.Blob = Blob
-        RNFetchBlob.
-        fs.readFile(fileURI, "base64").then((value) => {
-          return Blob.
-        })
         const targetRef = storage.ref(serverPath)
-        const response = await RNFetchBlob.fetch("GET", localDataPath)
-        const blob = await response.base64()
-        const task = await targetRef.put(file).catch((e) => {throw e})
-        return task
+        const response = await fetch(fileURI)
+        const blob = await response.blob()
+        const task = await targetRef.put(blob)
+        return (await targetRef.getDownloadURL()) as string
       } catch (e) {
         throw e
       }
+    }
+    // Deletes a file
+    static async deleteFile(downloadURL: string) {
+      try {
+        const targetRef = storage.refFromURL(downloadURL)
+        await targetRef.delete()
+      } catch (e) {
+        throw e
+      }
+    }
+    // Find businesses that match keywords within a certain range
+    static async findLocalBusinessesInRange(keywords: string[], location: {latitude: number, longitude: number}, rangeInKm?: number) {
+      let tenKeywords = keywords
+      if (keywords.length > 10) {
+        tenKeywords = keywords.slice(0,10)
+      }
+      // Get user data to find country to search
+      const userDoc = await UserFunctions.getUserDoc()
+      const colRef = firestore.collection("publicBusinessData/".concat(userDoc.country).concat("/businesses"))
+      const rangeInM = rangeInKm ? rangeInKm * 1000 : 50000
+      let currentLoc = [location.latitude, location.longitude]
+      // Get query bounds
+      const bounds = geofire.geohashQueryBounds(currentLoc, rangeInM)
+      // Get query promises
+      let promises = []
+      for (const bound of bounds) {
+        const query = colRef
+          .orderBy('geohash')
+          .startAt(bound[0])
+          .endAt(bound[1])
+          .where("keywords", "array-contains-any", tenKeywords)
+          .limit(10)
+        promises.push(query.get())
+      }
+      // Filter out false positives
+      const matchingBusinesses: PublicBusinessData[] = []
+      const querySnapshots = await Promise.all(promises)
+      querySnapshots.forEach((querySnap) => {
+        querySnap.docs.forEach((docSnap) => {
+          // Get data as public business data
+          const publicData = docSnap.data() as PublicBusinessData
+          // Check if the business's location is within range
+          if (publicData.coords.latitude && publicData.coords.longitude) {
+            const distanceInKm = geofire.distanceBetween([publicData.coords.latitude, publicData.coords.longitude], currentLoc);
+            const distanceInM = distanceInKm * 1000;
+            if (distanceInM <= rangeInM) {
+              matchingBusinesses.push(publicData);
+            }
+          }
+        })
+      })
+      return matchingBusinesses
     }
 }

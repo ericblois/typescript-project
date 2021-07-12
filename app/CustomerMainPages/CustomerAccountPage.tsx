@@ -4,19 +4,21 @@ import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
 import { auth } from "../HelperFiles/Constants";
-import { BusinessMainStackParamList, CustomerMainTabParamList, RootStackParamList } from "../HelperFiles/Navigation";
+import { CustomerTabParamList, CustomerMainStackParamList, RootStackParamList } from "../HelperFiles/Navigation";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 import UserFunctions from "../HelperFiles/UserFunctions";
 import { StackNavigationProp } from "@react-navigation/stack";
+import PageContainer from "../CustomComponents/PageContainer";
+import { ScrollView } from "react-native-gesture-handler";
 
 type CustomerAccountNavigationProp = CompositeNavigationProp<
-  BottomTabNavigationProp<CustomerMainTabParamList, "account">,
+  BottomTabNavigationProp<CustomerTabParamList, "account">,
   StackNavigationProp<RootStackParamList>
 >
 
-type CustomerAccountRouteProp = RouteProp<CustomerMainTabParamList, "account">;
+type CustomerAccountRouteProp = RouteProp<CustomerTabParamList, "account">;
 
 type CustomerAccountProps = {
     navigation: CustomerAccountNavigationProp,
@@ -93,7 +95,7 @@ export default class CustomerAccountPage extends Component<CustomerAccountProps,
 
   render() {
     return (
-      <View style={defaults.pageContainer}>
+      <PageContainer>
         <Text
           style={{
             fontSize: styleValues.largeTextSize
@@ -117,7 +119,7 @@ export default class CustomerAccountPage extends Component<CustomerAccountProps,
         {this.state.businessButtons}
         {this.renderCreateBusinessButton()}
         {this.renderDeleteAccountButton()}
-      </View>
+      </PageContainer>
     );
   }
 }

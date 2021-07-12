@@ -1,4 +1,4 @@
-export type Country = "canada" | "united_states"
+export type Country = "canada" | "united_states" | ""
 
 export type ShippingInfo = {
     name: string,
@@ -18,14 +18,19 @@ export type UserData = {
   birthYear: string,
   country: Country,
   shippingAddresses: ShippingInfo[],
-  defaultAddressIndex: number,
   businessIDs: string[]
 }
 
 export type ProductOption = {
-name: string,
-priceChange: number,
-image: string
+  name: string,
+  priceChange: number | null,
+  images: string[]
+}
+
+export const DefaultProductOption = {
+  name: "",
+  priceChange: null,
+  images: []
 }
 
 export type ProductOptionType = {
@@ -34,17 +39,31 @@ options: ProductOption[]
 }
 
 export type ProductData = {
-businessID: string,
-productID: string,
-category: string,
-name: string,
-price?: number,
-description?: string,
-images?: string[],
-optionTypes?: ProductOptionType[],
-ratings?: number[],
-extraInfo?: string,
-isVisible: boolean
+  businessID: string,
+  productID: string,
+  category: string,
+  name: string,
+  price: number | null,
+  description: string,
+  images: string[],
+  optionTypes: ProductOptionType[],
+  ratings: number[],
+  extraInfo: string,
+  isVisible: boolean
+}
+
+export const DefaultProductData = {
+  businessID: "",
+  productID: "",
+  category: "",
+  name: "",
+  price: null,
+  description: "",
+  images: [],
+  optionTypes: [],
+  ratings: [],
+  extraInfo: "",
+  isVisible: false
 }
 
 export type ProductCategory = {
@@ -52,34 +71,66 @@ name: string,
 productIDs: string[]
 }
 
-export type ProductRefCategory = {
-category: string,
-products: firebase.default.firestore.DocumentReference[]
-}
-
 export type PublicBusinessData = {
   userID: string,
   businessID: string,
-  name?: string,
-  profileImage?: string,
-  galleryImages?: string[],
-  businessType?: string,
-  totalRating?: number,
-  description?: string,
-  address?: string,
-  city?: string,
-  region?: string,
+  name: string,
+  profileImage: string,
+  galleryImages: string[],
+  businessType: string,
+  totalRating: number,
+  description: string,
+  coords: {latitude: number | null, longitude: number | null},
+  address: string,
+  city: string,
+  region: string,
   country: Country,
-  postalCode?: string,
-  geohash?: string,
-  keywords?: string[],
-  productList?: ProductCategory[],
+  postalCode: string,
+  geohash: string,
+  storePickup: boolean,
+  localDelivery: boolean,
+  deliveryRange: number,
+  countryShipping: boolean,
+  internationalShipping: boolean,
+  keywords: string[],
+  productList: ProductCategory[],
+}
+
+export const DefaultPublicBusinessData: PublicBusinessData = {
+  userID: "",
+  businessID: "",
+  name: "",
+  profileImage: "",
+  galleryImages: [],
+  businessType: "",
+  totalRating: 0,
+  description: "",
+  coords: {latitude: null, longitude: null},
+  address: "",
+  city: "",
+  region: "",
+  country: "",
+  postalCode: "",
+  geohash: "",
+  storePickup: false,
+  localDelivery: false,
+  deliveryRange: 0,
+  countryShipping: false,
+  internationalShipping: false,
+  keywords: [],
+  productList: [],
 }
 
 export type PrivateBusinessData = {
   userID: string,
   businessID: string,
   country: Country,
-  coords?: {latitude: number, longitude: number},
-  productListReference?: ProductRefCategory[],
+  coords: {latitude: number, longitude: number},
+}
+
+export const DefaultPrivateBusinessData: PrivateBusinessData = {
+  userID: "",
+  businessID: "",
+  country: "",
+  coords: {latitude: 0, longitude: 0},
 }

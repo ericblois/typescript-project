@@ -1,52 +1,37 @@
 
 import React, { Component } from "react";
 import { View, TouchableOpacity, Image, Text, StyleSheet, ActivityIndicator } from "react-native";
-import { styleValues } from "../HelperFiles/StyleSheet";
+import { icons, styleValues } from "../HelperFiles/StyleSheet";
 import {  useNavigation } from "@react-navigation/native";
-import { PublicBusinessData, PrivateBusinessData } from "../HelperFiles/DataTypes";
+import { PublicBusinessData } from "../HelperFiles/DataTypes";
 
 type Props = {
-  navigation: ReturnType<typeof useNavigation>,
-  businessData: PrivateBusinessData,
+  businessData: PublicBusinessData,
+  onPress?: () => void
 }
 
 type State = {}
 
 export default class SearchResultItem extends Component<Props, State> {
 
-    businessInfo: PublicBusinessData | undefined;
-
-
-    componentDidMount() {
-    }
-
-    displayLoadingScreen() {
-      if (this.businessInfo) {
-          return (
-              <ActivityIndicator style={styles.loadingScreen} size={"large"}/>
-          );
-      }
-      return <></>
-  }
-
     render() {
-        return !this.businessInfo ? this.displayLoadingScreen() : (
-          <TouchableOpacity style={styles.resultItemContainer} onPress={() => this.props.navigation.navigate("business", {businessData: this.props.businessData})}>
+        return (
+          <TouchableOpacity style={styles.resultItemContainer} onPress={this.props.onPress}>
             <View>
             <Image
                 style={styles.resultImage}
                 resizeMethod={"scale"}
                 resizeMode={"cover"}
-                source={{uri: this.businessInfo?.profileImage}}
+                source={this.props.businessData.profileImage !== "" ? {uri: this.props.businessData.profileImage} : icons.profile}
             />
             </View>
             <View style={styles.resultInfoContainer}>
             <View style={styles.resultUpperInfo}>
-                <Text style={styles.resultName}>{this.businessInfo?.name}</Text>
-                <Text style={styles.resultType}>{this.businessInfo?.businessType}</Text>
+                <Text style={styles.resultName}>{this.props.businessData.name}</Text>
+                <Text style={styles.resultType}>{this.props.businessData.businessType}</Text>
             </View>
             <View style={styles.resultLowerInfo}>
-                <Text>{this.businessInfo?.totalRating}</Text>
+                <Text>{this.props.businessData.totalRating}</Text>
                 <TouchableOpacity onPress={() => useNavigation().navigate("business", {businessData: this.props.businessData})}>
                 <Image
                     style={styles.favButton}

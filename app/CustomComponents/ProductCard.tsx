@@ -1,20 +1,24 @@
 
 import React, { Component } from "react";
-import { View, TouchableOpacity, Image, Text, StyleSheet, GestureResponderEvent } from "react-native";
+import { View, TouchableOpacity, Image, Text, StyleSheet, GestureResponderEvent, ActivityIndicator } from "react-native";
 import { defaults, styleValues } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
-import { productPropType, currency, ProductData } from "../HelperFiles/Constants";
+import { productPropType, currency } from "../HelperFiles/Constants";
 import RatingVisual from "./RatingVisual";
 import { useNavigation } from "@react-navigation/native";
+import { ProductData } from "../HelperFiles/DataTypes";
+import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
 
 type Props = {
-    productData: ProductData,
+    businessID: string,
+    productID: string,
     onLoadEnd?: () => void,
     onPress?: (event?: GestureResponderEvent) => void
 }
 
 type State = {
     totalRating: number
+    productData?: ProductData
 }
 
 export default class ProductCard extends Component<Props, State> {
@@ -23,52 +27,78 @@ export default class ProductCard extends Component<Props, State> {
         super(props);
         this.state = {
             totalRating: 0,
+            productData: undefined
         }
     }
 
     componentDidMount() {
-        let count = 0;
-        let totalRating = 0;
-        this.props.productData.ratings.forEach((num, index) => {
-            count += num;
-            totalRating += num*(index+1);
+        CustomerFunctions.getProduct(this.props.businessID, this.props.productID).then((productData) => {
+            let totalRating = 0;
+            productData.ratings.forEach((num) => {
+                totalRating += num
+            })
+            this.setState({productData: productData, totalRating: totalRating / productData.ratings.length}, () => {
+                if (this.props.onLoadEnd) {
+                    this.props.onLoadEnd()
+                }
+            })
         })
-        this.setState({totalRating: totalRating / count});
+    }
+
+    renderUI() {
+        if (this.state.productData) {
+            return (
+            <TouchableOpacity style={styles.cardContainer} onPress={() => {
+                if (this.props.onPress) {
+                    this.props.onPress();
+                }
+            }}>
+                <Image
+                    style={styles.productImage}
+                    resizeMethod={"scale"}
+                    resizeMode={"cover"}
+                    source={{uri: this.state.productData.images[0]}}
+                    onLoadEnd={() => {
+                        if (this.props.onLoadEnd) {
+                            this.props.onLoadEnd();
+                        }
+                    }}
+                />
+                <View style={styles.productInfoArea}>
+                    <Text style={styles.productName}>{this.state.productData.name}</Text>
+                    <Text
+                    style={styles.productDescription}
+                    numberOfLines={3}
+                    >
+                        {this.state.productData.description}
+                    </Text>
+                    <View style={styles.productSubInfoArea}>
+                        <Text style={styles.productPrice}>{this.state.productData.price ? currency + this.state.productData.price.toString() : "No price"}</Text>
+                        <RatingVisual rating={this.state.totalRating} height={styleValues.smallTextSize}/>
+                    </View>
+                </View>
+            </TouchableOpacity>
+            );
+        }
+    }
+
+    renderLoading() {
+        if (this.state.productData === undefined) {
+            return (
+                <View style={{...styles.cardContainer, ...{justifyContent: "center"}}}>
+                    <ActivityIndicator size={"small"}/>
+                </View>
+            )
+        }
     }
 
     render() {
         return (
-        <TouchableOpacity style={styles.cardContainer} onPress={() => {
-            if (this.props.onPress) {
-                this.props.onPress();
-            }
-        }}>
-            <Image
-                style={styles.productImage}
-                resizeMethod={"scale"}
-                resizeMode={"cover"}
-                source={{uri: this.props.productData.images[0]}}
-                onLoadEnd={() => {
-                    if (this.props.onLoadEnd) {
-                        this.props.onLoadEnd();
-                    }
-                }}
-            />
-            <View style={styles.productInfoArea}>
-                <Text style={styles.productName}>{this.props.productData.name}</Text>
-                <Text
-                style={styles.productDescription}
-                numberOfLines={3}
-                >
-                    {this.props.productData.description}
-                </Text>
-                <View style={styles.productSubInfoArea}>
-                        <Text style={styles.productPrice}>{currency + this.props.productData.price.toString()}</Text>
-                        <RatingVisual rating={this.state.totalRating} height={styleValues.smallTextSize}/>
-                    </View>
+            <View>
+                {this.renderUI()}
+                {this.renderLoading()}
             </View>
-        </TouchableOpacity>
-        );
+        )
     }
 }
 

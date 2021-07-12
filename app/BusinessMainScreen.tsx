@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import { StyleSheet, StatusBar, AppState, ActivityIndicator, View } from "react-native";
-import { BusinessEditMainPage, BusinessEditInfoPage, BusinessEditLocationPage, NotificationsPage, BusinessAccountPage, BusinessEditProductListPage, BusinessEditProductCategoryPage, BusinessEditProductPage } from "./HelperFiles/PageIndex";
+import { BusinessEditMainPage, BusinessEditInfoPage, BusinessEditLocationPage, NotificationsPage, BusinessAccountPage, BusinessEditProductListPage, BusinessEditProductCategoryPage, BusinessEditProductPage, ProductEditOptionTypePage, ProductEditOptionPage } from "./HelperFiles/PageIndex";
 import { MenuBar } from "./HelperFiles/CompIndex"
 import { styleValues } from "./HelperFiles/StyleSheet"
 import { defaults, icons } from "./HelperFiles/StyleSheet";
-import { BusinessMainStack, CustomerMainTab } from "./HelperFiles/Navigation";
+import { BusinessMainStack, CustomerMainStack } from "./HelperFiles/Navigation";
 import { initialWindowMetrics } from "react-native-safe-area-context";
 import { StackNavigationProp, StackHeaderProps } from '@react-navigation/stack';
 import { RootStackParamList } from "./HelperFiles/Navigation";
@@ -116,6 +116,18 @@ export default class BusinessMainScreen extends Component<Props, State> {
               name={"editProduct"}
               children={(props) => {
                 return <BusinessEditProductPage {...props} businessFuncs={this.businessFuncs}/>
+              }}
+          />
+          <BusinessMainStack.Screen
+              name={"editOptionType"}
+              children={(props) => {
+                return <ProductEditOptionTypePage {...props} businessFuncs={this.businessFuncs}/>
+              }}
+          />
+          <BusinessMainStack.Screen
+              name={"editOption"}
+              children={(props) => {
+                return <ProductEditOptionPage {...props} businessFuncs={this.businessFuncs}/>
               }}
           />
           <BusinessMainStack.Screen

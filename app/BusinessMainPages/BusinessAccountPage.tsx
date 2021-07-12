@@ -4,7 +4,7 @@ import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
 import { auth } from "../HelperFiles/Constants";
-import { MenuBar } from "../HelperFiles/CompIndex";
+import { MenuBar, PageContainer } from "../HelperFiles/CompIndex";
 import { BusinessMainStackParamList, RootStackParamList } from "../HelperFiles/Navigation";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
@@ -29,7 +29,7 @@ export default class BusinessAccountPage extends Component<BusinessAccountProps,
 
   render() {
     return (
-      <View style={defaults.pageContainer}>
+      <PageContainer>
         <Text>account</Text>
         <TextButton
           text={"Sign Out"}
@@ -52,7 +52,7 @@ export default class BusinessAccountPage extends Component<BusinessAccountProps,
             {iconSource: icons.profile, buttonFunc: () => {this.props.navigation.navigate("account")}}
           ]}
         />
-      </View>
+      </PageContainer>
     );
   }
 }
