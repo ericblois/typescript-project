@@ -13,6 +13,7 @@ import * as Permissions from 'expo-permissions';
 import { ImageSliderSelector, MapPopup, MenuBar, PageContainer } from "../HelperFiles/CompIndex";
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 import { extractKeywords, getCompressedImage, prefetchImages } from "../HelperFiles/ClientFunctions";
+import * as pluralize from "pluralize"
 
 type BusinessEditInfoNavigationProp = StackNavigationProp<BusinessMainStackParamList, "editInfo">;
 
@@ -160,7 +161,12 @@ export default class BusinessEditInfoPage extends Component<BusinessEditInfoProp
                   })
                   // Add new URLs
                   newPublicData.galleryImages = prevURLs.concat(downloadURLs)
-                  newPublicData.keywords = extractKeywords(newPublicData.description)
+                  const keywordsSource = newPublicData.name.concat(" ").concat(newPublicData.description)
+                  let keywords = extractKeywords(keywordsSource)
+                  keywords = keywords.map((keyword) => {
+                    return pluralize.singular(keyword)
+                  })
+                  newPublicData.keywords = keywords
                   this.props.businessFuncs.updatePublicData(newPublicData).then(() => {
                       this.setState({saved: true})
                   }, (e) => {

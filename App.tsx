@@ -10,7 +10,7 @@ import UserSignupScreen from "./app/UserSignupScreen";
 import CustomerMainScreen from "./app/CustomerMainScreen";
 import BusinessMainScreen from "./app/BusinessMainScreen";
 import BusinessShopScreen from "./app/CustomerMainPages/BusinessShopScreen";
-import ProductShopScreen from "./app/ProductShopScreen";
+import ProductShopScreen from "./app/BusinessShopPages/ProductShopPage";
 import { installWebGeolocationPolyfill } from "expo-location"
 
 LogBox.ignoreLogs(['Calling getNode()', 'VirtualizedLists should never be nested'])

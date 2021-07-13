@@ -4,7 +4,7 @@ import { BusinessShopStack } from "../HelperFiles/Navigation";
 import PropTypes from 'prop-types';
 import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
 import { IconButton, TabIcon } from "../HelperFiles/CompIndex";
-import { BusinessInfoPage, BusinessProductsPage } from "../HelperFiles/PageIndex";
+import { BusinessInfoPage, BusinessProductsPage, ProductShopPage } from "../HelperFiles/PageIndex";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { CustomerMainStackParamList } from "../HelperFiles/Navigation";
 import { RouteProp } from '@react-navigation/native';
@@ -46,6 +46,14 @@ export default class BusinessShopScreen extends Component<Props, State> {
                 children={(props) => {
                   return (
                     <BusinessProductsPage {...props} businessData={this.businessData}/>
+                  )
+                }}
+            />
+            <BusinessShopStack.Screen
+                name={"productInfo"}
+                children={(props) => {
+                  return (
+                    <ProductShopPage {...props} businessData={this.businessData}/>
                   )
                 }}
             />

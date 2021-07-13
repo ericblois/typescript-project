@@ -20,8 +20,7 @@ export type CustomerMainStackParamList = {
         businessData: PublicBusinessData
     },
     productShop: {
-        productData: ProductData,
-        productType: string
+        productData: ProductData
     }
 }
 
@@ -66,6 +65,9 @@ export const BusinessMainStack = createStackNavigator<BusinessMainStackParamList
 export type BusinessShopStackParamList = {
     info: undefined,
     products: undefined,
+    productInfo: {
+        productID: string
+    }
 }
 
 export const BusinessShopStack = createStackNavigator<BusinessShopStackParamList>();

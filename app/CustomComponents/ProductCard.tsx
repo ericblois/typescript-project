@@ -18,7 +18,8 @@ type Props = {
 
 type State = {
     totalRating: number
-    productData?: ProductData
+    productData?: ProductData,
+    imageLoaded: boolean
 }
 
 export default class ProductCard extends Component<Props, State> {
@@ -27,7 +28,8 @@ export default class ProductCard extends Component<Props, State> {
         super(props);
         this.state = {
             totalRating: 0,
-            productData: undefined
+            productData: undefined,
+            imageLoaded: false
         }
     }
 
@@ -37,18 +39,19 @@ export default class ProductCard extends Component<Props, State> {
             productData.ratings.forEach((num) => {
                 totalRating += num
             })
-            this.setState({productData: productData, totalRating: totalRating / productData.ratings.length}, () => {
-                if (this.props.onLoadEnd) {
-                    this.props.onLoadEnd()
-                }
-            })
+            this.setState({productData: productData, totalRating: totalRating / productData.ratings.length})
         })
     }
 
     renderUI() {
         if (this.state.productData) {
             return (
-            <TouchableOpacity style={styles.cardContainer} onPress={() => {
+            <TouchableOpacity style={{
+                flexDirection: "row",
+                alignItems: "center",
+                height: "100%",
+                width: "100%"
+            }} onPress={() => {
                 if (this.props.onPress) {
                     this.props.onPress();
                 }
@@ -59,9 +62,11 @@ export default class ProductCard extends Component<Props, State> {
                     resizeMode={"cover"}
                     source={{uri: this.state.productData.images[0]}}
                     onLoadEnd={() => {
-                        if (this.props.onLoadEnd) {
-                            this.props.onLoadEnd();
-                        }
+                        this.setState({imageLoaded: true}, () => {
+                            if (this.props.onLoadEnd) {
+                                this.props.onLoadEnd();
+                            }
+                        })
                     }}
                 />
                 <View style={styles.productInfoArea}>
@@ -83,9 +88,16 @@ export default class ProductCard extends Component<Props, State> {
     }
 
     renderLoading() {
-        if (this.state.productData === undefined) {
+        if (this.state.productData === undefined || !this.state.imageLoaded) {
             return (
-                <View style={{...styles.cardContainer, ...{justifyContent: "center"}}}>
+                <View style={{
+                    position: "absolute",
+                    width: "100%",
+                    height: "100%",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: styleValues.whiteColor
+                }}>
                     <ActivityIndicator size={"small"}/>
                 </View>
             )
@@ -94,7 +106,7 @@ export default class ProductCard extends Component<Props, State> {
 
     render() {
         return (
-            <View>
+            <View style={styles.cardContainer}>
                 {this.renderUI()}
                 {this.renderLoading()}
             </View>

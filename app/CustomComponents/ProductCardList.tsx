@@ -1,6 +1,6 @@
 
 import React, { Component } from "react";
-import { View, TouchableOpacity, Image, Text, StyleSheet, GestureResponderEvent, FlatList } from "react-native";
+import { View, TouchableOpacity, Image, Text, StyleSheet, GestureResponderEvent, FlatList, ActivityIndicator } from "react-native";
 import { defaults, styleValues } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { productPropType, currency } from "../HelperFiles/Constants";
@@ -9,14 +9,20 @@ import { useNavigation } from "@react-navigation/native";
 import { ProductCategory, ProductData } from "../HelperFiles/DataTypes";
 import ProductCard from "./ProductCard";
 
-type Props = {
+type ProductInfo = {
     businessID: string,
-    productIDs: string[],
+    productID: string,
+    onPress?: () => void
+}
+
+type Props = {
+    products: ProductInfo[],
+    showLoading?: boolean
     onLoadEnd?: () => void,
 }
 
 type State = {
-
+    cardsLoaded: boolean
 }
 
 export default class ProductCardList extends Component<Props, State> {
@@ -25,36 +31,67 @@ export default class ProductCardList extends Component<Props, State> {
 
     constructor(props: Props) {
         super(props);
-
+        this.state = {
+            cardsLoaded: false
+        }
     }
 
-    renderProductCard(productID: string) {
+    renderProductCard(product: ProductInfo) {
         return (
             <ProductCard
-                businessID={this.props.businessID}
-                productID={productID}
+                businessID={product.businessID}
+                productID={product.productID}
                 onLoadEnd={() => {
-                    if (this.props.onLoadEnd) {
-                        this.loadCount += 1
-                        if (this.loadCount === this.props.productIDs.length) {
-                            this.props.onLoadEnd()
+                    this.loadCount += 1
+                    if (this.loadCount === this.props.products.length) {
+                        this.setState({cardsLoaded: true}, () => {
+                            if (this.props.onLoadEnd) {
+                                this.props.onLoadEnd!()
+                            }
                             this.loadCount = 0
-                        }
+                        })
                     }
                 }}
+                onPress={product.onPress}
             />
         )
     }
 
-    render() {
+    renderUI() {
         return (
         <FlatList
-            data={this.props.productIDs}
-            keyExtractor={(item) => (item)}
+            data={this.props.products}
+            keyExtractor={(item) => (item.productID)}
             renderItem={({item}) => {
                 return this.renderProductCard(item)
             }}
         />
+        )
+    }
+
+    renderLoading() {
+        if (this.props.showLoading === true && !this.state.cardsLoaded) {
+            return (
+                <View style={{
+                    position: "absolute",
+                    width: "100%",
+                    height: "100%",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: styleValues.whiteColor
+                }}>
+                    <ActivityIndicator size={"large"}/>
+                </View>
+            )
+        }
+    }
+
+    render() {
+        return (
+            <View>
+                {this.renderUI()}
+                {this.renderLoading()}
+            </View>
         );
     }
 }

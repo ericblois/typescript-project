@@ -2,10 +2,11 @@ import SearchPage from "../CustomerMainPages/SearchPage";
 import FavouritesPage from "../CustomerMainPages/FavouritesPage";
 import NotificationsPage from "../CustomerMainPages/NotificationsPage";
 import CustomerAccountPage from "../CustomerMainPages/CustomerAccountPage";
-import ProductShopScreen from "../ProductShopScreen";
+import ProductShopScreen from "../BusinessShopPages/ProductShopPage";
 
 import BusinessInfoPage from "../BusinessShopPages/BusinessInfoPage"
 import BusinessProductsPage from "../BusinessShopPages/BusinessProductsPage"
+import ProductShopPage from "../BusinessShopPages/ProductShopPage"
 
 import AccountTypePage from "../SignupPages/AccountTypePage"
 import CustomerInfoPage from "../SignupPages/CustomerInfoPage"
@@ -20,6 +21,7 @@ import ProductEditOptionPage from "../BusinessEditPages/ProductEditOptionPage"
 import BusinessAccountPage from "../BusinessMainPages/BusinessAccountPage"
 import CustomerTabScreen from "../CustomerMainPages/CustomerTabScreen"
 
+
 export { 
     SearchPage,
     FavouritesPage,
@@ -28,6 +30,7 @@ export {
     ProductShopScreen,
     BusinessInfoPage,
     BusinessProductsPage,
+    ProductShopPage,
     AccountTypePage,
     CustomerInfoPage,
     BusinessEditMainPage,
@@ -39,5 +42,6 @@ export {
     ProductEditOptionTypePage,
     ProductEditOptionPage,
     BusinessAccountPage,
-    CustomerTabScreen
+    CustomerTabScreen,
+
 }

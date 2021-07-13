@@ -2,6 +2,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from "expo-image-manipulator"
 import { Image } from "react-native"
 import * as keyword_extractor from "keyword-extractor"
+import * as pluralize from "pluralize"
 
 // List of cached image URLs
 let cachedImages: string[] = [];
@@ -81,7 +82,6 @@ export async function getCompressedImage(uri: string, onSuccess?: (uri: string) 
         }
     })
 }
-const pluralize = require("pluralize");
 // Splits a string into individual query terms
 export const getQueryTerms = (searchText: string) => {
   // Convert the search text to lowercase, and remove any apostrophes

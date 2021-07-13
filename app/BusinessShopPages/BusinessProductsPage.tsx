@@ -60,8 +60,16 @@ export default class BusinessProducts extends Component<Props, State> {
         return (
             <PageContainer>
                 <ProductCardList
-                    businessID={this.props.businessData.businessID}
-                    productIDs={this.state.currentCategory.productIDs}
+                    products={this.state.currentCategory.productIDs.map((productID) => {
+                        return {
+                            businessID: this.props.businessData.businessID,
+                            productID: productID,
+                            onPress: () => this.props.navigation.navigate("productInfo", {
+                                productID: productID 
+                            })
+                        }
+                    })}
+                    showLoading
                 />
                 {this.renderCategoryBar()}
                 <MenuBar
