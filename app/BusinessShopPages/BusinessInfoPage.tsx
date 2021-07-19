@@ -6,10 +6,14 @@ import { ImageSlider, MenuBar, PageContainer, RatingVisual, ScrollContainer } fr
 import { businessPropType, formatText } from "../HelperFiles/Constants";
 import { PublicBusinessData } from "../HelperFiles/DataTypes"
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { BusinessShopStackParamList } from "../HelperFiles/Navigation";
-import { RouteProp } from '@react-navigation/native';
+import { BusinessShopStackParamList, CustomerMainStackParamList, CustomerTabParamList } from "../HelperFiles/Navigation";
+import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
+import { StackNavigationProp } from "@react-navigation/stack";
 
-type BusinessInfoNavigationProp = BottomTabNavigationProp<BusinessShopStackParamList, "info">;
+type BusinessInfoNavigationProp = CompositeNavigationProp<
+    StackNavigationProp<BusinessShopStackParamList, "info">,
+    BottomTabNavigationProp<CustomerTabParamList>
+>
 
 type BusinessInfoRouteProp = RouteProp<BusinessShopStackParamList, "info">;
 
@@ -76,10 +80,11 @@ export default class BusinessInfoPage extends Component<Props, State> {
                 {this.displayLoadingScreen()}
             </ScrollContainer>
             <MenuBar
-                //buttonProps={this.state.inEditMode ? this.getEditButtons(props) : this.getMainButtons(props)}
                 buttonProps={[
-                    {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
-                    {iconSource: icons.shoppingCart, buttonFunc: () => {this.props.navigation.navigate("products")}}
+                    {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.navigate("search")}},
+                    {iconSource: icons.document, buttonFunc: () => {this.props.navigation.navigate("info")}},
+                    {iconSource: icons.shoppingCart, buttonFunc: () => {this.props.navigation.navigate("products")}},
+                    {iconSource: icons.message, buttonFunc: () => {console.log("Chat button")}}
                 ]}
             />
         </PageContainer>

@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { View, LogBox } from "react-native";
 import * as firebase from "firebase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { auth, businessDB, firestore } from "./app/HelperFiles/Constants";
+import { auth, firestore } from "./app/HelperFiles/Constants";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { RootStack, CustomerMainStack } from "./app/HelperFiles/Navigation";
 import StartScreen from "./app/StartScreen";

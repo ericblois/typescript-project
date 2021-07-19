@@ -6,8 +6,9 @@ import PropTypes from 'prop-types';
 import { productPropType, currency } from "../HelperFiles/Constants";
 import RatingVisual from "./RatingVisual";
 import { useNavigation } from "@react-navigation/native";
-import { ProductCategory, ProductData } from "../HelperFiles/DataTypes";
+import { CartItem, ProductCategory, ProductData } from "../HelperFiles/DataTypes";
 import ProductCard from "./ProductCard";
+import { ProductCartCard } from "../HelperFiles/CompIndex";
 
 type ProductInfo = {
     businessID: string,
@@ -16,8 +17,8 @@ type ProductInfo = {
 }
 
 type Props = {
-    products: ProductInfo[],
-    showLoading?: boolean
+    products: (ProductInfo | CartItem)[],
+    showLoading?: boolean,
     onLoadEnd?: () => void,
 }
 
@@ -57,13 +58,37 @@ export default class ProductCardList extends Component<Props, State> {
         )
     }
 
+    renderCartCard(item: CartItem) {
+        return (
+            <ProductCartCard
+                cartItem={item}
+                onLoadEnd={() => {
+                    this.loadCount += 1
+                    if (this.loadCount === this.props.products.length) {
+                        this.setState({cardsLoaded: true}, () => {
+                            if (this.props.onLoadEnd) {
+                                this.props.onLoadEnd!()
+                            }
+                            this.loadCount = 0
+                        })
+                    }
+                }}
+            />
+        )
+    }
+
     renderUI() {
         return (
         <FlatList
             data={this.props.products}
-            keyExtractor={(item) => (item.productID)}
+            keyExtractor={(item, index) => (index.toString())}
             renderItem={({item}) => {
-                return this.renderProductCard(item)
+                // Check if item is a CartItem
+                if ((item as CartItem).quantity) {
+                    return this.renderCartCard(item as CartItem)
+                } else {
+                    return this.renderProductCard(item as ProductInfo)
+                }
             }}
         />
         )

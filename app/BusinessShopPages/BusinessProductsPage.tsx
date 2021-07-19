@@ -3,12 +3,16 @@ import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity }
 import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
 import { MenuBar, PageContainer, ProductCard } from "../HelperFiles/CompIndex";
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { BusinessShopStackParamList } from "../HelperFiles/Navigation";
-import { RouteProp } from '@react-navigation/native';
+import { BusinessShopStackParamList, CustomerTabParamList } from "../HelperFiles/Navigation";
+import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
 import { ProductCategory, PublicBusinessData } from "../HelperFiles/DataTypes";
 import ProductCardList from "../CustomComponents/ProductCardList";
+import { StackNavigationProp } from "@react-navigation/stack";
 
-type BusinessProductsNavigationProp = BottomTabNavigationProp<BusinessShopStackParamList, "products">;
+type BusinessProductsNavigationProp = CompositeNavigationProp<
+    StackNavigationProp<BusinessShopStackParamList, "products">,
+    BottomTabNavigationProp<CustomerTabParamList>
+>
 
 type BusinessProductsRouteProp = RouteProp<BusinessShopStackParamList, "products">;
 
@@ -65,7 +69,8 @@ export default class BusinessProducts extends Component<Props, State> {
                             businessID: this.props.businessData.businessID,
                             productID: productID,
                             onPress: () => this.props.navigation.navigate("productInfo", {
-                                productID: productID 
+                                businessID: this.props.businessData.businessID,
+                                productID: productID,
                             })
                         }
                     })}
@@ -73,10 +78,11 @@ export default class BusinessProducts extends Component<Props, State> {
                 />
                 {this.renderCategoryBar()}
                 <MenuBar
-                    //buttonProps={this.state.inEditMode ? this.getEditButtons(props) : this.getMainButtons(props)}
                     buttonProps={[
-                        {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
-                        {iconSource: icons.shoppingCart, buttonFunc: () => {this.props.navigation.navigate("products")}}
+                        {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.navigate("search")}},
+                        {iconSource: icons.document, buttonFunc: () => {this.props.navigation.navigate("info")}},
+                        {iconSource: icons.shoppingCart, buttonFunc: () => {this.props.navigation.navigate("products")}},
+                        {iconSource: icons.message, buttonFunc: () => {console.log("Chat button")}}
                     ]}
                 />
             </PageContainer>

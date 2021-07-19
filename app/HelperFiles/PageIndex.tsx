@@ -2,7 +2,8 @@ import SearchPage from "../CustomerMainPages/SearchPage";
 import FavouritesPage from "../CustomerMainPages/FavouritesPage";
 import NotificationsPage from "../CustomerMainPages/NotificationsPage";
 import CustomerAccountPage from "../CustomerMainPages/CustomerAccountPage";
-import ProductShopScreen from "../BusinessShopPages/ProductShopPage";
+import CustomerOrdersPage from "../CustomerMainPages/CustomerOrdersPage";
+import CustomerCartPage from "../CustomerMainPages/CustomerCartPage";
 
 import BusinessInfoPage from "../BusinessShopPages/BusinessInfoPage"
 import BusinessProductsPage from "../BusinessShopPages/BusinessProductsPage"
@@ -27,7 +28,8 @@ export {
     FavouritesPage,
     NotificationsPage,
     CustomerAccountPage,
-    ProductShopScreen,
+    CustomerOrdersPage,
+    CustomerCartPage,
     BusinessInfoPage,
     BusinessProductsPage,
     ProductShopPage,

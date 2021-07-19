@@ -13,6 +13,7 @@ import SearchPage from "./SearchPage";
 import FavouritesPage from "./FavouritesPage";
 import NotificationsPage from "./NotificationsPage";
 import CustomerAccountPage from "./CustomerAccountPage";
+import { CustomerOrdersPage } from "../HelperFiles/PageIndex";
 
 type CustomerTabNavigationProp = BottomTabNavigationProp<CustomerMainStackParamList, "customerTab">;
 
@@ -58,6 +59,13 @@ export default class CustomerTabScreen extends Component<Props, State> {
                 component={NotificationsPage}
                 options={{
                   tabBarIcon: (options) => <TabIcon iconSource={icons.lines} options={options}/>
+                }}
+            />
+            <CustomerTab.Screen
+                name={"orders"} 
+                component={CustomerOrdersPage}
+                options={{
+                  tabBarIcon: (options) => <TabIcon iconSource={icons.document} options={options}/>
                 }}
             />
             <CustomerTab.Screen

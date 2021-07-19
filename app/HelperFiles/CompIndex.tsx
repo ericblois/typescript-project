@@ -4,6 +4,7 @@ import IconButton from "../CustomComponents/IconButton";
 import RatingVisual from "../CustomComponents/RatingVisual";
 import TextButton from "../CustomComponents/TextButton";
 import ProductCard from "../CustomComponents/ProductCard";
+import ProductCartCard from "../CustomComponents/ProductCartCard";
 import TabIcon from "../CustomComponents/TabIcon";
 import TextInputBox from "../CustomComponents/TextInputBox";
 import TextInputPopup from "../CustomComponents/TextInputPopup";
@@ -26,6 +27,7 @@ export {
     RatingVisual,
     TextButton,
     ProductCard,
+    ProductCartCard,
     TabIcon,
     TextInputBox,
     TextInputPopup,

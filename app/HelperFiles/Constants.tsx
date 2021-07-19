@@ -4,6 +4,10 @@ import "firebase/auth";
 import PropTypes from 'prop-types';
 import { Image } from "react-native";
 import * as geofireSource from "geofire-common"
+//import * as functionsSource from "firebase-functions"
+//import * as adminSource from "firebase-admin"
+
+//const functionsSource = require("firebase-functions")
 
 export const locationDocString = "/publicBusinessData/canada/regions/quebec/cities/montreal"
 
@@ -22,11 +26,14 @@ export const firebaseConfig = {
 
 const firebaseAppName = "TestApp"
 
-
 // Initialize Firebase
 if (!firebase.default.apps.length) {
     firebase.default.initializeApp(firebaseConfig);
 }
+// The Firebase Admin SDK to access Firestore.
+//export const admin = adminSource
+
+//export const functions = functionsSource
 
 export const auth = firebase.default.auth();
 
@@ -35,8 +42,6 @@ export const firestore = firebase.default.firestore();
 export const storage = firebase.default.storage();
 
 export const geofire = geofireSource
-
-export const businessDB = firestore.collection("businesses");
 
 export const currencyFormatter = new Intl.NumberFormat("en-CA", {
     style: "currency",

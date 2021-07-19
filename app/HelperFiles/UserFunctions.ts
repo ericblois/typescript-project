@@ -46,6 +46,9 @@ export default abstract class UserFunctions {
             }))
             await currentUser.delete()
             await ServerData.deleteDoc(userDocRef)
+            await firestore.runTransaction(async (transaction) => {
+                
+            })
         } catch (e) {
             throw e
         }
@@ -56,33 +59,38 @@ export default abstract class UserFunctions {
             // Get user's data
             const userData = (await UserFunctions.getUserDoc()) as UserData
             const userID = UserFunctions.getCurrentUser().uid
-            // Create initial private business data
-            let privateBusinessData: PrivateBusinessData = {...DefaultPrivateBusinessData, ...{
-                userID: userID,
-                country: userData.country
-            }}
             // Create a new document for the private data
             const privateDocPath = "/userData/".concat(userID).concat("/businesses")
             const privateColRef = firestore.collection(privateDocPath)
-            const privateDocRef = await ServerData.addDoc(privateBusinessData, privateColRef)
-
+            const privateDocRef = privateColRef.doc()
             const businessID = privateDocRef.id
-            // Update private doc with business ID
-            ServerData.updateDoc({businessID: businessID}, privateDocRef)
-            // Create a new document for the public data
+            // Create initial private business data
+            let privateBusinessData: PrivateBusinessData = {...DefaultPrivateBusinessData, ...{
+                userID: userID,
+                businessID: businessID,
+                country: userData.country
+            }}
+            // Create initial public data
             let publicBusinessData: PublicBusinessData = {...DefaultPublicBusinessData, ...{
                 userID: userID,
                 businessID: businessID,
                 country: userData.country
             }}
+            // Create a new document for the public data
             const publicDocPath = "/publicBusinessData/".concat(userData.country).concat("/businesses")
             const publicColRef = firestore.collection(publicDocPath)
-            const publicDocRef = await ServerData.addDoc(publicBusinessData, publicColRef, businessID)
-
+            const publicDocRef = publicColRef.doc(businessID)
+            // Get new business ID's
             let newBusinessIDs = userData.businessIDs
             newBusinessIDs.push(businessID)
-            await UserFunctions.updateUserDoc({businessIDs: newBusinessIDs})
-
+            const userDocRef = firestore.doc("userData/".concat(userID))
+            await firestore.runTransaction(async (transaction) => {
+                // Create private and public data docs
+                transaction.set(privateDocRef, privateBusinessData)
+                transaction.set(publicDocRef, publicBusinessData)
+                // Update user's business ID's
+                transaction.update(userDocRef, {businessIDs: newBusinessIDs})
+            })
             return businessID
         } catch(e) {
             throw e;
@@ -92,7 +100,7 @@ export default abstract class UserFunctions {
     static async deleteBusiness(businessID: string) {
         try {
             // Get user's data
-            const userData = (await UserFunctions.getUserDoc()) as UserData
+            const userData = (await UserFunctions.getUserDoc())
             const userID = UserFunctions.getCurrentUser().uid
             // Get private data
             const privateDocPath = "/userData/".concat(userID).concat("/businesses/").concat(businessID)
@@ -104,15 +112,23 @@ export default abstract class UserFunctions {
             // Get products collection
             const productsColPath = publicDocPath.concat("/products")
             const productsColRef = firestore.collection(productsColPath)
-            await ServerData.deleteCollection(productsColRef)
-            // Delete private and public data docs
-            await ServerData.deleteDoc(privateDocRef)
-            await ServerData.deleteDoc(publicDocRef)
-            // Delete business ID from user's business ID's
+            const productSnaps = (await productsColRef.get()).docs
+            // Get updated business ID's
             let newBusinessIDs = userData.businessIDs
             const businessIndex = newBusinessIDs.indexOf(businessID)
             newBusinessIDs.splice(businessIndex, 1)
-            await UserFunctions.updateUserDoc({businessIDs: newBusinessIDs})
+            const userDocRef = firestore.doc("userData/".concat(userID))
+            await firestore.runTransaction(async (transaction) => {
+                // Delete all product docs
+                for (const docSnap of productSnaps) {
+                    transaction.delete(docSnap.ref)
+                }
+                // Delete private and public data docs
+                transaction.delete(privateDocRef)
+                transaction.delete(publicDocRef)
+                // Delete business ID from user's business ID's
+                transaction.update(userDocRef, {businessIDs: newBusinessIDs})
+            })
             return businessID
         } catch(e) {
             throw e;

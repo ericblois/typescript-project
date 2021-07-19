@@ -7,7 +7,14 @@ export type ShippingInfo = {
     region?: string,
     country: string,
     postalCode: string
-  }
+}
+
+export type CartItem = {
+  businessID: string,
+  productID: string,
+  productOptions: { [optionType: string]: string},
+  quantity: number,
+}
 
 export type UserData = {
   name: string,
@@ -18,7 +25,21 @@ export type UserData = {
   birthYear: string,
   country: Country,
   shippingAddresses: ShippingInfo[],
+  cartItems: CartItem[],
   businessIDs: string[]
+}
+
+export const DefaultUserData: UserData = {
+  name: "",
+  age: 0,
+  gender: "male",
+  birthDay: "",
+  birthMonth: "",
+  birthYear: "",
+  country: "",
+  shippingAddresses: [],
+  cartItems: [],
+  businessIDs: []
 }
 
 export type ProductOption = {

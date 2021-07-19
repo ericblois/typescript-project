@@ -3,29 +3,33 @@ import { View, Image, Text, StyleSheet, ActivityIndicator, ScrollView, SafeAreaV
 
 import PropTypes from 'prop-types';
 import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
-import { ImageSlider, RatingVisual, MenuBar, IconButton, PageContainer, ScrollContainer } from "../HelperFiles/CompIndex";
+import { ImageSlider, RatingVisual, MenuBar, IconButton, PageContainer, ScrollContainer, TextDropdown } from "../HelperFiles/CompIndex";
 import { productPropType, formatText, currency } from "../HelperFiles/Constants";
 import { Picker } from "@react-native-picker/picker";
 import DropDownPicker from 'react-native-dropdown-picker';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { BusinessShopStackParamList } from "../HelperFiles/Navigation";
-import { RouteProp } from '@react-navigation/native';
-import { ProductData, PublicBusinessData } from "../HelperFiles/DataTypes";
+import { BusinessShopStackParamList, CustomerMainStackParamList } from "../HelperFiles/Navigation";
+import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
+import { CartItem, ProductData, ProductOptionType, PublicBusinessData } from "../HelperFiles/DataTypes";
 import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
 
-type ProductShopNavigationProp = StackNavigationProp<BusinessShopStackParamList, "productInfo">;
+type ProductShopNavigationProp = CompositeNavigationProp<
+    StackNavigationProp<BusinessShopStackParamList, "productInfo">,
+    StackNavigationProp<CustomerMainStackParamList>
+>
 
 type ProductShopRouteProp = RouteProp<BusinessShopStackParamList, "productInfo">;
 
 type Props = {
     navigation: ProductShopNavigationProp,
     route: ProductShopRouteProp,
-    businessData: PublicBusinessData
 }
 
 type State = {
     productData?: ProductData,
-    imagesLoaded: boolean
+    imagesLoaded: boolean,
+    optionSelections: { [optionType: string] : string },
+    quantity: number,
 }
 
 export default class ProductShopPage extends Component<Props, State> {
@@ -34,16 +38,76 @@ export default class ProductShopPage extends Component<Props, State> {
         super(props)
         this.state = {
             productData: undefined,
-            imagesLoaded: false
+            imagesLoaded: false,
+            optionSelections: {},
+            quantity: 1,
         }
+        props.navigation.addListener("focus", () => this.refreshData())
     }
 
-    componentDidMount() {
+    refreshData() {
         CustomerFunctions.getProduct(
-            this.props.businessData.businessID,
+            this.props.route.params.businessID,
             this.props.route.params.productID).then((productData) => {
                 this.setState({productData: productData})
         })
+    }
+
+    componentDidMount() {
+        this.refreshData()
+    }
+    // Check if all options have been given a value
+    checkOptions() {
+        let validOptions = true
+        if (this.state.productData) {
+            for (const optionType of this.state.productData.optionTypes) {
+                // Get this option selection
+                const selection = this.state.optionSelections[optionType.name]
+                //const selection = this.state.optionSelections.get(optionType.name)
+                // Check if this option has been selected
+                if (selection) {
+                    if (optionType.options.map((option) => (option.name)).includes(selection)) {
+                        continue
+                    }
+                }
+                validOptions = false
+            }
+        } else {
+            return false
+        }
+        return validOptions
+    }
+
+    renderOptions() {
+        if (this.state.productData) {
+            return (this.state.productData.optionTypes.map((optionType, index, array) => {
+                return (
+                    <View
+                        style={{
+                            zIndex: array.length - index
+                        }}
+                        key={optionType.name}
+                    >
+                        <TextDropdown
+                            items={optionType.options.map((option) => {
+                                return {
+                                    label: option.name,
+                                    value: option.name,
+                                }
+                            })}
+                            extraProps={{
+                                placeholder: optionType.name,
+                                onChangeItem: (item) => {
+                                    let selections = this.state.optionSelections
+                                    selections[optionType.name] = item.value
+                                    this.setState({optionSelections: selections})
+                                },
+                            }}
+                        ></TextDropdown>
+                    </View>
+                )
+            }))
+        }
     }
 
     renderUI() {
@@ -66,6 +130,7 @@ export default class ProductShopPage extends Component<Props, State> {
                     <View style={styles.descriptionBody}>
                         <Text style={styles.description}>{formatText(this.state.productData.description)}</Text>
                     </View>
+                    {this.renderOptions()}
                 </ScrollContainer>
             )
         }
@@ -85,11 +150,6 @@ export default class ProductShopPage extends Component<Props, State> {
               <ActivityIndicator
                 size={"large"}
               />
-              <MenuBar
-                buttonProps={[
-                  {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
-                ]}
-                />
             </View>
           )
         }
@@ -103,7 +163,22 @@ export default class ProductShopPage extends Component<Props, State> {
             <MenuBar
                 buttonProps={[
                     {iconSource: icons.backArrow, buttonFunc: () => this.props.navigation.goBack()},
-                    {iconSource: icons.shoppingCart, buttonFunc: () => {}},
+                    {iconSource: icons.plus, buttonFunc: () => {
+                        if (this.state.productData) {
+                            const cartItem: CartItem = {
+                                businessID: this.state.productData.businessID,
+                                productID: this.state.productData.productID,
+                                productOptions: this.state.optionSelections,
+                                quantity: this.state.quantity
+                            }
+                            CustomerFunctions.addToCart(cartItem)
+                        }
+                    }, buttonProps: {
+                        disabled: !this.checkOptions(),
+                    }, iconStyle: {
+                        tintColor: this.checkOptions() ? styleValues.darkGreyColor : styleValues.lightGreyColor
+                    }},
+                    {iconSource: icons.shoppingCart, buttonFunc: () => this.props.navigation.navigate("cart")},
                 ]}
             />
         </PageContainer>

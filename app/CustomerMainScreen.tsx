@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { StyleSheet, StatusBar, AppState, ActivityIndicator, View } from "react-native";
-import { CustomerTabScreen, ProductShopScreen } from "./HelperFiles/PageIndex";
+import { CustomerTabScreen, ProductShopPage, CustomerCartPage } from "./HelperFiles/PageIndex";
 import BusinessShopScreen from "./CustomerMainPages/BusinessShopScreen"
 import { defaults, icons } from "./HelperFiles/StyleSheet";
 import { CustomerMainStack } from "./HelperFiles/Navigation";
@@ -44,8 +44,12 @@ export default class CustomerMainScreen extends Component<Props, State> {
               component={BusinessShopScreen}
             />
             <CustomerMainStack.Screen
-              name={"productShop"}
-                component={ProductShopScreen}
+                name={"cart"}
+                children={(props) => {
+                  return (
+                    <CustomerCartPage {...props}/>
+                  )
+                }}
             />
         </CustomerMainStack.Navigator>
       </View>

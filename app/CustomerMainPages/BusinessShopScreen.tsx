@@ -8,6 +8,7 @@ import { BusinessInfoPage, BusinessProductsPage, ProductShopPage } from "../Help
 import { StackNavigationProp } from '@react-navigation/stack';
 import { CustomerMainStackParamList } from "../HelperFiles/Navigation";
 import { RouteProp } from '@react-navigation/native';
+import CustomerCartPage from "./CustomerCartPage";
 
 type BusinessShopNavigationProp = StackNavigationProp<CustomerMainStackParamList, "businessShop">;
 
@@ -40,6 +41,9 @@ export default class BusinessShopScreen extends Component<Props, State> {
                     <BusinessInfoPage {...props} businessData={this.businessData}/>
                   )
                 }}
+                options={{
+                  animationEnabled: false
+                }}
             />
             <BusinessShopStack.Screen
                 name={"products"}
@@ -48,12 +52,15 @@ export default class BusinessShopScreen extends Component<Props, State> {
                     <BusinessProductsPage {...props} businessData={this.businessData}/>
                   )
                 }}
+                options={{
+                  animationEnabled: false
+                }}
             />
             <BusinessShopStack.Screen
                 name={"productInfo"}
                 children={(props) => {
                   return (
-                    <ProductShopPage {...props} businessData={this.businessData}/>
+                    <ProductShopPage {...props}/>
                   )
                 }}
             />

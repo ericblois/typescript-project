@@ -246,22 +246,14 @@ export const defaults = StyleSheet.create({
   },
   dropdownContainer: {
     width: "100%",
-    height: styleValues.winWidth/10,
     backgroundColor: "#fff",
     borderWidth: styleValues.minorBorderWidth,
     borderRadius: styleValues.bordRadius,
     borderColor: styleValues.darkColor,
     marginBottom: styleValues.mediumPadding,
     alignItems: "center",
-    justifyContent: "center"
-  },
-  dropdown: {
-    width: "98%",
-    height: "95%",
-    alignItems: "center",
     justifyContent: "center",
-    borderRadius: styleValues.bordRadius,
-    borderColor: "#fff"
+    padding: styleValues.minorPadding
   },
   dropdownText: {
     width: "100%",
