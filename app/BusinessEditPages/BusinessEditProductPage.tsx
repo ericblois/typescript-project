@@ -8,7 +8,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { BusinessMainStackParamList } from "../HelperFiles/Navigation"
 import TextInputBox from "../CustomComponents/TextInputBox";
-import { ProductCategory, ProductData, ProductOption, ProductOptionType, PublicBusinessData } from "../HelperFiles/DataTypes";
+import { DefaultProductOptionType, ProductCategory, ProductData, ProductOption, ProductOptionType, PublicBusinessData } from "../HelperFiles/DataTypes";
 import * as Permissions from 'expo-permissions';
 import { CurrencyInputBox, GradientView, IconButton, ImageSliderSelector, MapPopup, MenuBar, PageContainer, ScrollContainer, TextDropdown, TextInputPopup } from "../HelperFiles/CompIndex";
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
@@ -70,8 +70,8 @@ export default class BusinessEditProductPage extends Component<BusinessEditProdu
             let newProductData = this.state.productData
             if (newProductData) {
               newProductData.optionTypes.push({
+                ...DefaultProductOptionType,
                 name: text,
-                options: []
               })
               this.setState({
                 productData: newProductData,

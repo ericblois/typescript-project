@@ -20,6 +20,7 @@ type Props = {
     products: (ProductInfo | CartItem)[],
     showLoading?: boolean,
     onLoadEnd?: () => void,
+    onDeleteItem?: () => void
 }
 
 type State = {
@@ -73,6 +74,7 @@ export default class ProductCardList extends Component<Props, State> {
                         })
                     }
                 }}
+                onDelete={this.props.onDeleteItem}
             />
         )
     }

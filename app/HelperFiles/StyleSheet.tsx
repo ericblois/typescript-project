@@ -77,9 +77,9 @@ export const styleValues = {
   roundedPadding: hasRoundCorners() ? winWidth * 0.05 : 0,
   largerTextSize: winWidth/12,
   largeTextSize: winWidth/16,
-  mediumTextSize: winWidth/18,
-  smallTextSize: winWidth/20,
-  smallerTextSize: winWidth/24,
+  mediumTextSize: winWidth/20,
+  smallTextSize: winWidth/24,
+  smallerTextSize: winWidth/28,
   smallestTextSize: winWidth/32,
   majorTextColor: "#000",
   minorTextColor: "#777",
@@ -285,5 +285,6 @@ export const icons = {
   edit: require("../../assets/editIcon.png"),
   location: require("../../assets/locationIcon.png"),
   crosshair: require("../../assets/crosshairIcon.png"),
-  image: require("../../assets/imageIcon.png")
+  image: require("../../assets/imageIcon.png"),
+  trash: require("../../assets/trashIcon.png")
 }

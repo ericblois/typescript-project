@@ -9,10 +9,16 @@ export type ShippingInfo = {
     postalCode: string
 }
 
+export type OptionSelections = {
+  [optionType: string]: {optionName: string, priceChange: number}
+}
+
 export type CartItem = {
   businessID: string,
   productID: string,
-  productOptions: { [optionType: string]: string},
+  productOptions: OptionSelections,
+  basePrice: number,
+  totalPrice: number,
   quantity: number,
 }
 
@@ -55,8 +61,15 @@ export const DefaultProductOption = {
 }
 
 export type ProductOptionType = {
-name: string,
-options: ProductOption[]
+  name: string,
+  optional: boolean,
+  options: ProductOption[]
+}
+
+export const DefaultProductOptionType: ProductOptionType = {
+    name: "",
+    optional: false,
+    options: []
 }
 
 export type ProductData = {

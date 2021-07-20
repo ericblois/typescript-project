@@ -5,12 +5,11 @@ import PropTypes from 'prop-types';
 import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
 import { ImageSlider, RatingVisual, MenuBar, IconButton, PageContainer, ScrollContainer, TextDropdown } from "../HelperFiles/CompIndex";
 import { productPropType, formatText, currency } from "../HelperFiles/Constants";
-import { Picker } from "@react-native-picker/picker";
 import DropDownPicker from 'react-native-dropdown-picker';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { BusinessShopStackParamList, CustomerMainStackParamList } from "../HelperFiles/Navigation";
 import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
-import { CartItem, ProductData, ProductOptionType, PublicBusinessData } from "../HelperFiles/DataTypes";
+import { CartItem, OptionSelections, ProductData, ProductOptionType, PublicBusinessData } from "../HelperFiles/DataTypes";
 import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
 
 type ProductShopNavigationProp = CompositeNavigationProp<
@@ -28,7 +27,7 @@ type Props = {
 type State = {
     productData?: ProductData,
     imagesLoaded: boolean,
-    optionSelections: { [optionType: string] : string },
+    optionSelections: OptionSelections,
     quantity: number,
 }
 
@@ -61,20 +60,19 @@ export default class ProductShopPage extends Component<Props, State> {
         let validOptions = true
         if (this.state.productData) {
             for (const optionType of this.state.productData.optionTypes) {
-                // Get this option selection
+                // Check if this option type has been selected
                 const selection = this.state.optionSelections[optionType.name]
+                if (selection && optionType.options.map((option) => (option.name)).includes(selection.optionName)) {
+                        continue
+                }
                 //const selection = this.state.optionSelections.get(optionType.name)
                 // Check if this option has been selected
-                if (selection) {
-                    if (optionType.options.map((option) => (option.name)).includes(selection)) {
-                        continue
-                    }
-                }
                 validOptions = false
             }
         } else {
             return false
         }
+        //console.log(this.state.optionSelections)
         return validOptions
     }
 
@@ -98,9 +96,18 @@ export default class ProductShopPage extends Component<Props, State> {
                             extraProps={{
                                 placeholder: optionType.name,
                                 onChangeItem: (item) => {
-                                    let selections = this.state.optionSelections
-                                    selections[optionType.name] = item.value
-                                    this.setState({optionSelections: selections})
+                                    // Get option info
+                                    const option = optionType.options.find((option) => {
+                                        return option.name === item.value
+                                    })
+                                    if (option) {
+                                        let selections = this.state.optionSelections
+                                        selections[optionType.name] = {
+                                            optionName: option.name,
+                                            priceChange: option.priceChange ? option.priceChange : 0
+                                        }
+                                        this.setState({optionSelections: selections})
+                                    }
                                 },
                             }}
                         ></TextDropdown>
@@ -164,11 +171,22 @@ export default class ProductShopPage extends Component<Props, State> {
                 buttonProps={[
                     {iconSource: icons.backArrow, buttonFunc: () => this.props.navigation.goBack()},
                     {iconSource: icons.plus, buttonFunc: () => {
-                        if (this.state.productData) {
+                        if (this.state.productData && this.state.productData.price) {
+                            let totalPrice = this.state.productData.price
+                            for (const selection of Object.values(this.state.optionSelections)) {
+                                totalPrice += selection.priceChange
+                            }
+                            let newSelections: OptionSelections = {}
+                            // Make sure the cart item's option selections are in the same order as the product's option types
+                            this.state.productData.optionTypes.forEach((optionType) => {
+                                newSelections[optionType.name] = this.state.optionSelections[optionType.name]
+                            })
                             const cartItem: CartItem = {
                                 businessID: this.state.productData.businessID,
                                 productID: this.state.productData.productID,
-                                productOptions: this.state.optionSelections,
+                                productOptions: newSelections,
+                                basePrice: this.state.productData.price,
+                                totalPrice: totalPrice,
                                 quantity: this.state.quantity
                             }
                             CustomerFunctions.addToCart(cartItem)

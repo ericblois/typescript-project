@@ -81,6 +81,7 @@ export default class CustomerCartPage extends Component<CustomerCartProps, Custo
                     <ProductCardList
                         products={items}
                         showLoading={true}
+                        onDeleteItem={() => this.refreshData()}
                     />
               </View>
               )

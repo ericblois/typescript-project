@@ -123,7 +123,8 @@ export default class CustomerInfoPage extends Component<Props, State> {
                 birthYear: this.state.birthYearText,
                 country: this.state.countryText,
                 businessIDs: [],
-                shippingAddresses: []
+                shippingAddresses: [],
+                cartItems: [],
             }
             // Create an account
             ServerData.createNewUser(
