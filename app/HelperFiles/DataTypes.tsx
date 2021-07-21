@@ -121,11 +121,13 @@ export type PublicBusinessData = {
   country: Country,
   postalCode: string,
   geohash: string,
-  storePickup: boolean,
-  localDelivery: boolean,
-  deliveryRange: number,
-  countryShipping: boolean,
-  internationalShipping: boolean,
+  deliveryMethods: {
+    pickup: boolean,
+    local: boolean,
+    country: boolean,
+    international: boolean
+  },
+  localDeliveryRange: number,
   keywords: string[],
   productList: ProductCategory[],
 }
@@ -146,11 +148,13 @@ export const DefaultPublicBusinessData: PublicBusinessData = {
   country: "",
   postalCode: "",
   geohash: "",
-  storePickup: false,
-  localDelivery: false,
-  deliveryRange: 0,
-  countryShipping: false,
-  internationalShipping: false,
+  deliveryMethods: {
+    pickup: false,
+    local: false,
+    country: false,
+    international: false
+  },
+  localDeliveryRange: 0,
   keywords: [],
   productList: [],
 }

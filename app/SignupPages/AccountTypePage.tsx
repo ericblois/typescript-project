@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, ScrollView, Text, StyleSheet, TextInput, ActivityIndicator } from "react-native";
-import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
 import { IconButton, MenuBar } from "../HelperFiles/CompIndex";
 import { auth, googleAPIKey } from "../HelperFiles/Constants";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -47,7 +47,9 @@ export default class AccountTypePage extends Component<Props, State> {
                     buttonStyle={{
                         ...defaults.textButtonNoColor,
                         ...styles.accountTypeButton,
-                        ...{borderWidth: this.state.typeSelection === "customer" ? styleValues.majorBorderWidth : styleValues.minorBorderWidth}
+                        ...{borderWidth: this.state.typeSelection === "customer" ? styleValues.majorBorderWidth : styleValues.minorBorderWidth,
+                            borderColor: this.state.typeSelection === "customer" ? colors.validColor : colors.grayColor,
+                        }
                     }}
                     buttonFunc={() => {
                         this.setState({typeSelection: "customer"})
@@ -59,7 +61,9 @@ export default class AccountTypePage extends Component<Props, State> {
                     buttonStyle={{
                         ...defaults.textButtonNoColor,
                         ...styles.accountTypeButton,
-                        ...{borderWidth: this.state.typeSelection === "business" ? styleValues.majorBorderWidth : styleValues.minorBorderWidth}
+                        ...{borderWidth: this.state.typeSelection === "business" ? styleValues.majorBorderWidth : styleValues.minorBorderWidth,
+                            borderColor: this.state.typeSelection === "business" ? colors.validColor : colors.grayColor,
+                        }
                     }}
                     buttonFunc={() => {
                         this.setState({typeSelection: "business"})
@@ -73,7 +77,7 @@ export default class AccountTypePage extends Component<Props, State> {
                         },
                         {
                             iconSource: icons.enter,
-                            iconStyle: {tintColor: this.state.typeSelection ? styleValues.darkGreyColor : styleValues.lightGreyColor},
+                            iconStyle: {tintColor: this.state.typeSelection ? colors.darkGrayColor : colors.lightGrayColor},
                             buttonFunc: () => {
                                 if (this.state.typeSelection) {
                                     this.props.navigation.navigate("customerInfo", {accountType: this.state.typeSelection})

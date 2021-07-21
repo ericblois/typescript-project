@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, KeyboardAvoidingView, } from "react-native";
-import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { auth, geofire } from "../HelperFiles/Constants";
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -185,7 +185,7 @@ export default class BusinessEditLocationPage extends Component<BusinessEditLoca
                 onToggle={(value) => {
                     let newPublicData = this.state.publicData
                     if (newPublicData) {
-                        newPublicData.storePickup = value
+                        newPublicData.deliveryMethods.pickup = value
                         this.setState({publicData: newPublicData, saved: false})
                     }
                 }}
@@ -197,7 +197,7 @@ export default class BusinessEditLocationPage extends Component<BusinessEditLoca
                 onToggle={(value) => {
                     let newPublicData = this.state.publicData
                     if (newPublicData) {
-                        newPublicData.localDelivery = value
+                        newPublicData.deliveryMethods.local = value
                         this.setState({publicData: newPublicData, saved: false})
                     }
                 }}
@@ -209,7 +209,7 @@ export default class BusinessEditLocationPage extends Component<BusinessEditLoca
                 onToggle={(value) => {
                     let newPublicData = this.state.publicData
                     if (newPublicData) {
-                        newPublicData.countryShipping = value
+                        newPublicData.deliveryMethods.country = value
                         this.setState({publicData: newPublicData, saved: false})
                     }
                 }}
@@ -221,7 +221,7 @@ export default class BusinessEditLocationPage extends Component<BusinessEditLoca
                 onToggle={(value) => {
                     let newPublicData = this.state.publicData
                     if (newPublicData) {
-                        newPublicData.internationalShipping = value
+                        newPublicData.deliveryMethods.country = value
                         this.setState({publicData: newPublicData, saved: false})
                     }
                 }}
@@ -229,7 +229,7 @@ export default class BusinessEditLocationPage extends Component<BusinessEditLoca
             <View style={{
                 borderWidth: styleValues.minorBorderWidth,
                 borderRadius: styleValues.bordRadius,
-                borderColor: styleValues.bordColor,
+                borderColor: colors.grayColor,
                 width: "100%",
                 alignItems: "center",
                 marginVertical: styleValues.mediumPadding,
@@ -309,7 +309,7 @@ export default class BusinessEditLocationPage extends Component<BusinessEditLoca
                         value: "united_states"
                     }
                 ]}
-                extraProps={{
+                dropdownProps={{
                     placeholder: "Country",
                     defaultValue: this.state.publicData?.country,
                     onChangeItem: (item) => {
@@ -325,7 +325,7 @@ export default class BusinessEditLocationPage extends Component<BusinessEditLoca
         <MenuBar
             buttonProps={[
                 {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
-                {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? styleValues.validColor : styleValues.invalidColor}, buttonFunc: () => {
+                {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? colors.validColor : colors.invalidColor}, buttonFunc: () => {
                     if (this.state.privateData && this.state.publicData) {
                         this.props.businessFuncs.updatePrivateData(this.state.privateData).then(() => {
                             this.props.businessFuncs.updatePublicData(this.state.publicData!).then(() => {
@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: styleValues.minorBorderWidth,
         borderBottomLeftRadius: 0,
         borderBottomRightRadius: 0,
-        borderColor: styleValues.greyColor,
+        borderColor: colors.grayColor,
     },
     dividerHeader: {
         

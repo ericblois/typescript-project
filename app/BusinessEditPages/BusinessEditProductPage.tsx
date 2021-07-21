@@ -1,6 +1,6 @@
 import React, { Component, useRef } from "react";
 import { View, Text, StyleSheet, ImageURISource, ScrollView, Keyboard, Platform, ActivityIndicator } from "react-native";
-import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
 import { auth, currencyFormatter } from "../HelperFiles/Constants";
@@ -238,7 +238,7 @@ export default class BusinessEditProductPage extends Component<BusinessEditProdu
           <MenuBar
             buttonProps={[
               {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
-              {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? styleValues.validColor : styleValues.invalidColor}, buttonFunc: async () => {
+              {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? colors.validColor : colors.invalidColor}, buttonFunc: async () => {
                   if (this.state.productData) {
                       // Add new images
                       let downloadURLs: string[] = await this.props.businessFuncs.uploadImages(this.state.newImages)
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     borderWidth: styleValues.minorBorderWidth,
-    borderColor: styleValues.greyColor,
+    borderColor: colors.grayColor,
     borderRadius: styleValues.bordRadius,
     padding: styleValues.mediumPadding,
     paddingBottom: 0,

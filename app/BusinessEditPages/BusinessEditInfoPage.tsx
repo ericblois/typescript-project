@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, KeyboardAvoidingView, ScrollView, ActivityIndicator } from "react-native";
-import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
 import { auth } from "../HelperFiles/Constants";
@@ -144,7 +144,7 @@ export default class BusinessEditInfoPage extends Component<BusinessEditInfoProp
           <MenuBar
             buttonProps={[
               {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
-              {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? styleValues.validColor : styleValues.invalidColor}, buttonFunc: async () => {
+              {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? colors.validColor : colors.invalidColor}, buttonFunc: async () => {
                 if (this.state.publicData) {
                   // Add new images
                   let downloadURLs: string[] = await this.props.businessFuncs.uploadImages(this.state.newImages)

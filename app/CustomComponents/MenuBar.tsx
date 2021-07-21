@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, StyleSheet, ViewStyle, GestureResponderEvent } from "react-native";
-import { styleValues, icons, defaults } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, icons, defaults } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import IconButton from "./IconButton";
 import { useNavigation  } from "@react-navigation/native";

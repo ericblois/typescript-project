@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { View, StyleSheet, Text } from "react-native";
 import { BusinessShopStack } from "../HelperFiles/Navigation";
 import PropTypes from 'prop-types';
-import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
 import { IconButton, TabIcon } from "../HelperFiles/CompIndex";
 import { BusinessInfoPage, BusinessProductsPage, ProductShopPage } from "../HelperFiles/PageIndex";
 import { StackNavigationProp } from '@react-navigation/stack';

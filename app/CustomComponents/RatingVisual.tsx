@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Text, Image, StyleSheet, View } from "react-native";
-import { styleValues } from "../HelperFiles/StyleSheet";
+import { styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { useNavigation } from "@react-navigation/native";
 
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     starIcon: {
         width: styleValues.smallTextSize,
         aspectRatio: 1,
-        tintColor: styleValues.darkGreyColor,
+        tintColor: colors.darkGrayColor,
         marginRight: styleValues.minorPadding/2,
         //borderWidth: 1
     }

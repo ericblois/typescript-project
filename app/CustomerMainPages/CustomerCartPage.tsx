@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, FlatList, } from "react-native";
-import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
 import { auth } from "../HelperFiles/Constants";
@@ -17,6 +17,8 @@ import ProductCartCard from "../CustomComponents/ProductCartCard";
 import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
 import ProductCardList from "../CustomComponents/ProductCardList";
 import MenuBar from "../CustomComponents/MenuBar";
+import TextDropdown from "../CustomComponents/TextDropdown";
+import ScrollContainer from "../CustomComponents/ScrollContainer";
 
 type CustomerCartNavigationProp = CompositeNavigationProp<
   StackNavigationProp<CustomerMainStackParamList, "cart">,
@@ -69,6 +71,33 @@ export default class CustomerCartPage extends Component<CustomerCartProps, Custo
     })
   }
 
+  getDeliveryItems(businessID: string) {
+        let items: TextDropdown["props"]["items"] = []
+        for (const [method, isOffered] of Object.entries(this.state.businesses![businessID].deliveryMethods)) {
+            if (isOffered) {
+                let label = ""
+                switch (method) {
+                    case "pickup":
+                        label = "In-store pickup"
+                        break
+                    case "local":
+                        label = "Local delivery"
+                        break
+                    case "country":
+                        label = "Country-wide shipping"
+                        break
+                    case "international":
+                        label = "International shipping"
+                        break
+                    default:
+                        return undefined
+                }
+                items.push({label: label, value: method})
+            }
+        }
+        return items
+  }
+
   renderBusinessCarts() {
       if (this.state.businessCarts) {
           return Object.entries(this.state.businessCarts).map(([businessID, items]) => {
@@ -77,25 +106,33 @@ export default class CustomerCartPage extends Component<CustomerCartProps, Custo
                     style={styles.businessContainer}
                     key={businessID}
                 >
-                    <Text style={defaults.largeTextHeader}>{this.state.businesses![businessID].name}</Text>
+                    <Text style={{...defaults.largeTextHeader, ...{marginBottom: 0}}}>{this.state.businesses![businessID].name}</Text>
                     <ProductCardList
                         products={items}
                         showLoading={true}
+                        scrollable={false}
                         onDeleteItem={() => this.refreshData()}
                     />
+                    <View
+                        style={styles.checkoutBar}
+                    >
+                        <TextDropdown
+                            items={this.getDeliveryItems(businessID)}
+                            style={styles.deliveryMethod}
+                            dropdownProps={{
+                                placeholder: "Delivery method"
+                            }}
+                        />
+                        <TextButton
+                            text={"Checkout"}
+                            buttonStyle={styles.checkoutButton}
+                            appearance={"color"}
+                        />
+                    </View>
               </View>
               )
           })
       }
-  }
-
-  renderCartItems(items: CartItem[]) {
-    return (
-        <ProductCardList
-            products={items}
-            showLoading={true}
-        />
-    )
   }
 
   render() {
@@ -106,8 +143,10 @@ export default class CustomerCartPage extends Component<CustomerCartProps, Custo
             fontSize: styleValues.largeTextSize
           }}
         >Your Cart</Text>
+        <ScrollContainer>
           {this.renderBusinessCarts()}
-          <MenuBar
+        </ScrollContainer>
+        <MenuBar
             buttonProps={[
                 {iconSource: icons.chevron, buttonFunc: () => this.props.navigation.goBack()},
                 {iconSource: icons.shoppingCart, buttonFunc: () => {}},
@@ -119,15 +158,24 @@ export default class CustomerCartPage extends Component<CustomerCartProps, Custo
 }
 
 const styles = StyleSheet.create({
-  signout: {
-    color: "red",
-    fontSize: styleValues.largeTextSize,
-  },
   businessContainer: {
     width: "100%",
     padding: styleValues.mediumPadding,
+    paddingBottom: 0,
     borderWidth: styleValues.minorBorderWidth,
     borderRadius: styleValues.bordRadius,
-    borderColor: styleValues.lightGreyColor,
+    borderColor: colors.lightGrayColor,
+  },
+  checkoutBar: {
+    flexDirection: "row",
+    width: "100%",
+  },
+  checkoutButton: {
+    width: "30%",
+  },
+  deliveryMethod: {
+    width: undefined, 
+    flex: 1,
+    marginRight: styleValues.mediumPadding
   },
 })

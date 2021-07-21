@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { TouchableOpacity, Image, StyleSheet, ViewStyle, GestureResponderEvent, ImageStyle } from "react-native";
-import { defaults, styleValues } from "../HelperFiles/StyleSheet";
+import { defaults, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { Icon } from "react-native-elements";
 

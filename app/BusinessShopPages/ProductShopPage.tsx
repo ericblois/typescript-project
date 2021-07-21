@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { View, Image, Text, StyleSheet, ActivityIndicator, ScrollView, SafeAreaView } from "react-native";
 
 import PropTypes from 'prop-types';
-import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
 import { ImageSlider, RatingVisual, MenuBar, IconButton, PageContainer, ScrollContainer, TextDropdown } from "../HelperFiles/CompIndex";
 import { productPropType, formatText, currency } from "../HelperFiles/Constants";
 import DropDownPicker from 'react-native-dropdown-picker';
@@ -93,7 +93,7 @@ export default class ProductShopPage extends Component<Props, State> {
                                     value: option.name,
                                 }
                             })}
-                            extraProps={{
+                            dropdownProps={{
                                 placeholder: optionType.name,
                                 onChangeItem: (item) => {
                                     // Get option info
@@ -194,7 +194,7 @@ export default class ProductShopPage extends Component<Props, State> {
                     }, buttonProps: {
                         disabled: !this.checkOptions(),
                     }, iconStyle: {
-                        tintColor: this.checkOptions() ? styleValues.darkGreyColor : styleValues.lightGreyColor
+                        tintColor: this.checkOptions() ? colors.darkGrayColor : colors.lightGrayColor
                     }},
                     {iconSource: icons.shoppingCart, buttonFunc: () => this.props.navigation.navigate("cart")},
                 ]}
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
         paddingBottom: styleValues.mediumPadding,
         marginBottom: styleValues.mediumPadding,
         borderBottomWidth: styleValues.minorBorderWidth,
-        borderColor: styleValues.bordColor
+        borderColor: colors.grayColor
     },
     subHeader: {
         width: "100%",
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
         paddingBottom: styleValues.mediumPadding,
         marginBottom: styleValues.mediumPadding,
         borderBottomWidth: styleValues.minorBorderWidth,
-        borderColor: styleValues.bordColor
+        borderColor: colors.grayColor
     },
     productTitle: {
         fontSize: styleValues.largeTextSize,

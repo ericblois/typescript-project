@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import { TouchableWithoutFeedback, Keyboard, View, ScrollViewProps } from "react-native"
 import { ScrollView } from "react-native-gesture-handler"
-import { defaults, styleValues } from "../HelperFiles/StyleSheet"
+import { defaults, styleValues, colors } from "../HelperFiles/StyleSheet"
 
 export default class PageContainer extends Component {
 

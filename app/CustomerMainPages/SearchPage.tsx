@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { View, StyleSheet, NativeSyntheticEvent, TextInputSubmitEditingEventData, FlatList, ActivityIndicator, } from "react-native";
 import PropTypes from 'prop-types';
 import { SearchBar, } from "react-native-elements";
-import { styleValues, defaults } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults } from "../HelperFiles/StyleSheet";
 import { BusinessCard, PageContainer, TextInputBox } from "../HelperFiles/CompIndex";
 import { firestore } from "../HelperFiles/Constants";
 import { getQueryTerms } from "../HelperFiles/ClientFunctions"
@@ -124,11 +124,11 @@ export default class SearchPage extends Component<Props, State> {
 const styles = StyleSheet.create({
   searchBar: {
     backgroundColor: "#fff",
-    borderBottomColor: styleValues.bordColor,
+    borderBottomColor: colors.grayColor,
     borderBottomWidth: styleValues.minorBorderWidth,
-    borderColor: styleValues.bordColor,
+    borderColor: colors.grayColor,
     borderRadius: styleValues.bordRadius,
-    borderTopColor: styleValues.bordColor,
+    borderTopColor: colors.grayColor,
     borderTopWidth: styleValues.minorBorderWidth,
     borderWidth: styleValues.minorBorderWidth,
     height: styleValues.winWidth * 0.125,

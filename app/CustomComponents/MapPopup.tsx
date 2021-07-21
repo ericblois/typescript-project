@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Image, StyleSheet, FlatList, Text, ImageStyle } from "react-native";
-import { icons, styleValues } from "../HelperFiles/StyleSheet";
+import { icons, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { useNavigation } from "@react-navigation/native";
 import IconButton from "../CustomComponents/IconButton";
@@ -79,7 +79,7 @@ export default class MapPopup extends Component<Props, State> {
                 <IconButton
                     iconSource={icons.checkBox}
                     buttonStyle={styles.mapButton}
-                    iconStyle={{tintColor: styleValues.whiteColor}}
+                    iconStyle={{tintColor: colors.whiteColor}}
                     buttonFunc={() => {
                         if (this.props.onSaveLocation) {
                             this.props.onSaveLocation(this.currentRegion!)
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
         position: "absolute",
         height: styleValues.iconLargeSize,
         width: styleValues.iconLargeSize,
-        tintColor: styleValues.darkGreyColor
+        tintColor: colors.darkGrayColor
     },
     mapButton: {
         position: "absolute",

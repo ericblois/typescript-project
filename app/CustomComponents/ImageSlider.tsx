@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Image, StyleSheet, FlatList, Text, ImageStyle, ViewStyle, TouchableWithoutFeedback } from "react-native";
-import { icons, styleValues } from "../HelperFiles/StyleSheet";
+import { icons, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { useNavigation } from "@react-navigation/native";
 import IconButton from "./IconButton";
@@ -115,15 +115,15 @@ export default class ImageSlider extends Component<Props, State> {
                 <View style={{marginHorizontal: styleValues.mediumPadding}}>
                 <View style={[styles.gallery, {
                     height: this.state.galleryHeight,
-                    backgroundColor: styleValues.lightColor,
+                    backgroundColor: colors.lightColor,
                     borderWidth: styleValues.minorBorderWidth,
                     borderRadius: styleValues.bordRadius,
-                    borderColor: styleValues.darkColor,
+                    borderColor: colors.darkColor,
                     alignItems: "center",
                     justifyContent: "center",
                 }]}>
                     <Text style={{
-                        color: styleValues.darkColor,
+                        color: colors.darkColor,
                         fontSize: styleValues.smallerTextSize
                     }}>
                         There are no images to show.

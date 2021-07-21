@@ -2,7 +2,7 @@ import React, { Component, Fragment } from "react";
 import { View, TouchableOpacity, Text, StyleSheet, TextStyle, ViewStyle, Image, GestureResponderEvent, ImageStyle } from "react-native";
 import PropTypes from 'prop-types';
 import { NavigationProp, useNavigation } from "@react-navigation/native"
-import { defaults, styleValues } from "../HelperFiles/StyleSheet";
+import { defaults, styleValues, colors } from "../HelperFiles/StyleSheet";
 
 type Props = {
     text: string,
@@ -73,7 +73,7 @@ export default class TextButton extends Component<Props, State> {
         }
         let defaultTextStyle = {...styles.textStyle}
         if (this.props.appearance === "color") {
-            defaultTextStyle.color = styleValues.whiteColor
+            defaultTextStyle.color = colors.whiteColor
         }
         return (
             <TouchableOpacity
@@ -100,19 +100,19 @@ const styles = StyleSheet.create({
     textStyle: {
         textAlign: "center",
         textAlignVertical: "center",
-        fontSize: styleValues.smallTextSize,
+        fontSize: styleValues.mediumTextSize,
         color: styleValues.majorTextColor,
     },
     subtextStyle: {
         textAlign: "center",
-        fontSize: styleValues.smallestTextSize,
+        fontSize: styleValues.smallTextSize,
         color: styleValues.minorTextColor
     },
     iconStyle: {
         aspectRatio: 1,
         maxWidth: "10%",
         maxHeight: "75%",
-        tintColor: styleValues.darkGreyColor,
+        tintColor: colors.darkGrayColor,
         alignSelf: "center",
         flexWrap: "wrap",
     },

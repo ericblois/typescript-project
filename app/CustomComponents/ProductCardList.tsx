@@ -1,7 +1,7 @@
 
 import React, { Component } from "react";
 import { View, TouchableOpacity, Image, Text, StyleSheet, GestureResponderEvent, FlatList, ActivityIndicator } from "react-native";
-import { defaults, styleValues } from "../HelperFiles/StyleSheet";
+import { defaults, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { productPropType, currency } from "../HelperFiles/Constants";
 import RatingVisual from "./RatingVisual";
@@ -19,8 +19,9 @@ type ProductInfo = {
 type Props = {
     products: (ProductInfo | CartItem)[],
     showLoading?: boolean,
+    scrollable?: boolean,
     onLoadEnd?: () => void,
-    onDeleteItem?: () => void
+    onDeleteItem?: () => void,
 }
 
 type State = {
@@ -92,6 +93,8 @@ export default class ProductCardList extends Component<Props, State> {
                     return this.renderProductCard(item as ProductInfo)
                 }
             }}
+            contentContainerStyle={{marginBottom: styleValues.mediumPadding}}
+            scrollEnabled={this.props.scrollable !== false}
         />
         )
     }
@@ -105,7 +108,7 @@ export default class ProductCardList extends Component<Props, State> {
                     height: "100%",
                     alignItems: "center",
                     justifyContent: "center",
-                    backgroundColor: styleValues.whiteColor
+                    backgroundColor: colors.whiteColor
                 }}>
                     <ActivityIndicator size={"large"}/>
                 </View>
@@ -126,7 +129,7 @@ export default class ProductCardList extends Component<Props, State> {
 const styles = StyleSheet.create({
     cardContainer: {
         backgroundColor: "#fff",
-        borderColor: styleValues.bordColor,
+        borderColor: colors.grayColor,
         borderRadius: styleValues.bordRadius,
         borderWidth: styleValues.minorBorderWidth,
         height: styleValues.winWidth * 0.3,

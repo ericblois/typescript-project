@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, ScrollView, Text, StyleSheet, TextInput, ActivityIndicator } from "react-native";
-import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
 import { TextInputBox, DateScrollPicker, TextDropdown, MenuBar, PageContainer } from "../HelperFiles/CompIndex";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList, UserSignupStackParamList } from "../HelperFiles/Navigation";
@@ -176,7 +176,7 @@ export default class CustomerInfoPage extends Component<Props, State> {
                     This will be used when messaging businesses.
                 </Text>
                 <TextInputBox
-                    style={{borderColor: this.state.validName ? styleValues.validColor : styleValues.darkColor}}
+                    style={{borderColor: this.state.validName ? colors.validColor : colors.invalidColor}}
                     textProps={{...this.defaultTextProps, ...{
                         onChangeText: async (text) => {
                             let validName = text.length > 0
@@ -194,7 +194,7 @@ export default class CustomerInfoPage extends Component<Props, State> {
                     This will be used to sign in to your account.
                 </Text>
                 <TextInputBox
-                    style={{borderColor: this.state.validEmail ? styleValues.validColor : styleValues.invalidColor}}
+                    style={{borderColor: this.state.validEmail ? colors.validColor : colors.invalidColor}}
                     textProps={{...this.defaultTextProps, ...{
                         onChangeText: (text) => {
                             // Regular expression for an email
@@ -212,7 +212,7 @@ export default class CustomerInfoPage extends Component<Props, State> {
                     Use at least 6 characters in your password.
                 </Text>
                 <TextInputBox
-                    style={{borderColor: this.state.validPass ? styleValues.validColor : styleValues.invalidColor}}
+                    style={{borderColor: this.state.validPass ? colors.validColor : colors.invalidColor}}
                     textProps={{...this.defaultTextProps, ...{
                         onChangeText: (text) => {
                             let validPass = text.length > 5
@@ -227,7 +227,7 @@ export default class CustomerInfoPage extends Component<Props, State> {
                     {this.state.passText}
                 </TextInputBox>
                 <TextInputBox
-                    style={{borderColor: this.state.validConfirm ? styleValues.validColor : styleValues.invalidColor}}
+                    style={{borderColor: this.state.validConfirm ? colors.validColor : colors.invalidColor}}
                     textProps={{...this.defaultTextProps, ...{
                         onChangeText: (text) => {
                             let validConfirm = text === this.state.passText
@@ -244,7 +244,7 @@ export default class CustomerInfoPage extends Component<Props, State> {
                     You must be 13 years of age or older to use this service.
                 </Text>
                 <DateScrollPicker
-                    style={{borderColor: this.state.validBirthday ? styleValues.validColor : styleValues.invalidColor}}
+                    style={{borderColor: this.state.validBirthday ? colors.validColor : colors.invalidColor}}
                     extraProps={{
                         value: this.state.birthdayValue,
                         onChange: (event, date) => {
@@ -272,13 +272,13 @@ export default class CustomerInfoPage extends Component<Props, State> {
                     zIndex: 2
                 }}>
                     <TextDropdown
-                        style={{borderColor: this.state.validGender ? styleValues.validColor : styleValues.invalidColor}}
+                        style={{borderColor: this.state.validGender ? colors.validColor : colors.invalidColor}}
                         items={[
                             {label: "Male", value: "male"},
                             {label: "Female", value: "female"},
                             {label: "Nonbinary", value: "nonbinary"}
                         ]}
-                        extraProps={{
+                        dropdownProps={{
                             placeholder: "Gender",
                             onChangeItem: (item) => {
                                 const value = item.value;
@@ -293,7 +293,7 @@ export default class CustomerInfoPage extends Component<Props, State> {
                     zIndex: 1
                 }}>
                     <TextDropdown
-                        style={{borderColor: this.state.validCountry ? styleValues.validColor : styleValues.invalidColor}}
+                        style={{borderColor: this.state.validCountry ? colors.validColor : colors.invalidColor}}
                         items={[
                             {
                                 label: "Canada",
@@ -304,7 +304,7 @@ export default class CustomerInfoPage extends Component<Props, State> {
                                 value: "united_states"
                             }
                         ]}
-                        extraProps={{
+                        dropdownProps={{
                             placeholder: "Country",
                             onChangeItem: (item) => {
                                 this.setState({countryText: item.value, validCountry: true})
@@ -328,7 +328,7 @@ export default class CustomerInfoPage extends Component<Props, State> {
                     },
                     {
                         iconSource: icons.enter,
-                        iconStyle: {tintColor: this.isEnterValid() ? styleValues.darkGreyColor : styleValues.lightGreyColor},
+                        iconStyle: {tintColor: this.isEnterValid() ? colors.darkGrayColor : colors.lightGrayColor},
                         buttonFunc: () => this.nextPage(),
                         buttonProps: {
                             // When enter is disabled, don't change opacity when pressed

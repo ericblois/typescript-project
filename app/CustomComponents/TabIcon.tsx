@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { TouchableOpacity, Image, StyleSheet, ImageStyle } from "react-native";
-import { styleValues } from "../HelperFiles/StyleSheet";
+import { styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { Icon } from "react-native-elements";
 
@@ -49,6 +49,6 @@ const styles = StyleSheet.create({
   iconStyle: {
     height: "100%",
     aspectRatio: 1,
-    tintColor: styleValues.darkGreyColor,
+    tintColor: colors.darkGrayColor,
   },
 });

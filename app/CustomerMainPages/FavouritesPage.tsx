@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet } from "react-native";
 
-import { styleValues, defaults } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults } from "../HelperFiles/StyleSheet";
 import { MenuBar, PageContainer } from "../HelperFiles/CompIndex";
 import PropTypes from 'prop-types';
 

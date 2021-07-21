@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Image, StyleSheet, FlatList, Text, ImageStyle, ViewStyle, TouchableWithoutFeedback } from "react-native";
-import { icons, styleValues } from "../HelperFiles/StyleSheet";
+import { icons, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { useNavigation } from "@react-navigation/native";
 import IconButton from "../CustomComponents/IconButton";
@@ -173,7 +173,7 @@ export default class ImageSliderSelector extends Component<Props, State> {
                         right: 0,
                     }}
                     iconStyle={{
-                        tintColor: styleValues.whiteColor
+                        tintColor: colors.whiteColor
                     }}
                     buttonFunc={() => {
                         this.removeImage(item.uri)
@@ -207,15 +207,15 @@ export default class ImageSliderSelector extends Component<Props, State> {
                 <View style={{marginHorizontal: styleValues.mediumPadding}}>
                 <View style={[styles.gallery, {
                     height: this.state.galleryHeight,
-                    backgroundColor: styleValues.lightColor,
+                    backgroundColor: colors.lightColor,
                     borderWidth: styleValues.minorBorderWidth,
                     borderRadius: styleValues.bordRadius,
-                    borderColor: styleValues.darkColor,
+                    borderColor: colors.darkColor,
                     alignItems: "center",
                     justifyContent: "center",
                 }]}>
                     <Text style={{
-                        color: styleValues.darkColor,
+                        color: colors.darkColor,
                         fontSize: styleValues.smallerTextSize
                     }}>
                         There are no images to show.
@@ -231,7 +231,7 @@ export default class ImageSliderSelector extends Component<Props, State> {
             <IconButton
                 iconSource={icons.plus}
                 buttonStyle={styles.imageSelectButton}
-                iconStyle={{tintColor: styleValues.whiteColor}}
+                iconStyle={{tintColor: colors.whiteColor}}
                 buttonFunc={async () => {
                     const result = await accessPhotos()
                     if (result) {

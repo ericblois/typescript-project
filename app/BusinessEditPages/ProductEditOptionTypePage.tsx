@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, ImageURISource, ScrollView, ActivityIndicator } from "react-native";
-import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
 import { auth } from "../HelperFiles/Constants";
@@ -186,7 +186,7 @@ export default class ProductEditOptionTypePage extends Component<ProductEditOpti
             buttonProps={[
                 {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
                 {iconSource: icons.plus, buttonFunc: () => {this.setState({showPopup: true})}},
-                {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? styleValues.validColor : styleValues.invalidColor}, buttonFunc: () => {
+                {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? colors.validColor : colors.invalidColor}, buttonFunc: () => {
                     if (this.state.productData) {
                         let newProductData = this.state.productData
                         this.props.businessFuncs.updateProduct(this.props.route.params.productID, newProductData).then(() => {

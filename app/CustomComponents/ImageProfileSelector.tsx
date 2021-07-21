@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Image, StyleSheet, FlatList, Text, ImageStyle } from "react-native";
-import { icons, styleValues } from "../HelperFiles/StyleSheet";
+import { icons, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { useNavigation } from "@react-navigation/native";
 import IconButton from "../CustomComponents/IconButton";
@@ -62,7 +62,7 @@ export default class ImageProfileSelector extends Component<Props, State> {
                 <IconButton
                     buttonStyle={styles.saveIcon}
                     iconSource={icons.checkBox}
-                    iconStyle={{tintColor: styleValues.whiteColor}}
+                    iconStyle={{tintColor: colors.whiteColor}}
                     buttonFunc={async () => {
                         const result = await accessPhotos()
                         if (result) {
@@ -83,7 +83,7 @@ export default class ImageProfileSelector extends Component<Props, State> {
                 <IconButton
                     buttonStyle={styles.editIcon}
                     iconSource={icons.edit}
-                    iconStyle={{tintColor: styleValues.whiteColor}}
+                    iconStyle={{tintColor: colors.whiteColor}}
                     buttonFunc={async () => {
                         const result = await accessPhotos()
                         if (result) {
@@ -114,15 +114,15 @@ const styles = StyleSheet.create({
         width: "100%",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: styleValues.lightColor,
+        backgroundColor: colors.lightColor,
         borderRadius: styleValues.bordRadius,
-        borderColor: styleValues.darkColor,
+        borderColor: colors.darkColor,
         borderWidth: styleValues.minorBorderWidth,
     },
     noProfileText: {
         textAlignVertical: "center",
         textAlign: "center",
-        color: styleValues.darkColor,
+        color: colors.darkColor,
         fontSize: styleValues.smallTextSize,
         marginBottom: styleValues.mediumPadding
     },

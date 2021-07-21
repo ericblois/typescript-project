@@ -1,7 +1,7 @@
 
 import React, { Component } from "react";
 import { View, TouchableOpacity, Image, Text, StyleSheet, GestureResponderEvent, ActivityIndicator } from "react-native";
-import { defaults, styleValues } from "../HelperFiles/StyleSheet";
+import { defaults, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { productPropType, currency } from "../HelperFiles/Constants";
 import RatingVisual from "./RatingVisual";
@@ -96,7 +96,7 @@ export default class ProductCard extends Component<Props, State> {
                     height: "100%",
                     alignItems: "center",
                     justifyContent: "center",
-                    backgroundColor: styleValues.whiteColor
+                    backgroundColor: colors.whiteColor
                 }}>
                     <ActivityIndicator size={"small"}/>
                 </View>
@@ -117,7 +117,7 @@ export default class ProductCard extends Component<Props, State> {
 const styles = StyleSheet.create({
     cardContainer: {
         backgroundColor: "#fff",
-        borderColor: styleValues.bordColor,
+        borderColor: colors.grayColor,
         borderRadius: styleValues.bordRadius,
         borderWidth: styleValues.minorBorderWidth,
         height: styleValues.winWidth * 0.3,

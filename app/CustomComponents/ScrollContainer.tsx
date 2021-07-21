@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import { TouchableWithoutFeedback, Keyboard, View, ScrollViewProps, KeyboardAvoidingView } from "react-native"
 import { ScrollView } from "react-native-gesture-handler"
 import GradientView from "../CustomComponents/GradientView"
-import { defaults, styleValues } from "../HelperFiles/StyleSheet"
+import { defaults, styleValues, colors } from "../HelperFiles/StyleSheet"
 
 type Props = {
     scrollProps?: ScrollViewProps,

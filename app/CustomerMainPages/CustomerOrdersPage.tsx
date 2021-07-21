@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { styleValues, defaults } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import PageContainer from "../CustomComponents/PageContainer";
 import { CustomerMainStackParamList, CustomerTabParamList } from "../HelperFiles/Navigation";
@@ -33,6 +33,7 @@ export default class CustomerOrdersPage extends Component<Props, State> {
         <TextButton
           text={"Go to cart"}
           buttonFunc={() => this.props.navigation.navigate("cart")}
+          rightIconSource={icons.shoppingCart}
         />
       </PageContainer>
     );

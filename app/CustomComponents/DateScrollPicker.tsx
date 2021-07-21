@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { TouchableOpacity, Text, StyleSheet, TextStyle, ViewStyle, View, GestureResponderEvent } from "react-native";
 import PropTypes from 'prop-types';
 import { NavigationProp, useNavigation } from "@react-navigation/native"
-import { styleValues, defaults } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults } from "../HelperFiles/StyleSheet";
 import { TextInput } from "react-native-gesture-handler";
 import DateTimePicker from "@react-native-community/datetimepicker";
 

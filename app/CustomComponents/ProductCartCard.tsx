@@ -1,7 +1,7 @@
 
 import React, { Component } from "react";
 import { View, TouchableOpacity, Image, Text, StyleSheet, GestureResponderEvent, ActivityIndicator } from "react-native";
-import { defaults, icons, styleValues } from "../HelperFiles/StyleSheet";
+import { defaults, icons, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { productPropType, currency, currencyFormatter } from "../HelperFiles/Constants";
 import RatingVisual from "./RatingVisual";
@@ -94,7 +94,7 @@ export default class ProductCartCard extends Component<Props, State> {
             >
                 <IconButton
                     iconSource={icons.minus}
-                    buttonStyle={{height: "60%"}}
+                    buttonStyle={{height: "75%"}}
                     buttonFunc={async () => {
                         if (this.state.cartItem.quantity > 0) {
                             const newCartItem = await CustomerFunctions.updateCartQuantity(this.state.cartItem, this.state.cartItem.quantity - 1)
@@ -107,7 +107,7 @@ export default class ProductCartCard extends Component<Props, State> {
                 >{this.state.cartItem.quantity}</Text>
                 <IconButton
                     iconSource={icons.plus}
-                    buttonStyle={{height: "60%"}}
+                    buttonStyle={{height: "75%"}}
                     buttonFunc={async () => {
                         if (this.state.cartItem.quantity < 99) {
                             const newCartItem = await CustomerFunctions.updateCartQuantity(this.state.cartItem, this.state.cartItem.quantity + 1)
@@ -124,7 +124,7 @@ export default class ProductCartCard extends Component<Props, State> {
             return (
                 <Text
                     style={styles.mainPriceText}
-                >{currencyFormatter.format(this.state.cartItem.totalPrice)}</Text>
+                >{currencyFormatter.format(this.state.cartItem.totalPrice * this.state.cartItem.quantity)}</Text>
             )
         }
     }
@@ -193,7 +193,7 @@ export default class ProductCartCard extends Component<Props, State> {
                     height: "100%",
                     alignItems: "center",
                     justifyContent: "center",
-                    backgroundColor: styleValues.whiteColor
+                    backgroundColor: colors.whiteColor
                 }}>
                     <ActivityIndicator size={"small"}/>
                 </View>
@@ -214,7 +214,7 @@ export default class ProductCartCard extends Component<Props, State> {
 const styles = StyleSheet.create({
     cardContainer: {
         backgroundColor: "#fff",
-        borderColor: styleValues.bordColor,
+        borderColor: colors.grayColor,
         borderRadius: styleValues.bordRadius,
         borderWidth: styleValues.minorBorderWidth,
         width: "100%",
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     },
     optionText: {
         fontSize: styleValues.smallTextSize,
-        color: styleValues.greyColor
+        color: colors.grayColor
     },
     mainPriceText: {
         textAlign: "right",
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
         textAlignVertical: "center",
         fontSize: styleValues.smallTextSize,
         width: "35%",
-        color: styleValues.greyColor
+        color: colors.grayColor
     },
     bottomContainer: {
         flexDirection: "row",
@@ -264,7 +264,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         borderTopWidth: styleValues.minorBorderWidth,
-        borderColor: styleValues.lightGreyColor,
+        borderColor: colors.lightGrayColor,
+        marginTop: styleValues.minorPadding,
+        paddingTop: styleValues.minorPadding
     },
     deleteButton: {
         height: "75%",

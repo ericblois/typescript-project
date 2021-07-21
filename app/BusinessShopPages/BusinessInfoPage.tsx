@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, ScrollView } from "react-native";
 import PropTypes from 'prop-types';
-import { defaults, icons, styleValues } from "../HelperFiles/StyleSheet";
+import { defaults, icons, styleValues, colors } from "../HelperFiles/StyleSheet";
 import { ImageSlider, MenuBar, PageContainer, RatingVisual, ScrollContainer } from "../HelperFiles/CompIndex";
 import { businessPropType, formatText } from "../HelperFiles/Constants";
 import { PublicBusinessData } from "../HelperFiles/DataTypes"
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
         paddingBottom: styleValues.mediumPadding,
         marginBottom: styleValues.mediumPadding,
         borderBottomWidth: styleValues.minorBorderWidth,
-        borderColor: styleValues.bordColor
+        borderColor: colors.grayColor
     },
     subHeader: {
         width: "100%",

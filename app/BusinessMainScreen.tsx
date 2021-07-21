@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { StyleSheet, StatusBar, AppState, ActivityIndicator, View } from "react-native";
 import { BusinessEditMainPage, BusinessEditInfoPage, BusinessEditLocationPage, NotificationsPage, BusinessAccountPage, BusinessEditProductListPage, BusinessEditProductCategoryPage, BusinessEditProductPage, ProductEditOptionTypePage, ProductEditOptionPage } from "./HelperFiles/PageIndex";
 import { MenuBar } from "./HelperFiles/CompIndex"
-import { styleValues } from "./HelperFiles/StyleSheet"
+import { styleValues, colors } from "./HelperFiles/StyleSheet"
 import { defaults, icons } from "./HelperFiles/StyleSheet";
 import { BusinessMainStack, CustomerMainStack } from "./HelperFiles/Navigation";
 import { initialWindowMetrics } from "react-native-safe-area-context";

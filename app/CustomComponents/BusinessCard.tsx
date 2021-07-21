@@ -1,7 +1,7 @@
 
 import React, { Component } from "react";
 import { View, TouchableOpacity, Image, Text, StyleSheet, ActivityIndicator } from "react-native";
-import { icons, styleValues } from "../HelperFiles/StyleSheet";
+import { icons, styleValues, colors } from "../HelperFiles/StyleSheet";
 import {  useNavigation } from "@react-navigation/native";
 import { PublicBusinessData } from "../HelperFiles/DataTypes";
 
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     },
     resultItemContainer: {
         backgroundColor: "#fff",
-        borderColor: styleValues.bordColor,
+        borderColor: colors.grayColor,
         borderRadius: styleValues.bordRadius,
         borderWidth: styleValues.minorBorderWidth,
         height: styleValues.winWidth * 0.25,

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { StyleSheet, StatusBar, AppState, ActivityIndicator, View } from "react-native";
 import BusinessShopScreen from "./BusinessShopScreen"
-import { defaults, icons, styleValues } from "../HelperFiles/StyleSheet";
+import { defaults, icons, styleValues, colors } from "../HelperFiles/StyleSheet";
 import { CustomerMainStack, CustomerTab } from "../HelperFiles/Navigation";
 import TabIcon from "../CustomComponents/TabIcon";
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -37,6 +37,8 @@ export default class CustomerTabScreen extends Component<Props, State> {
             tabBarOptions={{
               style: {...defaults.tabBar, ...{marginBottom: styleValues.mediumPadding}},
               showLabel: false,
+              activeTintColor: colors.darkColor,
+              inactiveTintColor: colors.lightGrayColor
             }}
             initialRouteName={"search"}
         >

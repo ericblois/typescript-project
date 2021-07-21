@@ -1,6 +1,6 @@
 import React, { Component, ReactNode } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity } from "react-native";
-import { styleValues, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
 import { MenuBar, PageContainer, ProductCard } from "../HelperFiles/CompIndex";
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { BusinessShopStackParamList, CustomerTabParamList } from "../HelperFiles/Navigation";
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
         height: styleValues.winWidth * 0.15,
         borderWidth: styleValues.minorBorderWidth,
         borderRadius: styleValues.mediumPadding,
-        borderColor: styleValues.bordColor,
+        borderColor: colors.grayColor,
     },
     barContent: {
         height: "100%",

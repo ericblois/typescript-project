@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Text, View, StyleSheet, TextStyle, GestureResponderEvent, ImageStyle, ViewStyle } from "react-native";
-import { defaults, styleValues } from "../HelperFiles/StyleSheet";
+import { defaults, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { Icon } from "react-native-elements";
 import { Switch } from "react-native-gesture-handler";
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
         padding: styleValues.mediumPadding,
         borderRadius: styleValues.bordRadius,
         borderWidth: styleValues.minorBorderWidth,
-        borderColor: styleValues.bordColor
+        borderColor: colors.grayColor
     },
     switch: {
 

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Image, StyleSheet, FlatList, Text, ImageStyle } from "react-native";
-import { defaults, icons, styleValues } from "../HelperFiles/StyleSheet";
+import { defaults, icons, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { useNavigation } from "@react-navigation/native";
 import { accessPhotos } from "../HelperFiles/ClientFunctions"
@@ -35,7 +35,7 @@ export default class TextInputPopup extends Component<Props, State> {
             <IconButton
                 iconSource={icons.checkBox}
                 buttonStyle={styles.saveButton}
-                iconStyle={{tintColor: styleValues.whiteColor}}
+                iconStyle={{tintColor: colors.whiteColor}}
                 buttonFunc={() => {
                     if (this.props.onSaveText) {
                         this.props.onSaveText(this.state.currentText)

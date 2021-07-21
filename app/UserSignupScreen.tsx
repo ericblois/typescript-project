@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { StyleSheet, StatusBar, AppState, ActivityIndicator, View, Text } from "react-native";
 import { CustomerInfoPage, AccountTypePage } from "./HelperFiles/PageIndex";
-import { defaults, icons, styleValues } from "./HelperFiles/StyleSheet";
+import { defaults, icons, styleValues, colors } from "./HelperFiles/StyleSheet";
 import { NavigationContainer, ParamListBase, Route } from "@react-navigation/native";
 import { RootStack, CustomerMainStack, RootStackParamList } from "./HelperFiles/Navigation";
 import { UserSignupStack, UserSignupStackParamList } from "./HelperFiles/Navigation";

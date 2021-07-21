@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { TouchableOpacity, Text, StyleSheet, TextStyle, ViewStyle, View, TextInput, KeyboardAvoidingView } from "react-native";
 import PropTypes from 'prop-types';
 import { NavigationProp, useNavigation } from "@react-navigation/native"
-import { styleValues, defaults } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults } from "../HelperFiles/StyleSheet";
 import CurrencyInput, { CurrencyInputProps } from "react-native-currency-input"
 import { LinearGradient } from "expo-linear-gradient"
 
@@ -21,7 +21,7 @@ export default class CurrencyInputBox extends Component<CurrencyInputBoxProps, S
     }
 
     render() {
-        const fadeoutColor = this.props.fadeColor ? this.props.fadeColor : styleValues.whiteColor
+        const fadeoutColor = this.props.fadeColor ? this.props.fadeColor : colors.whiteColor
         return (
             <LinearGradient
                 colors={[fadeoutColor, 'rgba(255,255,255,0)', 'rgba(255,255,255,0)', fadeoutColor]}
