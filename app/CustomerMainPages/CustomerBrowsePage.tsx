@@ -32,7 +32,7 @@ type State = {
     searchText: string,
     businessResults: PublicBusinessData[],
     showSearchResults: boolean,
-    loading: boolean
+    searchLoading: boolean
 }
 
 export default class CustomerBrowsePage extends Component<Props, State> {
@@ -43,7 +43,7 @@ export default class CustomerBrowsePage extends Component<Props, State> {
           searchText: "",
           businessResults: [],
           showSearchResults: false,
-          loading: false
+          searchLoading: false
         }
         props.navigation.addListener("focus", () => this.refreshData())
         this.refreshData()
@@ -58,19 +58,19 @@ export default class CustomerBrowsePage extends Component<Props, State> {
     onSubmit = (event: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {
       try {
         const search = event.nativeEvent.text;
-        this.setState({loading: true})
+        this.setState({searchLoading: true})
         // Get current position
         navigator.geolocation.getCurrentPosition(async (pos) => {
           const location = {latitude: pos.coords.latitude, longitude: pos.coords.longitude}
           const businesses = await ServerData.findLocalBusinessesInRange(getQueryTerms(search), location)
-          this.setState({businessResults: businesses, loading: false})
+          this.setState({businessResults: businesses, searchLoading: false})
         })
       } catch (e) {
         console.error(e);
       }
     }
 
-    renderBusinessCards(businesses: PublicBusinessData[]) {
+    renderSearchResults(businesses: PublicBusinessData[]) {
       if (this.state.businessResults.length > 0) {
         return (
           <FlatList
@@ -86,12 +86,19 @@ export default class CustomerBrowsePage extends Component<Props, State> {
                 />
               )
             }}
+            style={{
+              position: "absolute",
+              width: "100%",
+              top: defaults.inputBox.height + styleValues.mediumPadding,
+              bottom: defaults.tabBar.height + styleValues.mediumPadding*2,
+              backgroundColor: colors.whiteColor,
+            }}
           />
         )
-      } else if (this.state.loading) {
+      } else if (this.state.searchLoading) {
         return (
           <View
-            style={{flex: 1, alignItems: "center", justifyContent: "center"}}
+            style={{flex: 1, alignItems: "center", justifyContent: "center", position: "absolute"}}
           >
             <ActivityIndicator
               size={"large"}
@@ -112,6 +119,7 @@ export default class CustomerBrowsePage extends Component<Props, State> {
               businessIDs={this.state.userData.favorites}
               onCardPress={(publicData) => this.props.navigation.navigate("businessShop", {businessData: publicData})}
               showLoading={true}
+              style={{width: styleValues.winWidth, marginHorizontal: -styleValues.mediumPadding}}
             />
           </View>
         )
@@ -129,6 +137,7 @@ export default class CustomerBrowsePage extends Component<Props, State> {
               businessIDs={this.state.userData.favorites}
               onCardPress={(publicData) => this.props.navigation.navigate("businessShop", {businessData: publicData})}
               showLoading={true}
+              style={{width: styleValues.winWidth, marginHorizontal: -styleValues.mediumPadding}}
             />
           </View>
         )
@@ -146,6 +155,7 @@ export default class CustomerBrowsePage extends Component<Props, State> {
               businessIDs={this.state.userData.favorites}
               onCardPress={(publicData) => this.props.navigation.navigate("businessShop", {businessData: publicData})}
               showLoading={true}
+              style={{width: styleValues.winWidth, marginHorizontal: -styleValues.mediumPadding}}
             />
           </View>
         )
@@ -165,12 +175,14 @@ export default class CustomerBrowsePage extends Component<Props, State> {
                 onSubmitEditing: this.onSubmit
               }}
             ></TextInputBox>
-            <ScrollContainer>
+            <ScrollContainer style={{
+              width: styleValues.winWidth
+            }}>
               {this.renderFavorites()}
               {this.renderFeaturedBusinesses()}
               {this.renderPopularBusinesses()}
             </ScrollContainer>
-            {this.renderBusinessCards(this.state.businessResults)}
+            {this.renderSearchResults(this.state.businessResults)}
           </PageContainer>
       );
     }

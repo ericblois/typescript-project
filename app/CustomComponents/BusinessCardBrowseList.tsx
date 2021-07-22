@@ -1,6 +1,6 @@
 
 import React, { Component } from "react";
-import { View, TouchableOpacity, Image, Text, StyleSheet, GestureResponderEvent, FlatList, ActivityIndicator } from "react-native";
+import { View, TouchableOpacity, Image, Text, StyleSheet, GestureResponderEvent, FlatList, ActivityIndicator, ViewStyle } from "react-native";
 import { defaults, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { productPropType, currency } from "../HelperFiles/Constants";
@@ -8,10 +8,11 @@ import RatingVisual from "./RatingVisual";
 import { useNavigation } from "@react-navigation/native";
 import { CartItem, ProductCategory, ProductData, PublicBusinessData } from "../HelperFiles/DataTypes";
 import ProductCard from "./ProductCard";
-import { BusinessCard, ProductCartCard } from "../HelperFiles/CompIndex";
+import { BusinessCard, ItemList, ProductCartCard } from "../HelperFiles/CompIndex";
 
 type Props = {
     businessIDs: string[],
+    style?: ViewStyle,
     showLoading?: boolean,
     onCardPress?: (publicData: PublicBusinessData) => void,
     onLoadEnd?: () => void,
@@ -79,14 +80,15 @@ export default class ProductCardList extends Component<Props, State> {
 
     renderUI() {
         return (
-            <FlatList
-            data={this.props.businessIDs}
-            keyExtractor={(item) => (item)}
-            renderItem={({item}) => {
-                return this.renderBusinessCard(item)
-            }}
-            style={{width: "100%"}}
-            contentContainerStyle={styles.cardList}
+            <ItemList
+                data={this.props.businessIDs}
+                keyExtractor={(item) => (item)}
+                renderItem={({item}) => {
+                    return this.renderBusinessCard(item)
+                }}
+                style={this.props.style}
+                contentContainerStyle={styles.cardList}
+                horizontal={true}
             />
         )
     }

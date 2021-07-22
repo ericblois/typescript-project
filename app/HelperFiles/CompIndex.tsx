@@ -21,6 +21,7 @@ import GradientView from "../CustomComponents/GradientView";
 import BusinessCard from "../CustomComponents/BusinessCard";
 import BusinessCardBrowseList from "../CustomComponents/BusinessCardBrowseList";
 import BusinessResult from "../CustomComponents/BusinessResult";
+import ItemList from "../CustomComponents/ItemList";
 
 export {
     MenuBar,
@@ -45,5 +46,6 @@ export {
     GradientView,
     BusinessCard,
     BusinessCardBrowseList,
-    BusinessResult
+    BusinessResult,
+    ItemList
 };

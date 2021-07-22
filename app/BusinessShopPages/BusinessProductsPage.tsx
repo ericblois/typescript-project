@@ -79,7 +79,7 @@ export default class BusinessProducts extends Component<Props, State> {
                 {this.renderCategoryBar()}
                 <MenuBar
                     buttonProps={[
-                        {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.navigate("search")}},
+                        {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.navigate("browse")}},
                         {iconSource: icons.document, buttonFunc: () => {this.props.navigation.navigate("info")}},
                         {iconSource: icons.shoppingCart, buttonFunc: () => {this.props.navigation.navigate("products")}},
                         {iconSource: icons.message, buttonFunc: () => {console.log("Chat button")}}
