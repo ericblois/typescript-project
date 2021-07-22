@@ -42,7 +42,7 @@ export default class ScrollContainer extends Component<Props, State> {
                 >
                     <ScrollView
                         style={{width: "100%", height: "100%"}}
-                        contentContainerStyle={{paddingTop: styleValues.mediumPadding, width: "100%"}}
+                        contentContainerStyle={{paddingVertical: styleValues.mediumPadding, width: "100%"}}
                         showsVerticalScrollIndicator={false}
                         showsHorizontalScrollIndicator={false}
                         {...this.props.scrollProps}

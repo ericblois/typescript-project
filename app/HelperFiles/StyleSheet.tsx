@@ -62,6 +62,7 @@ export const colors = {
   blackColor: "#000",
   validColor: "#2CB557",
   invalidColor: "#DD404B",
+  yellowColor: "#FFCF56"
 }
 
 export const styleValues = {
@@ -276,6 +277,7 @@ export const defaults = StyleSheet.create({
 export const icons = {
   backArrow: require("../../assets/backArrowIcon.png"),
   star: require("../../assets/starIcon.png"),
+  hollowStar: require("../../assets/starHollowIcon.png"),
   search: require("../../assets/searchIcon.png"),
   lines: require("../../assets/linesIcon.png"),
   profile: require("../../assets/profileIcon.png"),

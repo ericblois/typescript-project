@@ -9,6 +9,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { CustomerMainStackParamList } from "../HelperFiles/Navigation";
 import { RouteProp } from '@react-navigation/native';
 import CustomerCartPage from "./CustomerCartPage";
+import { PublicBusinessData } from "../HelperFiles/DataTypes";
+import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
 
 type BusinessShopNavigationProp = StackNavigationProp<CustomerMainStackParamList, "businessShop">;
 
@@ -19,11 +21,13 @@ type Props = {
     route: BusinessShopRouteProp
 }
 
-type State = {}
+type State = {
+  businessData: PublicBusinessData
+}
 
 export default class BusinessShopScreen extends Component<Props, State> {
 
-    businessData = this.props.route.params.businessData;
+    businessData = this.props.route.params.businessData
 
     render() {
         return (

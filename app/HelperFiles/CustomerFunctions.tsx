@@ -49,6 +49,45 @@ export abstract class CustomerFunctions {
             throw e
         }
     }
+    // Get list of favorite businesses (by their ID)
+    public static async getFavorites() {
+        try {
+            const userData = await UserFunctions.getUserDoc()
+            return userData.favorites
+        } catch (e) {
+            throw e
+        }
+    }
+    // Add a business to favorites
+    public static async addToFavorites(businessID: string) {
+        try {
+            const userData = await UserFunctions.getUserDoc()
+            let newFavorites = userData.favorites
+            if (!newFavorites.includes(businessID)) {
+                newFavorites.push(businessID)
+                await UserFunctions.updateUserDoc({favorites: newFavorites})
+            }
+        } catch (e) {
+            throw e
+        }
+    }
+    // Delete a favorite business
+    public static async deleteFavorite(businessID: string) {
+        try {
+            const userData = await UserFunctions.getUserDoc()
+            let newFavorites = userData.favorites
+            const favIndex = newFavorites.findIndex((id) => {
+                return id === businessID
+            })
+            if (favIndex < 0) {
+                throw new Error("Could not find a favourite with the ID: ".concat(businessID))
+            }
+            newFavorites.splice(favIndex, 1)
+            await UserFunctions.updateUserDoc({favorites: newFavorites})
+        } catch (e) {
+            throw e
+        }
+    }
 
     public static async getCart(businessID?: string) {
         try {

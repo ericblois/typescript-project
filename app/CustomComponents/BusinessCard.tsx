@@ -4,99 +4,124 @@ import { View, TouchableOpacity, Image, Text, StyleSheet, ActivityIndicator } fr
 import { icons, styleValues, colors } from "../HelperFiles/StyleSheet";
 import {  useNavigation } from "@react-navigation/native";
 import { PublicBusinessData } from "../HelperFiles/DataTypes";
+import { IconButton } from "../HelperFiles/CompIndex";
+import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
 
 type Props = {
-  businessData: PublicBusinessData,
-  onPress?: () => void
+  businessID: string,
+  onPress?: () => void,
+  onLoadEnd?: (publicData: PublicBusinessData) => void
 }
 
-type State = {}
+type State = {
+  businessData?: PublicBusinessData,
+  imageLoaded: boolean,
+}
 
-export default class SearchResultItem extends Component<Props, State> {
+export default class BusinessCard extends Component<Props, State> {
 
-    render() {
+    constructor(props: Props) {
+      super(props)
+      this.state = {
+        businessData: undefined,
+        imageLoaded: false,
+      }
+      this.refreshData()
+    }
+
+    async refreshData() {
+      CustomerFunctions.getPublicBusinessData(this.props.businessID).then((publicData) => {
+        this.setState({businessData: publicData})
+      })
+    }
+
+    renderUI() {
+      if (this.state.businessData) {
         return (
-          <TouchableOpacity style={styles.resultItemContainer} onPress={this.props.onPress}>
-            <View>
+          <TouchableOpacity style={styles.cardContainer} onPress={this.props.onPress}>
             <Image
-                style={styles.resultImage}
+                style={styles.galleryImage}
                 resizeMethod={"scale"}
                 resizeMode={"cover"}
-                source={this.props.businessData.profileImage !== "" ? {uri: this.props.businessData.profileImage} : icons.profile}
+                source={this.state.businessData.galleryImages[0] ? {uri: this.state.businessData.galleryImages[0]} : icons.profile}
+                onLoadEnd={() => {
+                  this.setState({imageLoaded: true})
+                  if (this.props.onLoadEnd) {
+                    this.props.onLoadEnd(this.state.businessData!)
+                  }
+                }}
             />
-            </View>
-            <View style={styles.resultInfoContainer}>
-            <View style={styles.resultUpperInfo}>
-                <Text style={styles.resultName}>{this.props.businessData.name}</Text>
-                <Text style={styles.resultType}>{this.props.businessData.businessType}</Text>
-            </View>
-            <View style={styles.resultLowerInfo}>
-                <Text>{this.props.businessData.totalRating}</Text>
-                <TouchableOpacity onPress={() => useNavigation().navigate("business", {businessData: this.props.businessData})}>
-                <Image
-                    style={styles.favButton}
-                    resizeMethod={"scale"}
-                    resizeMode={"contain"}
-                    source={require("../../assets/hollowStarIcon.png")}
-                />
-                </TouchableOpacity>
-            </View>
+            <Text style={styles.nameText}>{this.state.businessData.name}</Text>
+            <View style={styles.rowContainer}>
+              <Text style={styles.typeText}>{this.state.businessData.businessType}</Text>
             </View>
 
           </TouchableOpacity>
         );
+      }
+    }
+
+    renderLoading() {
+      if (!this.state.businessData || !this.state.imageLoaded) {
+        return (
+          <View
+            style={{...styles.cardContainer, ...{
+              position: "absolute",
+              alignItems: "center",
+              justifyContent: "center",
+              top: 0, 
+              left: 0
+            }}}
+          >
+            <ActivityIndicator
+              size={"small"}
+            />
+          </View>
+        )
+      }
+    }
+
+    render() {
+      return (
+        <View>
+          {this.renderUI()}
+          {this.renderLoading()}
+        </View>
+      )
     }
 }
 
 const styles = StyleSheet.create({
-    loadingScreen: {
-      position: "absolute",
-      top: 0,
+    cardContainer: {
       backgroundColor: "#fff",
-      width: "100%",
-      height: "100%",
+      borderColor: colors.grayColor,
+      borderRadius: styleValues.bordRadius,
+      borderWidth: styleValues.minorBorderWidth,
+      height: styleValues.winWidth * 0.6,
+      width: styleValues.winWidth * 0.6,
+      padding: styleValues.minorPadding,
+      justifyContent: "space-between",
     },
-    resultItemContainer: {
-        backgroundColor: "#fff",
-        borderColor: colors.grayColor,
-        borderRadius: styleValues.bordRadius,
-        borderWidth: styleValues.minorBorderWidth,
-        height: styleValues.winWidth * 0.25,
-        width: styleValues.winWidth * 0.95,
-        marginTop: styleValues.mediumPadding,
-        padding: styleValues.minorPadding,
-        flexDirection: "row",
-        justifyContent: "space-between",
-      },
-      resultInfoContainer: {
-        flex: 1,
-        marginLeft: "1%",
-      },
-      resultName: {
-        fontSize: styleValues.mediumTextSize,
-        color: styleValues.majorTextColor,
-      },
-      resultUpperInfo: {
-        flex: 2,
-      },
-      resultLowerInfo: {
-        flex: 1,
-        flexDirection: "row",
-        alignItems: "baseline",
-        justifyContent: "space-between",
-      },
-      resultType: {
-        fontSize: styleValues.smallestTextSize,
-        color: styleValues.minorTextColor,
-      },
-      resultImage: {
-        aspectRatio: 1,
-        flex: 1,
-        borderRadius: styleValues.bordRadius / 1.5,
-      },
-      favButton: {
-        height: "100%",
-        aspectRatio: 1,
-        tintColor: "black",
-      },
+    galleryImage: {
+      flex: 1,
+      height: "75%",
+      borderRadius: styleValues.bordRadius / 1.5,
+    },
+    infoContainer: {
+      width: "100%"
+    },
+    rowContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      width: "100%"
+    },
+    nameText: {
+      fontSize: styleValues.mediumTextSize,
+      color: styleValues.majorTextColor,
+    },
+    typeText: {
+      fontSize: styleValues.smallTextSize,
+      color: styleValues.minorTextColor,
+    },
 })

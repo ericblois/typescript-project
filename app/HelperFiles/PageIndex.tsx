@@ -1,4 +1,4 @@
-import SearchPage from "../CustomerMainPages/SearchPage";
+import CustomerBrowsePage from "../CustomerMainPages/CustomerBrowsePage";
 import FavouritesPage from "../CustomerMainPages/FavouritesPage";
 import NotificationsPage from "../CustomerMainPages/NotificationsPage";
 import CustomerAccountPage from "../CustomerMainPages/CustomerAccountPage";
@@ -24,7 +24,7 @@ import CustomerTabScreen from "../CustomerMainPages/CustomerTabScreen"
 
 
 export { 
-    SearchPage,
+    CustomerBrowsePage,
     FavouritesPage,
     NotificationsPage,
     CustomerAccountPage,

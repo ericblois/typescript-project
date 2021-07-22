@@ -19,6 +19,8 @@ import ScrollContainer from "../CustomComponents/ScrollContainer"
 import CurrencyInputBox from "../CustomComponents/CurrencyInputBox";
 import GradientView from "../CustomComponents/GradientView";
 import BusinessCard from "../CustomComponents/BusinessCard";
+import BusinessCardBrowseList from "../CustomComponents/BusinessCardBrowseList";
+import BusinessResult from "../CustomComponents/BusinessResult";
 
 export {
     MenuBar,
@@ -41,5 +43,7 @@ export {
     ScrollContainer,
     CurrencyInputBox,
     GradientView,
-    BusinessCard
+    BusinessCard,
+    BusinessCardBrowseList,
+    BusinessResult
 };

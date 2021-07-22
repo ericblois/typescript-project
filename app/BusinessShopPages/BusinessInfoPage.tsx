@@ -2,13 +2,14 @@ import React, { Component } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, ScrollView } from "react-native";
 import PropTypes from 'prop-types';
 import { defaults, icons, styleValues, colors } from "../HelperFiles/StyleSheet";
-import { ImageSlider, MenuBar, PageContainer, RatingVisual, ScrollContainer } from "../HelperFiles/CompIndex";
+import { IconButton, ImageSlider, MenuBar, PageContainer, RatingVisual, ScrollContainer } from "../HelperFiles/CompIndex";
 import { businessPropType, formatText } from "../HelperFiles/Constants";
 import { PublicBusinessData } from "../HelperFiles/DataTypes"
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { BusinessShopStackParamList, CustomerMainStackParamList, CustomerTabParamList } from "../HelperFiles/Navigation";
 import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from "@react-navigation/stack";
+import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
 
 type BusinessInfoNavigationProp = CompositeNavigationProp<
     StackNavigationProp<BusinessShopStackParamList, "info">,
@@ -24,7 +25,8 @@ type Props = {
 }
 
 type State = {
-    loaded: boolean
+    loaded: boolean,
+    favorited: boolean
 }
 
 export default class BusinessInfoPage extends Component<Props, State> {
@@ -34,9 +36,12 @@ export default class BusinessInfoPage extends Component<Props, State> {
     constructor(props: Props) {
         super(props)
         this.state = {
-            loaded: false
+            loaded: false,
+            favorited: false
         }
     }
+
+
 
     displayLoadingScreen() {
         if (!this.state.loaded) {
@@ -72,6 +77,20 @@ export default class BusinessInfoPage extends Component<Props, State> {
                     <View style={styles.subHeader}>
                         <Text style={styles.businessLocation}>{this.props.businessData.city + ", " + this.props.businessData.region}</Text>
                         <RatingVisual rating={this.props.businessData.totalRating}/>
+                        <IconButton
+                            iconSource={this.state.favorited ? icons.star : icons.hollowStar}
+                            buttonStyle={styles.favButton}
+                            iconStyle={{tintColor: this.state.favorited ? colors.mainColor : colors.grayColor}}
+                            buttonFunc={async () => {
+                            if (!this.state.favorited) {
+                                await CustomerFunctions.addToFavorites(this.props.businessData.businessID)
+                                this.setState({favorited: true})
+                            } else {
+                                await CustomerFunctions.deleteFavorite(this.props.businessData.businessID)
+                                this.setState({favorited: false})
+                            }
+                            }}
+                        />
                     </View>
                 </View>
                 <View style={styles.descriptionBody}>
@@ -81,7 +100,7 @@ export default class BusinessInfoPage extends Component<Props, State> {
             </ScrollContainer>
             <MenuBar
                 buttonProps={[
-                    {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.navigate("search")}},
+                    {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.navigate("browse")}},
                     {iconSource: icons.document, buttonFunc: () => {this.props.navigation.navigate("info")}},
                     {iconSource: icons.shoppingCart, buttonFunc: () => {this.props.navigation.navigate("products")}},
                     {iconSource: icons.message, buttonFunc: () => {console.log("Chat button")}}
@@ -138,6 +157,10 @@ const styles = StyleSheet.create({
     businessLocation: {
         fontSize: styleValues.smallTextSize,
         color: styleValues.minorTextColor,
+    },
+    favButton: {
+        width: "15%",
+        aspectRatio: 1,
     },
     description: {
         fontSize: styleValues.smallTextSize,

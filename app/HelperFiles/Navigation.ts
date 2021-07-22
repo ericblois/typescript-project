@@ -25,7 +25,7 @@ export type CustomerMainStackParamList = {
 export const CustomerMainStack = createStackNavigator<CustomerMainStackParamList>();
 
 export type CustomerTabParamList = {
-    search: undefined,
+    browse: undefined,
     fav: undefined,
     notif: undefined,
     orders: undefined,

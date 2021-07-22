@@ -9,7 +9,7 @@ import { RootStackParamList } from "../HelperFiles/Navigation";
 import { RouteProp } from '@react-navigation/native';
 import { CustomerMainStackParamList } from "../HelperFiles/Navigation";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
-import SearchPage from "./SearchPage";
+import CustomerBrowsePage from "./CustomerBrowsePage";
 import FavouritesPage from "./FavouritesPage";
 import NotificationsPage from "./NotificationsPage";
 import CustomerAccountPage from "./CustomerAccountPage";
@@ -40,15 +40,8 @@ export default class CustomerTabScreen extends Component<Props, State> {
               activeTintColor: colors.darkColor,
               inactiveTintColor: colors.lightGrayColor
             }}
-            initialRouteName={"search"}
+            initialRouteName={"browse"}
         >
-            <CustomerTab.Screen
-                name={"search"}
-                component={SearchPage}
-                options={{
-                  tabBarIcon: (options) => <TabIcon iconSource={icons.search} options={options}/>
-                }}
-            />
             <CustomerTab.Screen
                 name={"fav"} 
                 component={FavouritesPage}
@@ -61,6 +54,13 @@ export default class CustomerTabScreen extends Component<Props, State> {
                 component={NotificationsPage}
                 options={{
                   tabBarIcon: (options) => <TabIcon iconSource={icons.lines} options={options}/>
+                }}
+            />
+            <CustomerTab.Screen
+                name={"browse"}
+                component={CustomerBrowsePage}
+                options={{
+                  tabBarIcon: (options) => <TabIcon iconSource={icons.store} options={options}/>
                 }}
             />
             <CustomerTab.Screen

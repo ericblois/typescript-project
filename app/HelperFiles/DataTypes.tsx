@@ -32,6 +32,7 @@ export type UserData = {
   country: Country,
   shippingAddresses: ShippingInfo[],
   cartItems: CartItem[],
+  favorites: string[],
   businessIDs: string[]
 }
 
@@ -45,6 +46,7 @@ export const DefaultUserData: UserData = {
   country: "",
   shippingAddresses: [],
   cartItems: [],
+  favorites: [],
   businessIDs: []
 }
 

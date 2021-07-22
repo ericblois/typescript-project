@@ -139,32 +139,4 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
     },
-    productImage: {
-        height: "100%",
-        aspectRatio: 1,
-        borderRadius: styleValues.minorPadding,
-        marginRight: styleValues.minorPadding
-    },
-    productInfoArea: {
-        height: "100%",
-        flex: 1,
-    },
-    productName: {
-        fontSize: styleValues.mediumTextSize
-    },
-    productDescription: {
-        fontSize: styleValues.smallestTextSize,
-        color: styleValues.minorTextColor
-    },
-    productPrice: {
-        fontSize: styleValues.smallTextSize
-    },
-    productSubInfoArea: {
-        width: "100%",
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "flex-end",
-        position: "absolute",
-        bottom: 0
-    }
 })
