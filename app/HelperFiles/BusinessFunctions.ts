@@ -1,7 +1,7 @@
-import { PrivateBusinessData, ProductCategory, ProductData, PublicBusinessData, UserData } from "./DataTypes"
+import { OrderData, PrivateBusinessData, ProductCategory, ProductData, PublicBusinessData, UserData } from "./DataTypes"
 import ServerData from "./ServerData"
 import UserFunctions from "./UserFunctions"
-import { firestore, storage } from "./Constants"
+import { firestore, storage, functions } from "./Constants"
 import uuid from 'react-native-uuid';
 import { getCompressedImage } from "./ClientFunctions"
 
@@ -265,6 +265,59 @@ export class BusinessFunctions {
             await Promise.all(downloadURLs.map((downloadURL) => {
                 return ServerData.deleteFile(downloadURL)
             }))
+        } catch (e) {
+            throw e
+        }
+    }
+
+    public async getOrders(types?: OrderData["status"][]) {
+        try {
+            const privateData = await this.getPrivateData()
+            const ordersColPath = `privateBusinessData/${privateData.country}/businesses/${privateData.businessID}/orders`
+            const ordersColRef = firestore.collection(ordersColPath)
+            if (types) {
+                const ordersQuery = await ordersColRef.where("status", "in", types).get()
+                const orders = ordersQuery.docs.map((snap) => {
+                    return snap.data() as OrderData
+                })
+                return orders
+            } else {
+                const ordersQuery = await ordersColRef.get()
+                const orders = ordersQuery.docs.map((snap) => {
+                    return snap.data() as OrderData
+                })
+                return orders
+            }
+        } catch (e) {
+            throw e
+        }
+    }
+
+    public async respondToOrder(businessID: string, orderID: string, acceptOrder: boolean) {
+        try {
+            const orderInfo = {
+                businessID: businessID,
+                orderID: orderID,
+                acceptOrder: acceptOrder
+            }
+            const respondToOrder = functions.httpsCallable("respondToOrder")
+            const result = await respondToOrder(orderInfo)
+            return result.data
+        } catch (e) {
+            throw e
+        }
+    }
+
+    public async completeOrder(businessID: string, orderID: string, shipped: boolean) {
+        try {
+            const orderInfo = {
+                businessID: businessID,
+                orderID: orderID,
+                shipped: shipped
+            }
+            const completeOrder = functions.httpsCallable("completeOrder")
+            const result = await completeOrder(orderInfo)
+            return result.data
         } catch (e) {
             throw e
         }

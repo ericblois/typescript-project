@@ -23,6 +23,7 @@
     "firebase": "8.2.3",
     "geofire-common": "^5.2.0",
     "keyword-extractor": "0.0.20",
+    "order-id": "^2.1.1",
     "pluralize": "^8.0.0",
     "react": "16.13.1",
     "react-dom": "16.13.1",

@@ -1,7 +1,7 @@
-import { CartItem, PrivateBusinessData, ProductCategory, ProductData, PublicBusinessData, UserData } from "./DataTypes"
+import { CartItem, OrderData, PrivateBusinessData, ProductCategory, ProductData, PublicBusinessData, ShippingInfo, UserData } from "./DataTypes"
 import ServerData from "./ServerData"
 import UserFunctions from "./UserFunctions"
-import { firestore, storage } from "./Constants"
+import { firestore, functions, storage } from "./Constants"
 import uuid from 'react-native-uuid';
 import { getCompressedImage } from "./ClientFunctions"
 
@@ -192,6 +192,46 @@ export abstract class CustomerFunctions {
             // Update the cart
             cart.splice(itemIndex, 1)
             UserFunctions.updateUserDoc({cartItems: cart})
+        } catch (e) {
+            throw e
+        }
+    }
+
+    public async getOrders(types?: OrderData["status"][]) {
+        try {
+            const currentUser = await UserFunctions.getCurrentUser()
+            const ordersColPath = `userData/${currentUser.uid}/orders`
+            const ordersColRef = firestore.collection(ordersColPath)
+            if (types) {
+                const ordersQuery = await ordersColRef.where("status", "in", types).get()
+                const orders = ordersQuery.docs.map((snap) => {
+                    return snap.data() as OrderData
+                })
+                return orders
+            } else {
+                const ordersQuery = await ordersColRef.get()
+                const orders = ordersQuery.docs.map((snap) => {
+                    return snap.data() as OrderData
+                })
+                return orders
+            }
+        } catch (e) {
+            throw e
+        }
+    }
+
+    public static async placeOrder(businessID: string, cartItems: CartItem[], shippingInfo: ShippingInfo, deliveryMethod: OrderData["deliveryMethod"], deliveryPrice: number) {
+        try {
+            const orderData = {
+                businessID: businessID,
+                cartItems: cartItems,
+                shippingInfo: shippingInfo,
+                deliveryMethod: deliveryMethod,
+                deliveryPrice: deliveryPrice
+            }
+            const createOrder = functions.httpsCallable("createOrder")
+            const result = await createOrder(orderData)
+            return result.data
         } catch (e) {
             throw e
         }

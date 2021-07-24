@@ -4,7 +4,7 @@ export type ShippingInfo = {
     name: string,
     streetAddress: string,
     city: string,
-    region?: string,
+    region: string | null,
     country: string,
     postalCode: string
 }
@@ -20,6 +20,21 @@ export type CartItem = {
   basePrice: number,
   totalPrice: number,
   quantity: number,
+}
+
+export type OrderData = {
+  businessID: string,
+  userID: string,
+  orderID: string,
+  cartItems: CartItem[],
+  subtotalPrice: number,
+  totalPrice: number,
+  deliveryMethod: "pickup" | "local" | "country" | "international",
+  deliveryPrice: number,
+  creationTime: string,
+  responseTime: string | null,
+  completionTime: string | null,
+  status: "pending" | "accepted" | "rejected" | "shipped" | "completed"
 }
 
 export type UserData = {

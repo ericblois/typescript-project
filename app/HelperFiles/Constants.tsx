@@ -6,6 +6,7 @@ import { Image } from "react-native";
 import * as geofireSource from "geofire-common"
 //import * as functionsSource from "firebase-functions"
 //import * as adminSource from "firebase-admin"
+import "firebase/functions";
 
 //const functionsSource = require("firebase-functions")
 
@@ -41,7 +42,11 @@ export const firestore = firebase.default.firestore();
 
 export const storage = firebase.default.storage();
 
+export const functions = firebase.default.functions();
+
 export const geofire = geofireSource
+
+
 
 export const currencyFormatter = new Intl.NumberFormat("en-CA", {
     style: "currency",
