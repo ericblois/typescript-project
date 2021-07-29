@@ -1,7 +1,7 @@
 
 import React, { Component } from "react";
 import { View, TouchableOpacity, Image, Text, StyleSheet, ActivityIndicator } from "react-native";
-import { icons, styleValues, colors } from "../HelperFiles/StyleSheet";
+import { icons, styleValues, colors, defaults, textStyles, buttonStyles, } from "../HelperFiles/StyleSheet";
 import {  useNavigation } from "@react-navigation/native";
 import { PublicBusinessData } from "../HelperFiles/DataTypes";
 import { IconButton } from "../HelperFiles/CompIndex";
@@ -43,7 +43,7 @@ export default class BusinessResult extends Component<Props, State> {
                 <Text style={styles.resultType}>{this.props.businessData.businessType}</Text>
             </View>
             <View style={styles.resultLowerInfo}>
-                <Text>{this.props.businessData.totalRating}</Text>
+                <Text style={textStyles.small}>{`${this.props.businessData.totalRating}%`}</Text>
                 <IconButton
                   iconSource={this.state.favorited ? icons.star : icons.hollowStar}
                   buttonStyle={styles.favButton}
@@ -91,8 +91,8 @@ const styles = StyleSheet.create({
         marginLeft: "1%",
       },
       resultName: {
-        fontSize: styleValues.mediumTextSize,
-        color: styleValues.majorTextColor,
+        ...textStyles.medium,
+        textAlign: "left",
       },
       resultUpperInfo: {
         flex: 2,
@@ -104,7 +104,8 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
       },
       resultType: {
-        fontSize: styleValues.smallestTextSize,
+        ...textStyles.small,
+        textAlign: "left",
         color: styleValues.minorTextColor,
       },
       resultImage: {

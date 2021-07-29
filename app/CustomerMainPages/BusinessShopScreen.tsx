@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import { View, StyleSheet, Text } from "react-native";
 import { BusinessShopStack } from "../HelperFiles/Navigation";
 import PropTypes from 'prop-types';
-import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
-import { IconButton, TabIcon } from "../HelperFiles/CompIndex";
+import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
+import { IconButton, MenuBar, TabIcon } from "../HelperFiles/CompIndex";
 import { BusinessInfoPage, BusinessProductsPage, ProductShopPage } from "../HelperFiles/PageIndex";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { CustomerMainStackParamList } from "../HelperFiles/Navigation";
@@ -11,6 +11,7 @@ import { RouteProp } from '@react-navigation/native';
 import CustomerCartPage from "./CustomerCartPage";
 import { PublicBusinessData } from "../HelperFiles/DataTypes";
 import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
+import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 
 type BusinessShopNavigationProp = StackNavigationProp<CustomerMainStackParamList, "businessShop">;
 
@@ -33,10 +34,7 @@ export default class BusinessShopScreen extends Component<Props, State> {
         return (
           <BusinessShopStack.Navigator
             initialRouteName={"info"}
-            screenOptions={(props) => ({
-              headerStatusBarHeight: 0,
-              headerShown: false,
-            })}
+            headerMode={"none"}
           >
             <BusinessShopStack.Screen
                 name={"info"}

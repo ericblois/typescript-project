@@ -1,7 +1,7 @@
 import React, { Component, ReactNode } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity } from "react-native";
-import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
-import { MenuBar, PageContainer, ProductCard } from "../HelperFiles/CompIndex";
+import { styleValues, colors, defaults, textStyles, buttonStyles, icons, menuBarHeight } from "../HelperFiles/StyleSheet";
+import { ItemList, MenuBar, PageContainer, ProductCard } from "../HelperFiles/CompIndex";
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { BusinessShopStackParamList, CustomerTabParamList } from "../HelperFiles/Navigation";
 import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
@@ -39,21 +39,31 @@ export default class BusinessProducts extends Component<Props, State> {
         }
     }
 
+    renderCategorySeperator(index: number) {
+        return index === 0 ? undefined : (
+            <View
+                style={{width: styleValues.mediumPadding*3}}
+            />
+        )
+    }
+
     renderCategoryBar() {
         return (
-            <FlatList
+            <ItemList
                 style={styles.categoryBar}
                 data={this.props.businessData.productList}
                 horizontal={true}
                 keyExtractor={(item, index) => index.toString()}
-                ItemSeparatorComponent={() => <View style={{width: styleValues.mediumPadding*3}}/>}
                 renderItem={({item, index}) => (
-                    <TouchableOpacity
-                        style={styles.barContent}
-                        onPress={() => this.setState({currentCategory: item})}
-                    >
-                        <Text style={styles.barText}>{item.name}</Text>
-                    </TouchableOpacity>
+                    <View style={{flexDirection: "row", height: "100%"}}>
+                        {this.renderCategorySeperator(index!)}
+                        <TouchableOpacity
+                            style={styles.barContent}
+                            onPress={() => this.setState({currentCategory: item})}
+                        >
+                            <Text style={textStyles.large}>{item.name}</Text>
+                        </TouchableOpacity>
+                    </View>
                 )}
             />
         )
@@ -62,7 +72,11 @@ export default class BusinessProducts extends Component<Props, State> {
     render() {
         // Check if page is loaded
         return (
-            <PageContainer>
+            <PageContainer
+                style={{
+                    paddingBottom: menuBarHeight*2
+                }}
+            >
                 <ProductCardList
                     products={this.state.currentCategory.productIDs.map((productID) => {
                         return {
@@ -74,6 +88,7 @@ export default class BusinessProducts extends Component<Props, State> {
                             })
                         }
                     })}
+                    scrollable
                     showLoading
                 />
                 {this.renderCategoryBar()}
@@ -81,8 +96,11 @@ export default class BusinessProducts extends Component<Props, State> {
                     buttonProps={[
                         {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.navigate("browse")}},
                         {iconSource: icons.document, buttonFunc: () => {this.props.navigation.navigate("info")}},
-                        {iconSource: icons.shoppingCart, buttonFunc: () => {this.props.navigation.navigate("products")}},
-                        {iconSource: icons.message, buttonFunc: () => {console.log("Chat button")}}
+                        {
+                            iconSource: icons.shoppingCart,
+                            buttonFunc: () => {this.props.navigation.navigate("products")},
+                            iconStyle: {tintColor: colors.mainColor}
+                        },
                     ]}
                 />
             </PageContainer>
@@ -92,13 +110,13 @@ export default class BusinessProducts extends Component<Props, State> {
 
 const styles = StyleSheet.create({
     categoryBar: {
-        position: "absolute",
-        bottom: styleValues.winWidth * 0.15 + styleValues.mediumPadding*2,
         width: styleValues.winWidth - styleValues.mediumPadding*2,
-        height: styleValues.winWidth * 0.15,
-        borderWidth: styleValues.minorBorderWidth,
-        borderRadius: styleValues.mediumPadding,
-        borderColor: colors.grayColor,
+        position: "absolute",
+        bottom: menuBarHeight,
+        padding: 0,
+        paddingVertical: styleValues.mediumPadding,
+        borderBottomWidth: styleValues.minorBorderWidth,
+        borderColor: colors.lightGrayColor,
     },
     barContent: {
         height: "100%",

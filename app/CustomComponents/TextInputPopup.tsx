@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Image, StyleSheet, FlatList, Text, ImageStyle } from "react-native";
-import { defaults, icons, styleValues, colors } from "../HelperFiles/StyleSheet";
+import { defaults, textStyles, buttonStyles, icons, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { useNavigation } from "@react-navigation/native";
 import { accessPhotos } from "../HelperFiles/ClientFunctions"
@@ -56,7 +56,7 @@ export default class TextInputPopup extends Component<Props, State> {
                 >
                     <TextInputBox
                         {...this.props.textInputProps}
-                        style={{...defaults.textButtonNoColor, ...styles.textInput}}
+                        style={{...buttonStyles.noColor, ...styles.textInput}}
                         textProps={{...{
                             onChangeText: (text) => {
                                 this.setState({currentText: text})

@@ -1,4 +1,4 @@
-import { auth, firestore } from "./Constants"
+import { auth, firestore, functions } from "./Constants"
 import { Country, DefaultPrivateBusinessData, DefaultPublicBusinessData, PrivateBusinessData, PublicBusinessData, UserData } from "./DataTypes"
 import ServerData from "./ServerData"
 
@@ -56,44 +56,10 @@ export default abstract class UserFunctions {
     // Create a new business, returns business ID
     static async createNewBusiness() {
         try {
-            // Get user's data
-            const userData = (await UserFunctions.getUserDoc()) as UserData
-            const userID = UserFunctions.getCurrentUser().uid
-            // Create a new document for the private data
-            const privateDocPath = "/userData/".concat(userID).concat("/businesses")
-            const privateColRef = firestore.collection(privateDocPath)
-            const privateDocRef = privateColRef.doc()
-            const businessID = privateDocRef.id
-            // Create initial private business data
-            let privateBusinessData: PrivateBusinessData = {...DefaultPrivateBusinessData, ...{
-                userID: userID,
-                businessID: businessID,
-                country: userData.country
-            }}
-            // Create initial public data
-            let publicBusinessData: PublicBusinessData = {...DefaultPublicBusinessData, ...{
-                userID: userID,
-                businessID: businessID,
-                country: userData.country
-            }}
-            // Create a new document for the public data
-            const publicDocPath = "/publicBusinessData/".concat(userData.country).concat("/businesses")
-            const publicColRef = firestore.collection(publicDocPath)
-            const publicDocRef = publicColRef.doc(businessID)
-            // Get new business ID's
-            let newBusinessIDs = userData.businessIDs
-            newBusinessIDs.push(businessID)
-            const userDocRef = firestore.doc("userData/".concat(userID))
-            await firestore.runTransaction(async (transaction) => {
-                // Create private and public data docs
-                transaction.set(privateDocRef, privateBusinessData)
-                transaction.set(publicDocRef, publicBusinessData)
-                // Update user's business ID's
-                transaction.update(userDocRef, {businessIDs: newBusinessIDs})
-            })
-            return businessID
-        } catch(e) {
-            throw e;
+            const createNewBusiness = functions.httpsCallable("createNewBusiness")
+            return (await createNewBusiness()).data
+        } catch (e) {
+            throw e
         }
     }
     // Delete a business

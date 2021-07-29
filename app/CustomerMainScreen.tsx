@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import { StyleSheet, StatusBar, AppState, ActivityIndicator, View } from "react-native";
-import { CustomerTabScreen, ProductShopPage, CustomerCartPage } from "./HelperFiles/PageIndex";
+import { CustomerTabScreen, ProductShopPage, CustomerCartPage, CustomerOrderPage, CustomerEditShippingPage, CustomerEditAddressPage } from "./HelperFiles/PageIndex";
 import BusinessShopScreen from "./CustomerMainPages/BusinessShopScreen"
-import { defaults, icons } from "./HelperFiles/StyleSheet";
+import { defaults, textStyles, buttonStyles, icons } from "./HelperFiles/StyleSheet";
 import { CustomerMainStack } from "./HelperFiles/Navigation";
 import TabIcon from "./CustomComponents/TabIcon";
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -50,6 +50,18 @@ export default class CustomerMainScreen extends Component<Props, State> {
                     <CustomerCartPage {...props}/>
                   )
                 }}
+            />
+            <CustomerMainStack.Screen
+                name={"order"}
+                component={CustomerOrderPage}
+            />
+            <CustomerMainStack.Screen
+                name={"editShipping"}
+                component={CustomerEditShippingPage}
+            />
+            <CustomerMainStack.Screen
+                name={"editAddress"}
+                component={CustomerEditAddressPage}
             />
         </CustomerMainStack.Navigator>
       </View>

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, ImageURISource, ScrollView, ActivityIndicator } from "react-native";
-import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
 import { auth } from "../HelperFiles/Constants";
@@ -104,7 +104,7 @@ export default class ProductEditOptionTypePage extends Component<ProductEditOpti
       return (
         <TextButton
           text={params.item.name}
-          buttonStyle={{...defaults.textButtonNoColor, ...{justifyContent: "space-between"}}}
+          buttonStyle={{...buttonStyles.noColor, ...{justifyContent: "space-between"}}}
           rightIconSource={icons.chevron}
           rightIconStyle={{transform: [{scaleX: -1}]}}
           buttonFunc={async () => {
@@ -133,7 +133,7 @@ export default class ProductEditOptionTypePage extends Component<ProductEditOpti
         return (
           <TextButton
             text={"Delete this option type"}
-            buttonStyle={defaults.textButtonNoColor}
+            buttonStyle={buttonStyles.noColor}
             textStyle={{color: "red"}}
             buttonFunc={async () => {
                 let newProductData = this.state.productData
@@ -160,7 +160,7 @@ export default class ProductEditOptionTypePage extends Component<ProductEditOpti
       return (
         <PageContainer>
             <Text
-            style={styles.headerText}
+            style={textStyles.large}
             >
             {this.props.route.params.productName.concat(": ").concat(this.props.route.params.optionType)}
             </Text>
@@ -239,9 +239,6 @@ export default class ProductEditOptionTypePage extends Component<ProductEditOpti
 }
 
 const styles = StyleSheet.create({
-    headerText: {
-      fontSize: styleValues.largeTextSize,
-    },
     list: {
       width: "100%",
     },

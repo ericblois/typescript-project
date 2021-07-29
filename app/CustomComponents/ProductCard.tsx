@@ -1,9 +1,9 @@
 
 import React, { Component } from "react";
 import { View, TouchableOpacity, Image, Text, StyleSheet, GestureResponderEvent, ActivityIndicator } from "react-native";
-import { defaults, styleValues, colors } from "../HelperFiles/StyleSheet";
+import { defaults, textStyles, buttonStyles, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
-import { productPropType, currency } from "../HelperFiles/Constants";
+import { productPropType, currency, currencyFormatter } from "../HelperFiles/Constants";
 import RatingVisual from "./RatingVisual";
 import { useNavigation } from "@react-navigation/native";
 import { ProductData } from "../HelperFiles/DataTypes";
@@ -78,7 +78,7 @@ export default class ProductCard extends Component<Props, State> {
                         {this.state.productData.description}
                     </Text>
                     <View style={styles.productSubInfoArea}>
-                        <Text style={styles.productPrice}>{this.state.productData.price ? currency + this.state.productData.price.toString() : "No price"}</Text>
+                        <Text style={styles.productPrice}>{this.state.productData.price ? currencyFormatter.format(this.state.productData.price) : "No price"}</Text>
                         <RatingVisual rating={this.state.totalRating} height={styleValues.smallTextSize}/>
                     </View>
                 </View>
@@ -138,14 +138,16 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     productName: {
-        fontSize: styleValues.mediumTextSize
+        ...textStyles.medium,
+        textAlign: "left",
     },
     productDescription: {
-        fontSize: styleValues.smallestTextSize,
+        ...textStyles.small,
+        textAlign: "left",
         color: styleValues.minorTextColor
     },
     productPrice: {
-        fontSize: styleValues.smallTextSize
+        ...textStyles.medium
     },
     productSubInfoArea: {
         width: "100%",

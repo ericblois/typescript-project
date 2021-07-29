@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { TouchableOpacity, Text, StyleSheet, TextStyle, ViewStyle, View, TextInput, KeyboardAvoidingView } from "react-native";
 import PropTypes from 'prop-types';
 import { NavigationProp, useNavigation } from "@react-navigation/native"
-import { styleValues, colors, defaults } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, textStyles, buttonStyles, } from "../HelperFiles/StyleSheet";
 import CurrencyInput, { CurrencyInputProps } from "react-native-currency-input"
 import { LinearGradient } from "expo-linear-gradient"
 
@@ -29,11 +29,11 @@ export default class CurrencyInputBox extends Component<CurrencyInputBoxProps, S
                 start={this.props.horizontal === true ? {x: 0, y: 0.5} : undefined}
                 end={this.props.horizontal === true ? {x: 1, y: 0.5} : undefined}
                 style={{...{
-                    width: "100%",
-                    height: "100%",
                     position: "absolute",
                     top: 0,
-                    left: 0
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
                 }, ...this.props.style}}
                 pointerEvents={"none"}
             />

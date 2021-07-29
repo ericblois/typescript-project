@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, ImageURISource, ScrollView, ActivityIndicator } from "react-native";
-import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
 import { auth } from "../HelperFiles/Constants";
@@ -91,7 +91,7 @@ export default class BusinessEditProductListPage extends Component<BusinessEditP
       return (
         <TextButton
           text={params.item.name}
-          buttonStyle={{...defaults.textButtonNoColor, ...{justifyContent: "space-between"}}}
+          buttonStyle={{...buttonStyles.noColor, ...{justifyContent: "space-between"}}}
           rightIconSource={icons.chevron}
           rightIconStyle={{transform: [{scaleX: -1}]}}
           buttonFunc={async () => {
@@ -114,7 +114,7 @@ export default class BusinessEditProductListPage extends Component<BusinessEditP
         return (
           <PageContainer>
             <Text
-              style={styles.headerText}
+              style={textStyles.larger}
             >
               Categories
             </Text>
@@ -192,9 +192,6 @@ export default class BusinessEditProductListPage extends Component<BusinessEditP
 }
 
 const styles = StyleSheet.create({
-    headerText: {
-      fontSize: styleValues.largerTextSize
-    },
     list: {
       width: "100%",
     },

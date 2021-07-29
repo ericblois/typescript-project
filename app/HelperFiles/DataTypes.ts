@@ -6,7 +6,20 @@ export type ShippingInfo = {
     city: string,
     region: string | null,
     country: string,
-    postalCode: string
+    postalCode: string,
+    apartment: string | null,
+    message: string | null,
+}
+
+export const DefaultShippingInfo: Readonly<ShippingInfo> = {
+  name: "",
+  streetAddress: "",
+  city: "",
+  region: null,
+  country: "",
+  postalCode: "",
+  apartment: null,
+  message: null,
 }
 
 export type OptionSelections = {
@@ -51,7 +64,7 @@ export type UserData = {
   businessIDs: string[]
 }
 
-export const DefaultUserData: UserData = {
+export const DefaultUserData: Readonly<UserData> = {
   name: "",
   age: 0,
   gender: "male",
@@ -71,7 +84,7 @@ export type ProductOption = {
   images: string[]
 }
 
-export const DefaultProductOption = {
+export const DefaultProductOption: Readonly<ProductOption> = {
   name: "",
   priceChange: null,
   images: []
@@ -83,7 +96,7 @@ export type ProductOptionType = {
   options: ProductOption[]
 }
 
-export const DefaultProductOptionType: ProductOptionType = {
+export const DefaultProductOptionType: Readonly<ProductOptionType> = {
     name: "",
     optional: false,
     options: []
@@ -103,7 +116,7 @@ export type ProductData = {
   isVisible: boolean
 }
 
-export const DefaultProductData = {
+export const DefaultProductData: Readonly<ProductData> = {
   businessID: "",
   productID: "",
   category: "",
@@ -149,7 +162,7 @@ export type PublicBusinessData = {
   productList: ProductCategory[],
 }
 
-export const DefaultPublicBusinessData: PublicBusinessData = {
+export const DefaultPublicBusinessData: Readonly<PublicBusinessData> = {
   userID: "",
   businessID: "",
   name: "",
@@ -183,7 +196,7 @@ export type PrivateBusinessData = {
   coords: {latitude: number, longitude: number},
 }
 
-export const DefaultPrivateBusinessData: PrivateBusinessData = {
+export const DefaultPrivateBusinessData: Readonly<PrivateBusinessData> = {
   userID: "",
   businessID: "",
   country: "",

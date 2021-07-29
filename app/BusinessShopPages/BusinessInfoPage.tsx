@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, ScrollView } from "react-native";
 import PropTypes from 'prop-types';
-import { defaults, icons, styleValues, colors } from "../HelperFiles/StyleSheet";
+import { defaults, textStyles, buttonStyles, icons, styleValues, colors } from "../HelperFiles/StyleSheet";
 import { IconButton, ImageSlider, MenuBar, PageContainer, RatingVisual, ScrollContainer } from "../HelperFiles/CompIndex";
 import { businessPropType, formatText } from "../HelperFiles/Constants";
 import { PublicBusinessData } from "../HelperFiles/DataTypes"
@@ -101,9 +101,12 @@ export default class BusinessInfoPage extends Component<Props, State> {
             <MenuBar
                 buttonProps={[
                     {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.navigate("browse")}},
-                    {iconSource: icons.document, buttonFunc: () => {this.props.navigation.navigate("info")}},
+                    {
+                        iconSource: icons.document,
+                        buttonFunc: () => {this.props.navigation.navigate("info")},
+                        iconStyle: {tintColor: colors.mainColor}
+                    },
                     {iconSource: icons.shoppingCart, buttonFunc: () => {this.props.navigation.navigate("products")}},
-                    {iconSource: icons.message, buttonFunc: () => {console.log("Chat button")}}
                 ]}
             />
         </PageContainer>
@@ -146,16 +149,15 @@ const styles = StyleSheet.create({
         padding: styleValues.minorPadding
     },
     businessTitle: {
-        fontSize: styleValues.largerTextSize,
-        color: styleValues.majorTextColor,
+        ...textStyles.larger
     },
     businessType: {
-        fontSize: styleValues.mediumTextSize,
+        ...textStyles.medium,
         color: styleValues.minorTextColor,
         marginBottom: styleValues.minorPadding,
     },
     businessLocation: {
-        fontSize: styleValues.smallTextSize,
+        ...textStyles.medium,
         color: styleValues.minorTextColor,
     },
     favButton: {
@@ -163,6 +165,7 @@ const styles = StyleSheet.create({
         aspectRatio: 1,
     },
     description: {
-        fontSize: styleValues.smallTextSize,
+        ...textStyles.small,
+        textAlign: "left"
     }
 });

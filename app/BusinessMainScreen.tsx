@@ -3,7 +3,7 @@ import { StyleSheet, StatusBar, AppState, ActivityIndicator, View } from "react-
 import { BusinessEditMainPage, BusinessEditInfoPage, BusinessEditLocationPage, NotificationsPage, BusinessAccountPage, BusinessEditProductListPage, BusinessEditProductCategoryPage, BusinessEditProductPage, ProductEditOptionTypePage, ProductEditOptionPage } from "./HelperFiles/PageIndex";
 import { MenuBar } from "./HelperFiles/CompIndex"
 import { styleValues, colors } from "./HelperFiles/StyleSheet"
-import { defaults, icons } from "./HelperFiles/StyleSheet";
+import { defaults, textStyles, buttonStyles, icons } from "./HelperFiles/StyleSheet";
 import { BusinessMainStack, CustomerMainStack } from "./HelperFiles/Navigation";
 import { initialWindowMetrics } from "react-native-safe-area-context";
 import { StackNavigationProp, StackHeaderProps } from '@react-navigation/stack';
@@ -150,7 +150,7 @@ export default class BusinessMainScreen extends Component<Props, State> {
 }
 
 const headerBarTop = styleValues.winHeight
-    - defaults.tabBar.height
+    - defaults.tabBarLightColor.height
     - styleValues.mediumPadding*2
 
 const styles = StyleSheet.create({

@@ -22,6 +22,8 @@ import BusinessCard from "../CustomComponents/BusinessCard";
 import BusinessCardBrowseList from "../CustomComponents/BusinessCardBrowseList";
 import BusinessResult from "../CustomComponents/BusinessResult";
 import ItemList from "../CustomComponents/ItemList";
+import OrderCard from "../CustomComponents/OrderCard";
+import ProductCardList from "../CustomComponents/ProductCardList";
 
 export {
     MenuBar,
@@ -47,5 +49,7 @@ export {
     BusinessCard,
     BusinessCardBrowseList,
     BusinessResult,
-    ItemList
+    ItemList,
+    OrderCard,
+    ProductCardList
 };

@@ -3,8 +3,6 @@ import { initialWindowMetrics } from "react-native-safe-area-context";
 import * as Device from "expo-device";
 import * as Font from 'expo-font';
 
-//const winWidth = Dimensions.get("window").width;
-//const winHeight = Dimensions.get("window").height;
 const displayWidth = initialWindowMetrics
   ? initialWindowMetrics.frame.width
   : Dimensions.get("window").width;
@@ -18,6 +16,16 @@ const winWidth = initialWindowMetrics
 const winHeight = initialWindowMetrics
   ? displayHeight - initialWindowMetrics.insets.bottom - initialWindowMetrics.insets.top
   : displayHeight;
+
+export const menuBarHeight = winWidth * 0.15
+
+// --- Load fonts ---
+
+export const fonts = {
+  regular: "LatoRegular",
+  italic: "RubikItalic",
+  bold: "RubikBold",
+}
 
 const roundCornerDevices = [
   "iPhone",
@@ -83,8 +91,9 @@ export const styleValues = {
   iconLargestSize: winWidth * 0.2,
   statusBarHeight: StatusBar.currentHeight != null ? StatusBar.currentHeight : 20,
   roundedPadding: hasRoundCorners() ? winWidth * 0.05 : 0,
-  largerTextSize: winWidth/12,
-  largeTextSize: winWidth/16,
+  largestTextSize: winWidth/12,
+  largerTextSize: winWidth/16,
+  largeTextSize: winWidth/18,
   mediumTextSize: winWidth/20,
   smallTextSize: winWidth/24,
   smallerTextSize: winWidth/28,
@@ -92,6 +101,71 @@ export const styleValues = {
   majorTextColor: "#000",
   minorTextColor: "#777",
 };
+
+const defaultTemplates = StyleSheet.create({
+  text: {
+    fontFamily: fonts.regular,
+    textAlign: "center",
+    textAlignVertical: "center",
+  },
+  button: {
+    width: "100%",
+    height: winWidth* 0.125,
+    padding: styleValues.mediumPadding,
+    borderWidth: styleValues.minorBorderWidth,
+    borderRadius: styleValues.bordRadius,
+    flexDirection: "row",
+    marginBottom: styleValues.mediumPadding,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+})
+
+export const textStyles = StyleSheet.create({
+  smaller: {
+    ...defaultTemplates.text,
+    fontSize: styleValues.smallerTextSize,
+  },
+  small: {
+    ...defaultTemplates.text,
+    fontSize: styleValues.smallTextSize,
+  },
+  medium: {
+    ...defaultTemplates.text,
+    fontSize: styleValues.mediumTextSize,
+  },
+  large: {
+    ...defaultTemplates.text,
+    fontSize: styleValues.largeTextSize,
+  },
+  larger: {
+    ...defaultTemplates.text,
+    fontSize: styleValues.largerTextSize,
+  },
+  largest: {
+    ...defaultTemplates.text,
+    fontSize: styleValues.largestTextSize,
+  },
+})
+
+export const buttonStyles = StyleSheet.create({
+  mainColor: {
+    ...defaultTemplates.button,
+    borderColor: colors.darkColor,
+    backgroundColor: colors.mainColor,
+    
+  },
+  lightColor: {
+    ...defaultTemplates.button,
+    borderColor: colors.mainColor,
+    backgroundColor: colors.whiteColor,
+  },
+  noColor: {
+    ...defaultTemplates.button,
+    borderColor: colors.grayColor,
+    backgroundColor: colors.whiteColor,
+  },
+})
 
 export const defaults = StyleSheet.create({
   screenContainer: {
@@ -111,25 +185,7 @@ export const defaults = StyleSheet.create({
       height: winHeight,
       backgroundColor: "#fff",
       padding: styleValues.mediumPadding,
-      paddingBottom: styleValues.winWidth * 0.15 + styleValues.mediumPadding*2
-  },
-  smallTextHeader: {
-    fontSize: styleValues.smallTextSize,
-    textAlign: "center",
-    textAlignVertical: "center",
-    marginBottom: styleValues.mediumPadding
-  },
-  mediumTextHeader: {
-    fontSize: styleValues.mediumTextSize,
-    textAlign: "center",
-    textAlignVertical: "center",
-    marginBottom: styleValues.mediumPadding
-  },
-  largeTextHeader: {
-    fontSize: styleValues.largeTextSize,
-    textAlign: "center",
-    textAlignVertical: "center",
-    marginBottom: styleValues.mediumPadding
+      paddingBottom: menuBarHeight
   },
   dividerBox: {
     alignItems: "center",
@@ -140,16 +196,11 @@ export const defaults = StyleSheet.create({
     paddingBottom: 0,
     marginBottom: styleValues.mediumPadding
   },
-  tabBar: {
+  tabBarLightColor: {
     position: "absolute",
-    height: styleValues.winWidth * 0.15,
-    width: styleValues.winWidth - 2*styleValues.mediumPadding,
-    borderColor: colors.darkColor,
-    borderRadius: styleValues.bordRadius,
-    borderWidth: styleValues.minorBorderWidth,
-    borderTopWidth: styleValues.minorBorderWidth,
-    borderTopColor: colors.darkColor,
-    margin: styleValues.mediumPadding,
+    height: menuBarHeight,
+    width: styleValues.winWidth,
+    borderTopWidth: 0,
     paddingTop: styleValues.mediumPadding,
     paddingBottom: styleValues.mediumPadding,
   },
@@ -160,53 +211,25 @@ export const defaults = StyleSheet.create({
     borderRadius: styleValues.bordRadius,
     borderWidth: styleValues.minorBorderWidth,
     flexDirection: "row",
-    height: styleValues.winWidth * 0.15,
+    height: menuBarHeight,
     justifyContent: "space-between",
     position: "absolute",
     bottom: styleValues.mediumPadding,
     alignSelf: "center",
     width: styleValues.winWidth - styleValues.mediumPadding*2,
     paddingHorizontal: styleValues.majorPadding,
-    
   },
-  textButtonMainColor: {
-    width: "100%",
-    height: winWidth* 0.125,
-    padding: styleValues.mediumPadding,
-    borderWidth: styleValues.minorBorderWidth,
-    borderRadius: styleValues.bordRadius,
-    borderColor: colors.darkColor,
-    backgroundColor: colors.mainColor,
+  menuBarLightColor: {
     flexDirection: "row",
-    marginBottom: styleValues.mediumPadding,
     alignItems: "center",
-    justifyContent: "center"
-  },
-  textButtonLightColor: {
-    width: "100%",
-    height: winWidth* 0.125,
+    justifyContent: "space-between",
+    alignSelf: "center",
+    width: styleValues.winWidth,
+    height: menuBarHeight,
     padding: styleValues.mediumPadding,
-    borderWidth: styleValues.minorBorderWidth,
-    borderRadius: styleValues.bordRadius,
-    borderColor: colors.darkColor,
-    backgroundColor: "white",
-    flexDirection: "row",
-    marginBottom: styleValues.mediumPadding,
-    alignItems: "center",
-    justifyContent: "center"
-  },
-  textButtonNoColor: {
-    width: "100%",
-    height: winWidth* 0.125,
-    padding: styleValues.mediumPadding,
-    borderWidth: styleValues.minorBorderWidth,
-    borderRadius: styleValues.bordRadius,
-    borderColor: colors.grayColor,
-    backgroundColor: "white",
-    flexDirection: "row",
-    marginBottom: styleValues.mediumPadding,
-    alignItems: "center",
-    justifyContent: "center"
+    backgroundColor: colors.whiteColor,
+    position: "absolute",
+    bottom: 0,
   },
   iconButton: {
     alignContent: "center",
@@ -225,20 +248,19 @@ export const defaults = StyleSheet.create({
     backgroundColor: "#fff",
     borderWidth: styleValues.minorBorderWidth,
     borderRadius: styleValues.bordRadius,
-    borderColor: colors.darkColor,
+    borderColor: colors.mainColor,
     marginBottom: styleValues.mediumPadding,
     alignItems: "center",
     justifyContent: "center",
   },
   inputText: {
+    ...defaultTemplates.text,
     width: "95%",
     height: "95%",
     backgroundColor: "#fff",
     borderRadius: styleValues.bordRadius,
     fontSize: styleValues.smallTextSize,
     color: styleValues.majorTextColor,
-    textAlign: "center",
-    textAlignVertical: "center",
   },
   dateScrollPicker: {
     width: "100%",

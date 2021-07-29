@@ -1,6 +1,6 @@
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { ProductData, PublicBusinessData, PrivateBusinessData, ProductCategory, CartItem } from "./DataTypes";
+import { ProductData, PublicBusinessData, PrivateBusinessData, ProductCategory, CartItem, OrderData, ShippingInfo } from "./DataTypes";
 import { BusinessFunctions } from "./BusinessFunctions";
 
 export type RootStackParamList = {
@@ -20,6 +20,14 @@ export type CustomerMainStackParamList = {
         businessData: PublicBusinessData
     },
     cart: undefined,
+    order: {
+        orderData: OrderData
+    },
+    editShipping: undefined,
+    editAddress: {
+        shippingInfo: ShippingInfo,
+        addressIndex: number
+    }
 }
 
 export const CustomerMainStack = createStackNavigator<CustomerMainStackParamList>();

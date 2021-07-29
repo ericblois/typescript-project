@@ -1,7 +1,7 @@
 
 import React, { Component } from "react";
 import { View, TouchableOpacity, Image, Text, StyleSheet, GestureResponderEvent, FlatList, ActivityIndicator, ViewStyle } from "react-native";
-import { defaults, styleValues, colors } from "../HelperFiles/StyleSheet";
+import { defaults, textStyles, buttonStyles, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { productPropType, currency } from "../HelperFiles/Constants";
 import RatingVisual from "./RatingVisual";
@@ -23,7 +23,7 @@ type State = {
     cardsLoaded: boolean
 }
 
-export default class ProductCardList extends Component<Props, State> {
+export default class BusinessCardBrowseList extends Component<Props, State> {
 
     loadCount = 0
 
@@ -86,7 +86,6 @@ export default class ProductCardList extends Component<Props, State> {
                 renderItem={({item}) => {
                     return this.renderBusinessCard(item)
                 }}
-                style={this.props.style}
                 contentContainerStyle={styles.cardList}
                 horizontal={true}
             />
@@ -123,6 +122,5 @@ export default class ProductCardList extends Component<Props, State> {
 const styles = StyleSheet.create({
     cardList: {
         width: "100%",
-        height: styleValues.winWidth*0.6,
     },
 })

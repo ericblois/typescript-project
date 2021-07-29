@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, } from "react-native";
-import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
 import { auth } from "../HelperFiles/Constants";
@@ -14,7 +14,10 @@ import PageContainer from "../CustomComponents/PageContainer";
 import { ScrollView } from "react-native-gesture-handler";
 
 type CustomerAccountNavigationProp = CompositeNavigationProp<
-  BottomTabNavigationProp<CustomerTabParamList, "account">,
+  CompositeNavigationProp<
+    BottomTabNavigationProp<CustomerTabParamList, "account">,
+    StackNavigationProp<CustomerMainStackParamList>
+  >,
   StackNavigationProp<RootStackParamList>
 >
 
@@ -51,7 +54,7 @@ export default class CustomerAccountPage extends Component<CustomerAccountProps,
         <TextButton
           text={businessName ? businessName : "Unnamed business"}
           subtext={businessID}
-          buttonStyle={defaults.textButtonNoColor}
+          buttonStyle={buttonStyles.noColor}
           buttonFunc={() => {
             this.props.navigation.navigate("businessMain", {businessFuncs: businessFuncs})
           }}
@@ -66,7 +69,7 @@ export default class CustomerAccountPage extends Component<CustomerAccountProps,
     return (
       <TextButton
         text={"Create a new business"}
-        buttonStyle={{...defaults.textButtonNoColor, ...{justifyContent: "space-between"}}}
+        buttonStyle={{justifyContent: "space-between"}}
         rightIconSource={icons.plus}
         buttonFunc={async () => {
           // Create a new business
@@ -78,11 +81,22 @@ export default class CustomerAccountPage extends Component<CustomerAccountProps,
     )
   }
 
+  renderEditAddressesButton() {
+    return (
+      <TextButton
+        text={"Edit shipping info"}
+        buttonStyle={{justifyContent: "space-between"}}
+        rightIconSource={icons.chevron}
+        rightIconStyle={{transform: [{scaleX: -1}]}}
+        buttonFunc={() => this.props.navigation.navigate("editShipping")}
+      />
+    )
+  }
+
   renderDeleteAccountButton() {
     return (
       <TextButton
         text={"Delete this account"}
-        buttonStyle={defaults.textButtonNoColor}
         textStyle={{color: "red"}}
         buttonFunc={() => {
           UserFunctions.deleteAccount().then(() => {
@@ -97,9 +111,7 @@ export default class CustomerAccountPage extends Component<CustomerAccountProps,
     return (
       <PageContainer>
         <Text
-          style={{
-            fontSize: styleValues.largeTextSize
-          }}
+          style={textStyles.large}
         >
           Your Account
         </Text>
@@ -110,14 +122,13 @@ export default class CustomerAccountPage extends Component<CustomerAccountProps,
           }}
         ></TextButton>
         <Text
-          style={{
-            fontSize: styleValues.largeTextSize
-          }}
+          style={textStyles.large}
         >
           Businesses
         </Text>
         {this.state.businessButtons}
         {this.renderCreateBusinessButton()}
+        {this.renderEditAddressesButton()}
         {this.renderDeleteAccountButton()}
       </PageContainer>
     );

@@ -1,6 +1,6 @@
 import React, { Component, useRef } from "react";
 import { View, Text, StyleSheet, ImageURISource, ScrollView, Keyboard, Platform, ActivityIndicator } from "react-native";
-import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
 import { auth, currencyFormatter } from "../HelperFiles/Constants";
@@ -146,7 +146,7 @@ export default class BusinessEditProductPage extends Component<BusinessEditProdu
       return (
         <TextButton
           text={"Delete this product"}
-          buttonStyle={defaults.textButtonNoColor}
+          buttonStyle={buttonStyles.noColor}
           textStyle={{color: "red"}}
           buttonFunc={async () => {
             await this.props.businessFuncs.deleteProduct(this.props.route.params.productID).then(() => {
@@ -161,7 +161,7 @@ export default class BusinessEditProductPage extends Component<BusinessEditProdu
       if (this.state.productData) {
         return (
         <PageContainer>
-          <Text style={defaults.largeTextHeader}>{this.state.productData.name}</Text>
+          <Text style={textStyles.large}>{this.state.productData.name}</Text>
           <ScrollContainer>
             <ImageSliderSelector
               uris={this.state.productData ? this.state.productData.images : []}
@@ -224,12 +224,12 @@ export default class BusinessEditProductPage extends Component<BusinessEditProdu
               style={styles.optionsContainer}
             >
               <Text
-                style={styles.headerText}
+                style={{...textStyles.medium, ...{marginBottom: styleValues.mediumPadding}}}
               >Option Types</Text>
               {this.renderOptionTypes()}
               <IconButton
                 iconSource={icons.plus}
-                buttonStyle={defaults.textButtonNoColor}
+                buttonStyle={buttonStyles.noColor}
                 buttonFunc={() => this.setState({optionNamePopup: true})}
               />
             </View>
@@ -319,8 +319,4 @@ const styles = StyleSheet.create({
     marginBottom: styleValues.mediumPadding,
     flexShrink: 1
   },
-  headerText: {
-    fontSize: styleValues.mediumTextSize,
-    marginBottom: styleValues.mediumPadding
-  }
 })

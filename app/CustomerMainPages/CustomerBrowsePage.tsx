@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { View, Text, StyleSheet, NativeSyntheticEvent, TextInputSubmitEditingEventData, FlatList, ActivityIndicator, } from "react-native";
 import PropTypes from 'prop-types';
 import { SearchBar, } from "react-native-elements";
-import { styleValues, colors, defaults } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, textStyles, buttonStyles, fonts } from "../HelperFiles/StyleSheet";
 import { BusinessCard, BusinessCardBrowseList, BusinessResult, PageContainer, ScrollContainer, TextInputBox } from "../HelperFiles/CompIndex";
 import { firestore } from "../HelperFiles/Constants";
 import { getQueryTerms } from "../HelperFiles/ClientFunctions"
@@ -90,7 +90,7 @@ export default class CustomerBrowsePage extends Component<Props, State> {
               position: "absolute",
               width: "100%",
               top: defaults.inputBox.height + styleValues.mediumPadding,
-              bottom: defaults.tabBar.height + styleValues.mediumPadding*2,
+              bottom: defaults.tabBarLightColor.height + styleValues.mediumPadding*2,
               backgroundColor: colors.whiteColor,
             }}
           />
@@ -112,8 +112,12 @@ export default class CustomerBrowsePage extends Component<Props, State> {
       if (this.state.userData) {
         return (
           <View style={{width: "100%", marginBottom: styleValues.mediumPadding}}>
-            <Text
-              style={{...defaults.largeTextHeader, ...{textAlign: "left"}}}
+            <Text 
+              style={{...textStyles.large, ...{
+                textAlign: "left",
+                marginLeft: styleValues.mediumPadding,
+                marginBottom: styleValues.mediumPadding
+              }}}
             >Favorites</Text>
             <BusinessCardBrowseList
               businessIDs={this.state.userData.favorites}
@@ -131,7 +135,11 @@ export default class CustomerBrowsePage extends Component<Props, State> {
         return (
           <View style={{width: "100%", marginBottom: styleValues.mediumPadding}}>
             <Text
-              style={{...defaults.largeTextHeader, ...{textAlign: "left"}}}
+              style={{...textStyles.large, ...{
+                textAlign: "left",
+                marginLeft: styleValues.mediumPadding,
+                marginBottom: styleValues.mediumPadding
+              }}}
             >Featured Businesses</Text>
             <BusinessCardBrowseList
               businessIDs={this.state.userData.favorites}
@@ -149,13 +157,16 @@ export default class CustomerBrowsePage extends Component<Props, State> {
         return (
           <View style={{width: "100%", marginBottom: styleValues.mediumPadding}}>
             <Text
-              style={{...defaults.largeTextHeader, ...{textAlign: "left"}}}
+              style={{...textStyles.large, ...{
+                textAlign: "left",
+                marginLeft: styleValues.mediumPadding,
+                marginBottom: styleValues.mediumPadding
+              }}}
             >Popular Businesses</Text>
             <BusinessCardBrowseList
               businessIDs={this.state.userData.favorites}
               onCardPress={(publicData) => this.props.navigation.navigate("businessShop", {businessData: publicData})}
               showLoading={true}
-              style={{width: styleValues.winWidth, marginHorizontal: -styleValues.mediumPadding}}
             />
           </View>
         )

@@ -2,7 +2,7 @@ import React, { Component, Fragment } from "react";
 import { View, TouchableOpacity, Text, StyleSheet, TextStyle, ViewStyle, Image, GestureResponderEvent, ImageStyle } from "react-native";
 import PropTypes from 'prop-types';
 import { NavigationProp, useNavigation } from "@react-navigation/native"
-import { defaults, styleValues, colors } from "../HelperFiles/StyleSheet";
+import { defaults, textStyles, buttonStyles, styleValues, colors } from "../HelperFiles/StyleSheet";
 
 type Props = {
     text: string,
@@ -25,6 +25,32 @@ type State = {}
 
 export default class TextButton extends Component<Props, State> {
 
+    defaultButtonStyle = {...buttonStyles.noColor}
+    defaultTextStyle = {...styles.textStyle}
+    defaultIconStyle = {...styles.iconStyle}
+
+    constructor(props: Props) {
+        super(props)
+        // Update default button style
+        if (props.appearance === "light") {
+            this.defaultButtonStyle = buttonStyles.lightColor
+        } else if (props.appearance === "color") {
+            this.defaultButtonStyle = buttonStyles.mainColor
+        }
+        // Update default text style
+        if (props.appearance === "light") {
+            this.defaultTextStyle.color = colors.mainColor
+        } else if (props.appearance === "color") {
+            this.defaultTextStyle.color = colors.whiteColor
+        }
+        // Update default icon style
+        if (props.appearance === "light") {
+            this.defaultIconStyle.tintColor = colors.mainColor
+        } else if (props.appearance === "color") {
+            this.defaultIconStyle.tintColor = colors.whiteColor
+        }
+    }
+
     renderSubtext() {
         if (this.props.subtext) {
             return (
@@ -41,7 +67,7 @@ export default class TextButton extends Component<Props, State> {
             return (
                 <Image
                     source={this.props.leftIconSource}
-                    style = {{...styles.iconStyle, ...this.props.leftIconStyle}}
+                    style = {{...this.defaultIconStyle, ...this.props.leftIconStyle}}
                     resizeMethod={"scale"}
                     resizeMode={"contain"}
                 />
@@ -55,7 +81,7 @@ export default class TextButton extends Component<Props, State> {
             return (
                 <Image
                     source={this.props.rightIconSource}
-                    style = {{...styles.iconStyle, ...this.props.rightIconStyle}}
+                    style = {{...this.defaultIconStyle, ...this.props.rightIconStyle}}
                     resizeMethod={"scale"}
                     resizeMode={"contain"}
                 />
@@ -65,19 +91,9 @@ export default class TextButton extends Component<Props, State> {
     }
 
     render() {
-        let defaultButtonStyle = {...defaults.textButtonNoColor}
-        if (this.props.appearance === "light") {
-            defaultButtonStyle = defaults.textButtonLightColor
-        } else if (this.props.appearance === "color") {
-            defaultButtonStyle = defaults.textButtonMainColor
-        }
-        let defaultTextStyle = {...styles.textStyle}
-        if (this.props.appearance === "color") {
-            defaultTextStyle.color = colors.whiteColor
-        }
         return (
             <TouchableOpacity
-            style={{...defaultButtonStyle, ...this.props.buttonStyle, ...{
+            style={{...this.defaultButtonStyle, ...this.props.buttonStyle, ...{
                 justifyContent: this.props.rightIconSource != undefined || this.props.rightIconSource != undefined ? "space-between" : "center"
             }}}
             onPress={this.props.buttonFunc}
@@ -85,7 +101,7 @@ export default class TextButton extends Component<Props, State> {
             >
                 {this.renderLeftIcon()}
                 <View style={{alignItems: "center", justifyContent: "center"}}>
-                    <Text style = {[defaultTextStyle, this.props.textStyle]} {...this.props.textProps}>
+                    <Text style = {[this.defaultTextStyle, this.props.textStyle]} {...this.props.textProps}>
                         {this.props.text}
                     </Text>
                     {this.renderSubtext()}
@@ -98,21 +114,18 @@ export default class TextButton extends Component<Props, State> {
 
 const styles = StyleSheet.create({
     textStyle: {
-        textAlign: "center",
-        textAlignVertical: "center",
-        fontSize: styleValues.mediumTextSize,
+        ...textStyles.medium,
         color: styleValues.majorTextColor,
     },
     subtextStyle: {
-        textAlign: "center",
-        fontSize: styleValues.smallTextSize,
+        ...textStyles.small,
         color: styleValues.minorTextColor
     },
     iconStyle: {
         aspectRatio: 1,
         maxWidth: "10%",
         maxHeight: "75%",
-        tintColor: colors.darkGrayColor,
+        tintColor: colors.grayColor,
         alignSelf: "center",
         flexWrap: "wrap",
     },

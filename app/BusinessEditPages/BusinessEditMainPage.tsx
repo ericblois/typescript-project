@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, } from "react-native";
-import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { auth } from "../HelperFiles/Constants";
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -31,11 +31,11 @@ export default class BusinessEditMainPage extends Component<BusinessEditMainProp
   render() {
     return (
       <PageContainer>
-        <Text style={styles.editHeader}>Your Business Page</Text>
+        <Text style={{...textStyles.large, ...{marginBottom: styleValues.mediumPadding}}}>Your Business Page</Text>
         <ImageProfileSelector></ImageProfileSelector>
         <TextButton
             text={"Edit your info page"}
-            buttonStyle={defaults.textButtonNoColor}
+            buttonStyle={buttonStyles.noColor}
             textStyle={{}}
             rightIconSource={icons.chevron}
             rightIconStyle={{transform: [{scaleX: -1}]}}
@@ -45,7 +45,7 @@ export default class BusinessEditMainPage extends Component<BusinessEditMainProp
         ></TextButton>
         <TextButton
             text={"Edit your products / services"}
-            buttonStyle={defaults.textButtonNoColor}
+            buttonStyle={buttonStyles.noColor}
             textStyle={{fontSize: styleValues.smallTextSize}}
             rightIconSource={icons.chevron}
             rightIconStyle={{transform: [{scaleX: -1}]}}
@@ -55,7 +55,7 @@ export default class BusinessEditMainPage extends Component<BusinessEditMainProp
         ></TextButton>
         <TextButton
             text={"Location & delivery options"}
-            buttonStyle={defaults.textButtonNoColor}
+            buttonStyle={buttonStyles.noColor}
             textStyle={{fontSize: styleValues.smallTextSize}}
             rightIconSource={icons.chevron}
             rightIconStyle={{transform: [{scaleX: -1}]}}
@@ -65,7 +65,7 @@ export default class BusinessEditMainPage extends Component<BusinessEditMainProp
         ></TextButton>
         <TextButton
             text={"Delete this business"}
-            buttonStyle={defaults.textButtonNoColor}
+            buttonStyle={buttonStyles.noColor}
             textStyle={{fontSize: styleValues.smallTextSize, color: "red"}}
             buttonFunc={() => {
               UserFunctions.deleteBusiness(this.props.businessFuncs.businessID).then(() => {
@@ -86,8 +86,4 @@ export default class BusinessEditMainPage extends Component<BusinessEditMainProp
 }
 
 const styles = StyleSheet.create({
-    editHeader: {
-        fontSize: styleValues.largeTextSize,
-        marginBottom: styleValues.majorPadding
-    }
 })

@@ -1,12 +1,12 @@
 import React, { Component } from "react";
 import { View, ScrollView, Text, StyleSheet, TextInput, ActivityIndicator } from "react-native";
-import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import { TextInputBox, DateScrollPicker, TextDropdown, MenuBar, PageContainer } from "../HelperFiles/CompIndex";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList, UserSignupStackParamList } from "../HelperFiles/Navigation";
 import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
 import ServerData from "../HelperFiles/ServerData";
-import { UserData } from "../HelperFiles/DataTypes";
+import { DefaultUserData, UserData } from "../HelperFiles/DataTypes";
 import UserFunctions from "../HelperFiles/UserFunctions";
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 
@@ -115,6 +115,7 @@ export default class CustomerInfoPage extends Component<Props, State> {
         } else {
             this.setState({isLoading: true})
             const userData: UserData = {
+                ...DefaultUserData,
                 name: this.state.nameText,
                 gender: this.state.genderText!,
                 age: this.state.ageValue,
@@ -168,7 +169,7 @@ export default class CustomerInfoPage extends Component<Props, State> {
   render() {
         return (
         <PageContainer>
-            <Text style={styles.signupHeader}>
+            <Text style={textStyles.larger}>
                 Sign Up
             </Text>
             <ScrollView>
@@ -350,9 +351,6 @@ const styles = StyleSheet.create({
         width: "100%",
         height: "100%",
     },
-    signupHeader: {
-        fontSize: styleValues.largerTextSize,
-    },
     inputElement: {
         width: styleValues.winWidth-2*styleValues.mediumPadding,
         height: styleValues.winWidth/10,
@@ -370,9 +368,9 @@ const styles = StyleSheet.create({
         width: "100%",
     },
     inputDescription: {
+        ...textStyles.small,
         width: styleValues.winWidth-2*styleValues.mediumPadding,
         textAlign: "left",
-        fontSize: styleValues.smallestTextSize,
         padding: styleValues.mediumPadding,
     },
     genderPicker: {

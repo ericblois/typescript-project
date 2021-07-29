@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, KeyboardAvoidingView, ScrollView, ActivityIndicator } from "react-native";
-import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
 import { auth } from "../HelperFiles/Constants";

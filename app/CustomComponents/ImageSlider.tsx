@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Image, StyleSheet, FlatList, Text, ImageStyle, ViewStyle, TouchableWithoutFeedback } from "react-native";
-import { icons, styleValues, colors } from "../HelperFiles/StyleSheet";
+import { icons, styleValues, colors, defaults, textStyles, buttonStyles, } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { useNavigation } from "@react-navigation/native";
 import IconButton from "./IconButton";
@@ -122,10 +122,9 @@ export default class ImageSlider extends Component<Props, State> {
                     alignItems: "center",
                     justifyContent: "center",
                 }]}>
-                    <Text style={{
-                        color: colors.darkColor,
-                        fontSize: styleValues.smallerTextSize
-                    }}>
+                    <Text style={{...textStyles.small, ...{
+                        color: colors.darkColor
+                    }}}>
                         There are no images to show.
                     </Text>
                 </View>

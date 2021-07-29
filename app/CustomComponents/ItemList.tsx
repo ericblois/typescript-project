@@ -1,7 +1,7 @@
 
 import React, { Component } from "react";
 import { View, TouchableOpacity, Image, Text, StyleSheet, GestureResponderEvent, FlatList, ActivityIndicator } from "react-native";
-import { defaults, styleValues, colors } from "../HelperFiles/StyleSheet";
+import { defaults, textStyles, buttonStyles, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { productPropType, currency } from "../HelperFiles/Constants";
 import RatingVisual from "./RatingVisual";
@@ -20,16 +20,16 @@ const defaultAnimationConfig = {
     restDisplacementThreshold: 0.2,
   }
 
-type Props = Omit<DraggableFlatListProps<any>, "animationConfig"> & {
+type Props<T> = Omit<DraggableFlatListProps<T>, "animationConfig"> & {
     animationConfig?: typeof defaultAnimationConfig
 }
 
 type State = {
 }
 
-export default class ItemList extends Component<Props, State> {
+export default class ItemList<T> extends Component<Props<T>, State> {
 
-    constructor(props: Props) {
+    constructor(props: Props<T>) {
         super(props);
     }
 
@@ -38,7 +38,12 @@ export default class ItemList extends Component<Props, State> {
             <DraggableFlatList
                 animationConfig={defaultAnimationConfig}
                 {...this.props}
-                style={{}}
+                style={{
+                    top: 0,
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                }}
                 // Ensure spacing from edges so fade doesn't appear before scrolling
                 ListHeaderComponent={() => {
                     return (
@@ -48,17 +53,6 @@ export default class ItemList extends Component<Props, State> {
                                 height: this.props.horizontal === true ? "100%" : styleValues.mediumPadding,
                             }}/>
                             {this.props.ListHeaderComponent}
-                        </View>
-                    )
-                }}
-                ListFooterComponent={() => {
-                    return (
-                        <View>
-                            <View style={{
-                                width: this.props.horizontal === true ? styleValues.mediumPadding : "100%",
-                                height: this.props.horizontal === true ? "100%" : styleValues.mediumPadding,
-                            }}/>
-                            {this.props.ListFooterComponent}
                         </View>
                     )
                 }}
@@ -76,7 +70,7 @@ export default class ItemList extends Component<Props, State> {
 
     render() {
         return (
-            <View style={this.props.style}>
+            <View style={StyleSheet.compose({flex: 1}, this.props.style)}>
                 {this.renderList()}
                 {this.renderGradient()}
             </View>
@@ -85,8 +79,5 @@ export default class ItemList extends Component<Props, State> {
 }
 
 const styles = StyleSheet.create({
-    cardList: {
-        width: "100%",
-        height: styleValues.winWidth*0.6,
-    },
+    
 })

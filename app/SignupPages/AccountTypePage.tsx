@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, ScrollView, Text, StyleSheet, TextInput, ActivityIndicator } from "react-native";
-import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import { IconButton, MenuBar } from "../HelperFiles/CompIndex";
 import { auth, googleAPIKey } from "../HelperFiles/Constants";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -45,7 +45,7 @@ export default class AccountTypePage extends Component<Props, State> {
                     text={"Become a customer"}
                     subtext={"Start shopping from small businesses."}
                     buttonStyle={{
-                        ...defaults.textButtonNoColor,
+                        ...buttonStyles.noColor,
                         ...styles.accountTypeButton,
                         ...{borderWidth: this.state.typeSelection === "customer" ? styleValues.majorBorderWidth : styleValues.minorBorderWidth,
                             borderColor: this.state.typeSelection === "customer" ? colors.validColor : colors.grayColor,
@@ -59,7 +59,7 @@ export default class AccountTypePage extends Component<Props, State> {
                     text={"Start a business"}
                     subtext={"Create a business page to reach customers."}
                     buttonStyle={{
-                        ...defaults.textButtonNoColor,
+                        ...buttonStyles.noColor,
                         ...styles.accountTypeButton,
                         ...{borderWidth: this.state.typeSelection === "business" ? styleValues.majorBorderWidth : styleValues.minorBorderWidth,
                             borderColor: this.state.typeSelection === "business" ? colors.validColor : colors.grayColor,
@@ -98,9 +98,9 @@ export default class AccountTypePage extends Component<Props, State> {
 
 const styles = StyleSheet.create({
     titleText: {
+        ...textStyles.larger,
         position: "absolute",
-        top: styleValues.majorPadding,
-        fontSize: styleValues.largerTextSize
+        top: styleValues.mediumPadding,
     },
     accountTypeButton: {
         margin: styleValues.mediumPadding,

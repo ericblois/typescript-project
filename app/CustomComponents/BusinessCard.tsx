@@ -1,7 +1,7 @@
 
 import React, { Component } from "react";
 import { View, TouchableOpacity, Image, Text, StyleSheet, ActivityIndicator } from "react-native";
-import { icons, styleValues, colors } from "../HelperFiles/StyleSheet";
+import { icons, styleValues, colors, defaults, textStyles, buttonStyles, } from "../HelperFiles/StyleSheet";
 import {  useNavigation } from "@react-navigation/native";
 import { PublicBusinessData } from "../HelperFiles/DataTypes";
 import { IconButton } from "../HelperFiles/CompIndex";
@@ -38,7 +38,7 @@ export default class BusinessCard extends Component<Props, State> {
     renderUI() {
       if (this.state.businessData) {
         return (
-          <TouchableOpacity style={styles.cardContainer} onPress={this.props.onPress}>
+          <TouchableOpacity style={{width: "100%", height: "100%"}} onPress={this.props.onPress}>
             <Image
                 style={styles.galleryImage}
                 resizeMethod={"scale"}
@@ -65,13 +65,15 @@ export default class BusinessCard extends Component<Props, State> {
       if (!this.state.businessData || !this.state.imageLoaded) {
         return (
           <View
-            style={{...styles.cardContainer, ...{
+            style={{
               position: "absolute",
               alignItems: "center",
               justifyContent: "center",
               top: 0, 
-              left: 0
-            }}}
+              bottom: 0,
+              left: 0,
+              right: 0
+            }}
           >
             <ActivityIndicator
               size={"small"}
@@ -83,7 +85,7 @@ export default class BusinessCard extends Component<Props, State> {
 
     render() {
       return (
-        <View>
+        <View style={styles.cardContainer}>
           {this.renderUI()}
           {this.renderLoading()}
         </View>
@@ -97,14 +99,14 @@ const styles = StyleSheet.create({
       borderColor: colors.grayColor,
       borderRadius: styleValues.bordRadius,
       borderWidth: styleValues.minorBorderWidth,
-      height: styleValues.winWidth * 0.6,
       width: styleValues.winWidth * 0.6,
       padding: styleValues.minorPadding,
       justifyContent: "space-between",
     },
     galleryImage: {
       flex: 1,
-      height: "75%",
+      width: "100%",
+      aspectRatio: 4/3,
       borderRadius: styleValues.bordRadius / 1.5,
     },
     infoContainer: {
@@ -117,11 +119,12 @@ const styles = StyleSheet.create({
       width: "100%"
     },
     nameText: {
-      fontSize: styleValues.mediumTextSize,
-      color: styleValues.majorTextColor,
+      ...textStyles.large,
+      textAlign: "left",
     },
     typeText: {
-      fontSize: styleValues.smallTextSize,
+      ...textStyles.medium,
+      textAlign: "left",
       color: styleValues.minorTextColor,
     },
 })

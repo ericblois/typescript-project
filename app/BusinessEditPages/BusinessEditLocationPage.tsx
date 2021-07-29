@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, KeyboardAvoidingView, } from "react-native";
-import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { auth, geofire } from "../HelperFiles/Constants";
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -83,7 +83,7 @@ export default class BusinessEditLocationPage extends Component<BusinessEditLoca
             return (
                 <TextButton
                     text={"View current location"}
-                    buttonStyle={defaults.textButtonNoColor}
+                    buttonStyle={buttonStyles.noColor}
                     textStyle={{}}
                     rightIconSource={icons.chevron}
                     rightIconStyle={{transform: [{scaleX: -1}]}}
@@ -134,15 +134,15 @@ export default class BusinessEditLocationPage extends Component<BusinessEditLoca
   render() {
     return (
     <PageContainer>
-        <Text style={styles.header}>Location & Delivery</Text>
+        <Text style={{...textStyles.large, ...{marginBottom: styleValues.mediumPadding}}}>Location & Delivery</Text>
         <ScrollContainer avoidKeyboard>
             {this.renderViewLocationButton()}
             <View style={styles.divider}>
-                <Text style={{...defaults.smallTextHeader, ...styles.dividerHeader}}>Edit your location</Text>
+                <Text style={{...textStyles.small, ...styles.dividerHeader}}>Edit your location</Text>
                 {/* Get current location */}
                 <TextButton
                     text={"Current location"}
-                    buttonStyle={{...defaults.textButtonNoColor, ...styles.dividerButton}}
+                    buttonStyle={{...buttonStyles.noColor, ...styles.dividerButton}}
                     textStyle={{}}
                     rightIconSource={icons.location}
                     rightIconStyle={{transform: [{scaleX: -1}]}}
@@ -157,7 +157,7 @@ export default class BusinessEditLocationPage extends Component<BusinessEditLoca
                 {/* Choose location */}
                 <TextButton
                     text={"Choose a location"}
-                    buttonStyle={{...defaults.textButtonNoColor, ...styles.dividerButton}}
+                    buttonStyle={{...buttonStyles.noColor, ...styles.dividerButton}}
                     textStyle={{}}
                     rightIconSource={icons.chevron}
                     rightIconStyle={{transform: [{scaleX: -1}]}}
@@ -236,9 +236,7 @@ export default class BusinessEditLocationPage extends Component<BusinessEditLoca
                 paddingVertical: styleValues.mediumPadding
             }}>
                 <Text
-                    style={{
-                        fontSize: styleValues.mediumTextSize
-                    }}
+                    style={textStyles.small}
                 >Edit your public address</Text>
             </View>
             {/* Street Address */}
@@ -344,10 +342,6 @@ export default class BusinessEditLocationPage extends Component<BusinessEditLoca
 }
 
 const styles = StyleSheet.create({
-    header: {
-        fontSize: styleValues.largeTextSize,
-        marginBottom: styleValues.mediumPadding
-    },
     divider: {
         width: "100%",
         borderWidth: styleValues.minorBorderWidth,

@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import { TouchableWithoutFeedback, Keyboard, View, ScrollViewProps, KeyboardAvoidingView, ViewStyle } from "react-native"
 import { ScrollView } from "react-native-gesture-handler"
 import GradientView from "../CustomComponents/GradientView"
-import { defaults, styleValues, colors } from "../HelperFiles/StyleSheet"
+import { defaults, textStyles, buttonStyles, styleValues, colors } from "../HelperFiles/StyleSheet"
 
 type Props = {
     style?: ViewStyle,
@@ -36,7 +36,7 @@ export default class ScrollContainer extends Component<Props, State> {
         return (
             <View style={{...{flex: 1}, ...this.props.style}}>
                 <ScrollView
-                    style={{width: "100%", height: "100%", paddingHorizontal: styleValues.mediumPadding}}
+                    style={{width: "100%", height: "100%"}}
                     contentContainerStyle={{paddingVertical: styleValues.mediumPadding, width: "100%"}}
                     showsVerticalScrollIndicator={false}
                     showsHorizontalScrollIndicator={false}

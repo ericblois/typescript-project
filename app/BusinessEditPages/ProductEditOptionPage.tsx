@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, ImageURISource, ScrollView, ActivityIndicator } from "react-native";
-import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
 import { auth } from "../HelperFiles/Constants";
@@ -132,7 +132,7 @@ export default class ProductEditOptionPage extends Component<ProductEditOptionPr
       return (
         <TextButton
           text={"Delete this option"}
-          buttonStyle={defaults.textButtonNoColor}
+          buttonStyle={buttonStyles.noColor}
           textStyle={{color: "red"}}
           buttonFunc={async () => {
             let newProductData = this.state.productData
@@ -189,7 +189,7 @@ export default class ProductEditOptionPage extends Component<ProductEditOptionPr
               avoidKeyboard={true}
             ></TextInputBox>
             <View style={defaults.dividerBox}>
-              <Text style={defaults.mediumTextHeader}>Price Change</Text>
+              <Text style={textStyles.medium}>Price Change</Text>
               <View style={{
                 flexDirection: "row",
                 justifyContent: "space-between",

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Text, Image, StyleSheet, TextInput, KeyboardAvoidingView, SafeAreaView } from "react-native";
-import { styleValues, colors, defaults, icons } from "./HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "./HelperFiles/StyleSheet";
 import { TextButton, IconButton } from "./HelperFiles/CompIndex";
 import PropTypes from 'prop-types';
 import { auth } from "./HelperFiles/Constants";
@@ -80,7 +80,7 @@ export default class StartScreen extends Component<Props, State> {
                                 buttonFunc={() => this.setState({showLogin: false, responseText: ""})}
                             />
                             <Text
-                                style={styles.responseText}
+                                style={{...textStyles.small, ...styles.responseText}}
                             >
                                 {this.state.responseText}
                             </Text>
@@ -99,19 +99,19 @@ export default class StartScreen extends Component<Props, State> {
                 <View style={styles.signinContainer}>
                     <TextButton
                         text={"Login"}
-                        buttonStyle={defaults.textButtonNoColor}
+                        buttonStyle={buttonStyles.noColor}
                         textStyle={styles.buttonText}
                         buttonFunc={() => this.setState({showLogin: true})}
                     />
                     <TextButton
                         text={"Sign Up"}
-                        buttonStyle={defaults.textButtonNoColor}
+                        buttonStyle={buttonStyles.noColor}
                         textStyle={styles.buttonText}
                         buttonFunc={() => this.props.navigation.navigate("userSignup")}
                     />
                     <TextButton
                         text={"Browse as Guest"}
-                        buttonStyle={defaults.textButtonNoColor}
+                        buttonStyle={buttonStyles.noColor}
                         textStyle={styles.buttonText}
                         buttonFunc={() => {
                             auth.signInAnonymously().then(() => {
@@ -177,8 +177,6 @@ const styles = StyleSheet.create({
     responseText: {
         color: "#fff",
         height: styleValues.iconMediumSize,
-        fontSize: styleValues.smallestTextSize,
-        textAlign: "center"
     },
     logo: {
         position: "absolute",

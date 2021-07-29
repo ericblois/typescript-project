@@ -197,9 +197,24 @@ export abstract class CustomerFunctions {
         }
     }
 
-    public async getOrders(types?: OrderData["status"][]) {
+    public static async getOrder(orderID: string) {
         try {
-            const currentUser = await UserFunctions.getCurrentUser()
+            const currentUser = UserFunctions.getCurrentUser()
+            const orderDocPath = `userData/${currentUser.uid}/orders/${orderID}`
+            const orderDocRef = firestore.doc(orderDocPath)
+            const orderDocSnap = await orderDocRef.get()
+            if (!orderDocSnap.exists) {
+                throw new Error(`Could not find order ID: ${orderID}`)
+            }
+            return orderDocSnap.data() as OrderData
+        } catch (e) {
+            throw e
+        }
+    }
+
+    public static async getOrders(types?: OrderData["status"][]) {
+        try {
+            const currentUser = UserFunctions.getCurrentUser()
             const ordersColPath = `userData/${currentUser.uid}/orders`
             const ordersColRef = firestore.collection(ordersColPath)
             if (types) {
@@ -235,5 +250,9 @@ export abstract class CustomerFunctions {
         } catch (e) {
             throw e
         }
+    }
+
+    public static async deleteOrder() {
+
     }
 }

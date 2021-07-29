@@ -1,7 +1,7 @@
 
 import React, { Component } from "react";
 import { View, TouchableOpacity, Image, Text, StyleSheet, GestureResponderEvent, ActivityIndicator } from "react-native";
-import { defaults, icons, styleValues, colors } from "../HelperFiles/StyleSheet";
+import { defaults, textStyles, buttonStyles, icons, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { productPropType, currency, currencyFormatter } from "../HelperFiles/Constants";
 import RatingVisual from "./RatingVisual";
@@ -12,6 +12,7 @@ import { IconButton } from "../HelperFiles/CompIndex";
 
 type Props = {
     cartItem: CartItem,
+    editable?: boolean,
     onLoadEnd?: () => void,
     onPress?: (event?: GestureResponderEvent) => void,
     onDelete?: () => void
@@ -85,38 +86,65 @@ export default class ProductCartCard extends Component<Props, State> {
     }
 
     renderQuantity() {
-        return (
-            <View
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                }}
-            >
-                <IconButton
-                    iconSource={icons.minus}
-                    buttonStyle={{height: "75%"}}
-                    buttonFunc={async () => {
-                        if (this.state.cartItem.quantity > 0) {
-                            const newCartItem = await CustomerFunctions.updateCartQuantity(this.state.cartItem, this.state.cartItem.quantity - 1)
-                            this.setState({cartItem: newCartItem})
-                        }
+        if (this.props.editable !== false) {
+            return (
+                <View
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "center",
                     }}
-                />
-                <Text
-                    style={styles.productName}
-                >{this.state.cartItem.quantity}</Text>
-                <IconButton
-                    iconSource={icons.plus}
-                    buttonStyle={{height: "75%"}}
-                    buttonFunc={async () => {
-                        if (this.state.cartItem.quantity < 99) {
-                            const newCartItem = await CustomerFunctions.updateCartQuantity(this.state.cartItem, this.state.cartItem.quantity + 1)
-                            this.setState({cartItem: newCartItem})
-                        }
-                    }}
-                />
-            </View>
-        )
+                >
+                    <IconButton
+                        iconSource={icons.trash}
+                        buttonStyle={styles.deleteButton}
+                        buttonFunc={() => {
+                            CustomerFunctions.deleteCartItem(this.state.cartItem).then(() => {
+                                if (this.props.onDelete) {
+                                    this.props.onDelete()
+                                }
+                            })
+                        }}
+                    />
+                    <IconButton
+                        iconSource={icons.minus}
+                        buttonStyle={{
+                            width: styleValues.winWidth*0.06,
+                            aspectRatio: 1,
+                        }}
+                        buttonFunc={async () => {
+                            if (this.state.cartItem.quantity > 0) {
+                                const newCartItem = await CustomerFunctions.updateCartQuantity(this.state.cartItem, this.state.cartItem.quantity - 1)
+                                this.setState({cartItem: newCartItem})
+                            }
+                        }}
+                    />
+                    <Text
+                        style={{
+                            fontSize: styleValues.mediumTextSize,
+                            paddingHorizontal: styleValues.minorPadding
+                        }}
+                    >{this.state.cartItem.quantity}</Text>
+                    <IconButton
+                        iconSource={icons.plus}
+                        buttonStyle={{
+                            width: styleValues.winWidth*0.06,
+                            aspectRatio: 1,
+                        }}
+                        buttonFunc={async () => {
+                            if (this.state.cartItem.quantity < 99) {
+                                const newCartItem = await CustomerFunctions.updateCartQuantity(this.state.cartItem, this.state.cartItem.quantity + 1)
+                                this.setState({cartItem: newCartItem})
+                            }
+                        }}
+                    />
+                </View>
+            )
+        } else {
+            return (
+                <Text style={textStyles.small}>{`Quantity: ${this.state.cartItem.quantity}`}</Text>
+            )
+        }
     }
 
     renderSubtotal() {
@@ -137,10 +165,12 @@ export default class ProductCartCard extends Component<Props, State> {
                     width: "100%"
                 }}
                 onPress={() => {
-                if (this.props.onPress) {
-                    this.props.onPress();
-                }
-            }}>
+                    if (this.props.onPress) {
+                        this.props.onPress();
+                    }
+                }}
+                activeOpacity={this.props.onPress ? 0.2 : 1}
+            >
                 <View style={{flexDirection: "row"}}>
                     <Image
                         style={styles.productImage}
@@ -157,25 +187,17 @@ export default class ProductCartCard extends Component<Props, State> {
                     />
                     <View style={styles.productInfoArea}>
                         <View style={styles.textRow}>
-                            <Text style={styles.productName}>{this.state.productData.name}</Text>
-                            <Text style={styles.optionPriceText}>{this.state.cartItem.basePrice !== this.state.cartItem.totalPrice ? currencyFormatter.format(this.state.cartItem.basePrice) : ""}</Text>
+                            <Text
+                                style={styles.productName}
+                                numberOfLines={1}
+                            >{this.state.productData.name}</Text>
+                            <Text style={styles.optionPriceText}>{currencyFormatter.format(this.state.cartItem.basePrice)}</Text>
                         </View>
                         {this.renderOptionsText()}
                     </View>
                 </View>
                 {/* Bottom of card */}
                 <View style={styles.bottomContainer}>
-                    <IconButton
-                        iconSource={icons.trash}
-                        buttonStyle={styles.deleteButton}
-                        buttonFunc={() => {
-                            CustomerFunctions.deleteCartItem(this.state.cartItem).then(() => {
-                                if (this.props.onDelete) {
-                                    this.props.onDelete()
-                                }
-                            })
-                        }}
-                    />
                     {this.renderQuantity()}
                     {this.renderSubtotal()}
                 </View>
@@ -238,24 +260,25 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
     },
     productName: {
-        fontSize: styleValues.mediumTextSize
+        ...textStyles.medium,
+        textAlign: "left",
+        flex: 0.7,
     },
     optionText: {
-        fontSize: styleValues.smallTextSize,
+        ...textStyles.small,
+        textAlign: "left",
         color: colors.grayColor
     },
     mainPriceText: {
+        ...textStyles.medium,
         textAlign: "right",
-        textAlignVertical: "center",
-        fontSize: styleValues.mediumTextSize,
-        width: "35%"
+        flex: 0.3
     },
     optionPriceText: {
+        ...textStyles.small,
         textAlign: "right",
-        textAlignVertical: "center",
-        fontSize: styleValues.smallTextSize,
-        width: "35%",
-        color: colors.grayColor
+        color: colors.grayColor,
+        flex: 0.3,
     },
     bottomContainer: {
         flexDirection: "row",
@@ -270,5 +293,6 @@ const styles = StyleSheet.create({
     },
     deleteButton: {
         height: "75%",
+        marginRight: styleValues.mediumPadding
     },
 })

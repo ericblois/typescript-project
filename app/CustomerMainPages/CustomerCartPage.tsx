@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, FlatList, } from "react-native";
-import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
 import { auth } from "../HelperFiles/Constants";
@@ -12,7 +12,7 @@ import UserFunctions from "../HelperFiles/UserFunctions";
 import { StackNavigationProp } from "@react-navigation/stack";
 import PageContainer from "../CustomComponents/PageContainer";
 import { ScrollView } from "react-native-gesture-handler";
-import { CartItem, PublicBusinessData } from "../HelperFiles/DataTypes";
+import { CartItem, PublicBusinessData, ShippingInfo } from "../HelperFiles/DataTypes";
 import ProductCartCard from "../CustomComponents/ProductCartCard";
 import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
 import ProductCardList from "../CustomComponents/ProductCardList";
@@ -106,7 +106,7 @@ export default class CustomerCartPage extends Component<CustomerCartProps, Custo
                     style={styles.businessContainer}
                     key={businessID}
                 >
-                    <Text style={{...defaults.largeTextHeader, ...{marginBottom: 0}}}>{this.state.businesses![businessID].name}</Text>
+                    <Text style={textStyles.large}>{this.state.businesses![businessID].name}</Text>
                     <ProductCardList
                         products={items}
                         showLoading={true}
@@ -127,6 +127,19 @@ export default class CustomerCartPage extends Component<CustomerCartProps, Custo
                             text={"Checkout"}
                             buttonStyle={styles.checkoutButton}
                             appearance={"color"}
+                            buttonFunc={() => {
+                              const ship: ShippingInfo = {
+                                city: "Anyville",
+                                country: "Annation",
+                                name: "Bob Ross",
+                                postalCode: "B0O8I3",
+                                region: "Province",
+                                streetAddress: "123 Any Street",
+                                apartment: null,
+                                message: null
+                              }
+                              CustomerFunctions.placeOrder(businessID, items, ship, "local", 5)
+                            }}
                         />
                     </View>
               </View>
@@ -139,9 +152,7 @@ export default class CustomerCartPage extends Component<CustomerCartProps, Custo
     return (
       <PageContainer>
         <Text
-          style={{
-            fontSize: styleValues.largeTextSize
-          }}
+          style={textStyles.large}
         >Your Cart</Text>
         <ScrollContainer>
           {this.renderBusinessCarts()}

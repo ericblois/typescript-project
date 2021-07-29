@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, LogBox } from "react-native";
+import { View, LogBox, ActivityIndicator } from "react-native";
 import * as firebase from "firebase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { auth, firestore } from "./app/HelperFiles/Constants";
@@ -12,6 +12,11 @@ import BusinessMainScreen from "./app/BusinessMainScreen";
 import BusinessShopScreen from "./app/CustomerMainPages/BusinessShopScreen";
 import ProductShopScreen from "./app/BusinessShopPages/ProductShopPage";
 import { installWebGeolocationPolyfill } from "expo-location"
+import * as Font from 'expo-font';
+import { SourceSansPro_400Regular, SourceSansPro_400Regular_Italic, SourceSansPro_700Bold } from '@expo-google-fonts/source-sans-pro';
+import { Rubik_400Regular_Italic, Rubik_500Medium, Rubik_400Regular } from '@expo-google-fonts/rubik';
+import { Lato_400Regular, Lato_400Regular_Italic, Lato_700Bold } from '@expo-google-fonts/lato';
+import PageContainer from "./app/CustomComponents/PageContainer";
 
 LogBox.ignoreLogs(['Calling getNode()', 'VirtualizedLists should never be nested'])
 
@@ -20,10 +25,44 @@ interface Props {
 }
 
 interface State {
-
+  fontsLoaded: boolean
 }
 
 export default class App extends Component<Props, State> {
+
+  constructor(props: Props) {
+    super(props)
+    this.state = {
+      fontsLoaded: false
+    }
+  }
+
+  componentDidMount() {
+
+    installWebGeolocationPolyfill()
+    // Load local persistent data
+    this.getLocalData();
+    this.loadFonts()
+  }
+
+  async loadFonts() {
+    try {
+      await Font.loadAsync({
+        SourceSansProRegular: SourceSansPro_400Regular,
+        SourceSansProItalic: SourceSansPro_400Regular_Italic,
+        SourceSansProBold: SourceSansPro_700Bold,
+        RubikRegular: Rubik_400Regular,
+        RubikItalic: Rubik_400Regular_Italic,
+        RubikBold: Rubik_500Medium,
+        LatoRegular: Lato_400Regular,
+        LatoItalic: Lato_400Regular_Italic,
+        LatoBold: Lato_700Bold,
+      })
+      this.setState({fontsLoaded: true})
+    } catch (e) {
+      console.error(e)
+    }
+  }
 
   localData: { [key: string]: any } = {};
 
@@ -50,35 +89,39 @@ export default class App extends Component<Props, State> {
     AsyncStorage.setItem("localData", jsonValue).then(() => {}, (e) => console.error(e));
   }
 
-  componentDidMount() {
-    installWebGeolocationPolyfill()
-    // Load local persistent data
-    this.getLocalData();
-  }
-
   render() {
-    return (
-        <NavigationContainer
-          theme={{
-            ...DefaultTheme,
-            colors: {
-              ...DefaultTheme.colors,
-              background: "#f00"
-            }
-          }}
-        >
-            <RootStack.Navigator
-              initialRouteName={auth.currentUser ? "customerMain" : "start"}
-              screenOptions={{
-                headerShown: false,
-              }}
-            >
-              <RootStack.Screen name={"start"} component={StartScreen}/>
-              <RootStack.Screen name={"userSignup"} component={UserSignupScreen}/>
-              <RootStack.Screen name={"customerMain"} component={CustomerMainScreen}/>
-              <RootStack.Screen name={"businessMain"} component={BusinessMainScreen}/>
-            </RootStack.Navigator>
-        </NavigationContainer>
-    );
+    if (this.state.fontsLoaded) {
+      return (
+          <NavigationContainer
+            theme={{
+              ...DefaultTheme,
+              colors: {
+                ...DefaultTheme.colors,
+                background: "#f00"
+              }
+            }}
+          >
+              <RootStack.Navigator
+                initialRouteName={auth.currentUser ? "customerMain" : "start"}
+                screenOptions={{
+                  headerShown: false,
+                }}
+              >
+                <RootStack.Screen name={"start"} component={StartScreen}/>
+                <RootStack.Screen name={"userSignup"} component={UserSignupScreen}/>
+                <RootStack.Screen name={"customerMain"} component={CustomerMainScreen}/>
+                <RootStack.Screen name={"businessMain"} component={BusinessMainScreen}/>
+              </RootStack.Navigator>
+          </NavigationContainer>
+      );
+    } else {
+      return (
+        <PageContainer>
+          <ActivityIndicator
+            size={"large"}
+          />
+        </PageContainer>
+      )
+    }
   }
 }

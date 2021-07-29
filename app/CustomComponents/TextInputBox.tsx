@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { TouchableOpacity, Text, StyleSheet, TextStyle, ViewStyle, View, TextInput, KeyboardAvoidingView } from "react-native";
 import PropTypes from 'prop-types';
 import { NavigationProp, useNavigation } from "@react-navigation/native"
-import { styleValues, colors, defaults } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, textStyles, buttonStyles, } from "../HelperFiles/StyleSheet";
 
 type TextInputBoxProps = {
     style?: ViewStyle,
@@ -41,6 +41,7 @@ export default class TextInputBox extends Component<TextInputBoxProps, State> {
                     textAlign={"center"}
                     textAlignVertical={"center"}
                     autoCorrect={false}
+                    clearButtonMode={"while-editing"}
                     {...this.props.textProps}
                     onFocus={(e) => {
                         this.setState({shouldAvoid: true})

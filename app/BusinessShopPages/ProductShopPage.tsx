@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { View, Image, Text, StyleSheet, ActivityIndicator, ScrollView, SafeAreaView } from "react-native";
 
 import PropTypes from 'prop-types';
-import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import { ImageSlider, RatingVisual, MenuBar, IconButton, PageContainer, ScrollContainer, TextDropdown } from "../HelperFiles/CompIndex";
 import { productPropType, formatText, currency } from "../HelperFiles/Constants";
 import DropDownPicker from 'react-native-dropdown-picker';
@@ -243,15 +243,15 @@ const styles = StyleSheet.create({
         borderColor: colors.grayColor
     },
     productTitle: {
-        fontSize: styleValues.largeTextSize,
-        color: styleValues.majorTextColor,
+        ...textStyles.large
     },
     productType: {
-        fontSize: styleValues.smallTextSize,
+        ...textStyles.medium,
         color: styleValues.minorTextColor,
     },
     description: {
-        fontSize: styleValues.smallTextSize,
+        ...textStyles.small,
+        textAlign: "left",
     },
     optionPickerContainer: {
         width: styleValues.winWidth-2*styleValues.mediumPadding,

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Text, View, StyleSheet, TextStyle, GestureResponderEvent, ImageStyle, ViewStyle } from "react-native";
-import { defaults, styleValues, colors } from "../HelperFiles/StyleSheet";
+import { defaults, textStyles, buttonStyles, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { Icon } from "react-native-elements";
 import { Switch } from "react-native-gesture-handler";
@@ -32,7 +32,7 @@ export default class ToggleSwitch extends Component<ToggleSwitchProps, State> {
         if (this.props.text) {
             return (
                 <Text
-                    style={{...styles.text, ...this.props.textStyle}}
+                    style={{...textStyles.small, ...this.props.textStyle}}
                 >
                     {this.props.text}
                 </Text>
@@ -75,9 +75,4 @@ const styles = StyleSheet.create({
     switch: {
 
     },
-    text: {
-        textAlign: "center",
-        textAlignVertical: "center",
-        fontSize: styleValues.smallTextSize
-    }
 })

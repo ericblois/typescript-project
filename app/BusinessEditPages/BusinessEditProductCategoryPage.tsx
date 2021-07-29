@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, ImageURISource, ScrollView, ActivityIndicator } from "react-native";
-import { styleValues, colors, defaults, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
 import { auth } from "../HelperFiles/Constants";
@@ -94,7 +94,7 @@ export default class BusinessEditProductCategoryPage extends Component<BusinessE
       return (
         <TextButton
           text={product.name}
-          buttonStyle={{...defaults.textButtonNoColor, ...{justifyContent: "space-between"}}}
+          buttonStyle={{...buttonStyles.noColor, ...{justifyContent: "space-between"}}}
           rightIconSource={icons.chevron}
           rightIconStyle={{transform: [{scaleX: -1}]}}
           buttonFunc={() => {
@@ -111,7 +111,7 @@ export default class BusinessEditProductCategoryPage extends Component<BusinessE
       return (
         <TextButton
           text={"Delete this category"}
-          buttonStyle={defaults.textButtonNoColor}
+          buttonStyle={buttonStyles.noColor}
           textStyle={{color: "red"}}
           buttonFunc={async () => {
             await this.props.businessFuncs.deleteProductCategory(this.props.route.params.productCategory).then(() => {
@@ -127,7 +127,7 @@ export default class BusinessEditProductCategoryPage extends Component<BusinessE
         return (
           <PageContainer>
             <Text
-              style={styles.headerText}
+              style={textStyles.larger}
             >
               {this.props.route.params.productCategory}
             </Text>
@@ -210,9 +210,6 @@ export default class BusinessEditProductCategoryPage extends Component<BusinessE
 }
 
 const styles = StyleSheet.create({
-    headerText: {
-      fontSize: styleValues.largerTextSize
-    },
     list: {
       width: "100%",
     },
