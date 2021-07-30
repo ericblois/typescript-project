@@ -21,7 +21,6 @@ import BusinessEditProductPage from "../BusinessEditPages/BusinessEditProductPag
 import ProductEditOptionTypePage from "../BusinessEditPages/ProductEditOptionTypePage"
 import ProductEditOptionPage from "../BusinessEditPages/ProductEditOptionPage"
 import BusinessAccountPage from "../BusinessMainPages/BusinessAccountPage"
-import CustomerTabScreen from "../CustomerMainPages/CustomerTabScreen"
 import CustomerEditShippingPage from "../CustomerMainPages/CustomerEditShippingPage"
 import CustomerEditAddressPage from "../CustomerMainPages/CustomerEditAddressPage"
 
@@ -47,7 +46,6 @@ export {
     ProductEditOptionTypePage,
     ProductEditOptionPage,
     BusinessAccountPage,
-    CustomerTabScreen,
     CustomerEditShippingPage,
     CustomerEditAddressPage
 }

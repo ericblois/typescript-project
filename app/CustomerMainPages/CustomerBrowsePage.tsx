@@ -1,9 +1,8 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, NativeSyntheticEvent, TextInputSubmitEditingEventData, FlatList, ActivityIndicator, } from "react-native";
 import PropTypes from 'prop-types';
-import { SearchBar, } from "react-native-elements";
-import { styleValues, colors, defaults, textStyles, buttonStyles, fonts } from "../HelperFiles/StyleSheet";
-import { BusinessCard, BusinessCardBrowseList, BusinessResult, PageContainer, ScrollContainer, TextInputBox } from "../HelperFiles/CompIndex";
+import { styleValues, colors, defaults, textStyles, buttonStyles, fonts, menuBarHeight } from "../HelperFiles/StyleSheet";
+import { BusinessCard, BusinessCardBrowseList, BusinessResult, PageContainer, ScrollContainer, SearchBar, TextInputBox } from "../HelperFiles/CompIndex";
 import { firestore } from "../HelperFiles/Constants";
 import { getQueryTerms } from "../HelperFiles/ClientFunctions"
 import ServerData from "../HelperFiles/ServerData";
@@ -58,7 +57,7 @@ export default class CustomerBrowsePage extends Component<Props, State> {
     onSubmit = (event: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {
       try {
         const search = event.nativeEvent.text;
-        this.setState({searchLoading: true})
+        this.setState({showSearchResults: true, searchLoading: true})
         // Get current position
         navigator.geolocation.getCurrentPosition(async (pos) => {
           const location = {latitude: pos.coords.latitude, longitude: pos.coords.longitude}
@@ -70,59 +69,43 @@ export default class CustomerBrowsePage extends Component<Props, State> {
       }
     }
 
-    renderSearchResults(businesses: PublicBusinessData[]) {
-      if (this.state.businessResults.length > 0) {
-        return (
-          <FlatList
-            data={businesses}
-            keyExtractor={(item) => item.businessID}
-            renderItem={({item}) => {
-              return (
-                <BusinessResult
-                  businessData={item}
-                  onPress={() => {
-                    this.props.navigation.navigate("businessShop", {businessData: item})
-                  }}
-                />
-              )
-            }}
-            style={{
-              position: "absolute",
-              width: "100%",
-              top: defaults.inputBox.height + styleValues.mediumPadding,
-              bottom: defaults.tabBarLightColor.height + styleValues.mediumPadding*2,
-              backgroundColor: colors.whiteColor,
-            }}
-          />
-        )
-      } else if (this.state.searchLoading) {
-        return (
-          <View
-            style={{flex: 1, alignItems: "center", justifyContent: "center", position: "absolute"}}
-          >
-            <ActivityIndicator
-              size={"large"}
-            />
-          </View>
-        )
-      }
+    renderSearchResults() {
+      return (
+        <View style={{width: "100%", flex: 1}}>
+          {this.state.businessResults.map((publicData) => {
+            return (
+              <BusinessResult
+                businessData={publicData}
+                containerStyle={{
+                  width: styleValues.winWidth - 2*styleValues.mediumPadding,
+                  alignSelf: "center"
+                }}
+                onPress={() => {
+                  this.props.navigation.navigate("businessShop", {businessData: publicData})
+                }}
+                key={publicData.businessID}
+              />
+            )
+          })}
+        </View>
+      )
     }
 
     renderFavorites() {
       if (this.state.userData) {
         return (
-          <View style={{width: "100%", marginBottom: styleValues.mediumPadding}}>
+          <View style={{width: "100%",}}>
             <Text 
               style={{...textStyles.large, ...{
                 textAlign: "left",
                 marginLeft: styleValues.mediumPadding,
-                marginBottom: styleValues.mediumPadding
+                marginTop: styleValues.mediumPadding
               }}}
             >Favorites</Text>
             <BusinessCardBrowseList
               businessIDs={this.state.userData.favorites}
               onCardPress={(publicData) => this.props.navigation.navigate("businessShop", {businessData: publicData})}
-              showLoading={true}
+              showLoading={false}
               style={{width: styleValues.winWidth, marginHorizontal: -styleValues.mediumPadding}}
             />
           </View>
@@ -133,12 +116,11 @@ export default class CustomerBrowsePage extends Component<Props, State> {
     renderFeaturedBusinesses() {
       if (this.state.userData) {
         return (
-          <View style={{width: "100%", marginBottom: styleValues.mediumPadding}}>
+          <View style={{width: "100%"}}>
             <Text
               style={{...textStyles.large, ...{
                 textAlign: "left",
                 marginLeft: styleValues.mediumPadding,
-                marginBottom: styleValues.mediumPadding
               }}}
             >Featured Businesses</Text>
             <BusinessCardBrowseList
@@ -155,12 +137,11 @@ export default class CustomerBrowsePage extends Component<Props, State> {
     renderPopularBusinesses() {
       if (this.state.userData) {
         return (
-          <View style={{width: "100%", marginBottom: styleValues.mediumPadding}}>
+          <View style={{width: "100%",}}>
             <Text
               style={{...textStyles.large, ...{
                 textAlign: "left",
                 marginLeft: styleValues.mediumPadding,
-                marginBottom: styleValues.mediumPadding
               }}}
             >Popular Businesses</Text>
             <BusinessCardBrowseList
@@ -173,10 +154,61 @@ export default class CustomerBrowsePage extends Component<Props, State> {
       }
     }
 
+    renderContent() {
+      if (!this.state.showSearchResults) {
+        return (
+          <View
+            style={{width: "100%"}}
+          >
+              {this.renderFavorites()}
+              {this.renderFeaturedBusinesses()}
+              {this.renderPopularBusinesses()}
+          </View>
+        )
+      } else if (!this.state.searchLoading) {
+        return (
+          this.renderSearchResults()
+        )
+      } else {
+        return (
+          <View
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center"
+            }}
+          >
+            <ActivityIndicator
+              size={"large"}
+            />
+          </View>
+        )
+      }
+    }
+
     render() {
       return (
           <PageContainer>
-            <TextInputBox
+            <ScrollContainer
+              style={{
+                width: styleValues.winWidth
+              }}
+              contentContainerStyle={{
+                paddingHorizontal: 0,
+                paddingTop: styleValues.winWidth*0.1 + styleValues.mediumPadding,
+                paddingBottom: menuBarHeight + styleValues.mediumPadding
+              }}
+              containerStyle={{
+                position: "absolute",
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0
+              }}
+            >
+              {this.renderContent()}
+            </ScrollContainer>
+            <SearchBar
               textProps={{
                 placeholder: "Search...",
                 value: this.state.searchText,
@@ -185,15 +217,13 @@ export default class CustomerBrowsePage extends Component<Props, State> {
                 },
                 onSubmitEditing: this.onSubmit
               }}
-            ></TextInputBox>
-            <ScrollContainer style={{
-              width: styleValues.winWidth
-            }}>
-              {this.renderFavorites()}
-              {this.renderFeaturedBusinesses()}
-              {this.renderPopularBusinesses()}
-            </ScrollContainer>
-            {this.renderSearchResults(this.state.businessResults)}
+              onClearText={() => {
+                this.setState({showSearchResults: false})
+              }}
+              barStyle={{
+                marginBottom: 0,
+              }}
+            ></SearchBar>
           </PageContainer>
       );
     }

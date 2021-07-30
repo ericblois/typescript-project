@@ -8,7 +8,7 @@ import RatingVisual from "./RatingVisual";
 import { useNavigation } from "@react-navigation/native";
 import { CartItem, ProductCategory, ProductData, PublicBusinessData } from "../HelperFiles/DataTypes";
 import ProductCard from "./ProductCard";
-import { BusinessCard, ItemList, ProductCartCard } from "../HelperFiles/CompIndex";
+import { BusinessCard, ItemList, ProductCartCard, ScrollContainer } from "../HelperFiles/CompIndex";
 
 type Props = {
     businessIDs: string[],
@@ -39,6 +39,7 @@ export default class BusinessCardBrowseList extends Component<Props, State> {
         return (
             <BusinessCard
                 businessID={businessID}
+                key={businessID}
                 onLoadEnd={(publicData) => {
                     // Add this business' data to list
                     const businessIndex = this.props.businessIDs.findIndex((id) => {
@@ -80,15 +81,13 @@ export default class BusinessCardBrowseList extends Component<Props, State> {
 
     renderUI() {
         return (
-            <ItemList
-                data={this.props.businessIDs}
-                keyExtractor={(item) => (item)}
-                renderItem={({item}) => {
-                    return this.renderBusinessCard(item)
-                }}
-                contentContainerStyle={styles.cardList}
+            <ScrollContainer
                 horizontal={true}
-            />
+            >
+                {this.props.businessIDs.map((id) => {
+                    return this.renderBusinessCard(id)
+                })}
+            </ScrollContainer>
         )
     }
 
@@ -101,7 +100,7 @@ export default class BusinessCardBrowseList extends Component<Props, State> {
                     height: styleValues.winWidth*0.6,
                     alignItems: "center",
                     justifyContent: "center",
-                    backgroundColor: colors.whiteColor
+                    backgroundColor: colors.backgroundColor
                 }}>
                     <ActivityIndicator size={"large"}/>
                 </View>
@@ -111,7 +110,10 @@ export default class BusinessCardBrowseList extends Component<Props, State> {
 
     render() {
         return (
-            <View style={{width: "100%"}}>
+            <View style={{
+                width: "100%",
+                height: styleValues.winWidth*0.6
+            }}>
                 {this.renderUI()}
                 {this.renderLoading()}
             </View>

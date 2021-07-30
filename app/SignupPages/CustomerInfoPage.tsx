@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { View, ScrollView, Text, StyleSheet, TextInput, ActivityIndicator } from "react-native";
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
-import { TextInputBox, DateScrollPicker, TextDropdown, MenuBar, PageContainer } from "../HelperFiles/CompIndex";
+import { TextInputBox, DateScrollPicker, TextDropdown, MenuBar, PageContainer, ScrollContainer } from "../HelperFiles/CompIndex";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList, UserSignupStackParamList } from "../HelperFiles/Navigation";
 import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
@@ -172,7 +172,7 @@ export default class CustomerInfoPage extends Component<Props, State> {
             <Text style={textStyles.larger}>
                 Sign Up
             </Text>
-            <ScrollView>
+            <ScrollContainer>
                 <Text style={styles.inputDescription}>
                     This will be used when messaging businesses.
                 </Text>
@@ -316,12 +316,9 @@ export default class CustomerInfoPage extends Component<Props, State> {
                 <Text style={styles.inputDescription}>
                     {this.state.responseText}
                 </Text>
-            </ScrollView>
+            </ScrollContainer>
             {this.renderLoadingView()}
             <MenuBar
-                menuBarStyle={{
-                    bottom: styleValues.mediumPadding
-                }}
                 buttonProps={[
                     {
                         iconSource: icons.backArrow,

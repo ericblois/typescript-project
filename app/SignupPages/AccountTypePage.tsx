@@ -48,7 +48,7 @@ export default class AccountTypePage extends Component<Props, State> {
                         ...buttonStyles.noColor,
                         ...styles.accountTypeButton,
                         ...{borderWidth: this.state.typeSelection === "customer" ? styleValues.majorBorderWidth : styleValues.minorBorderWidth,
-                            borderColor: this.state.typeSelection === "customer" ? colors.validColor : colors.grayColor,
+                            borderColor: this.state.typeSelection === "customer" ? colors.mainColor : colors.lightGrayColor,
                         }
                     }}
                     buttonFunc={() => {
@@ -62,7 +62,7 @@ export default class AccountTypePage extends Component<Props, State> {
                         ...buttonStyles.noColor,
                         ...styles.accountTypeButton,
                         ...{borderWidth: this.state.typeSelection === "business" ? styleValues.majorBorderWidth : styleValues.minorBorderWidth,
-                            borderColor: this.state.typeSelection === "business" ? colors.validColor : colors.grayColor,
+                            borderColor: this.state.typeSelection === "business" ? colors.mainColor : colors.lightGrayColor,
                         }
                     }}
                     buttonFunc={() => {
@@ -89,7 +89,6 @@ export default class AccountTypePage extends Component<Props, State> {
                             }
                         }
                     ]}
-                    menuBarStyle={defaults.menuBarNoColor}
                 />
             </View>
         )

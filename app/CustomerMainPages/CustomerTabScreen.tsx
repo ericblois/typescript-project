@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { StyleSheet, StatusBar, AppState, ActivityIndicator, View } from "react-native";
 import BusinessShopScreen from "./BusinessShopScreen"
-import { defaults, textStyles, buttonStyles, icons, styleValues, colors } from "../HelperFiles/StyleSheet";
+import { defaults, textStyles, buttonStyles, icons, styleValues, colors, tabBarStyles } from "../HelperFiles/StyleSheet";
 import { CustomerMainStack, CustomerTab } from "../HelperFiles/Navigation";
 import TabIcon from "../CustomComponents/TabIcon";
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -35,7 +35,10 @@ export default class CustomerTabScreen extends Component<Props, State> {
     return (
         <CustomerTab.Navigator
             tabBarOptions={{
-              style: defaults.tabBarLightColor,
+              style: {
+                ...tabBarStyles.lightHover,
+                ...defaults.mediumShadow
+              },
               showLabel: false,
               activeTintColor: colors.mainColor,
               inactiveTintColor: colors.lightGrayColor

@@ -106,7 +106,10 @@ export default class ProductCard extends Component<Props, State> {
 
     render() {
         return (
-            <View style={styles.cardContainer}>
+            <View style={{
+                ...styles.cardContainer,
+                ...defaults.smallShadow
+            }}>
                 {this.renderUI()}
                 {this.renderLoading()}
             </View>
@@ -117,9 +120,7 @@ export default class ProductCard extends Component<Props, State> {
 const styles = StyleSheet.create({
     cardContainer: {
         backgroundColor: "#fff",
-        borderColor: colors.grayColor,
         borderRadius: styleValues.bordRadius,
-        borderWidth: styleValues.minorBorderWidth,
         height: styleValues.winWidth * 0.3,
         width: styleValues.winWidth - styleValues.mediumPadding*2,
         marginTop: styleValues.mediumPadding,

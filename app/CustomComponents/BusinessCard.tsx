@@ -38,7 +38,7 @@ export default class BusinessCard extends Component<Props, State> {
     renderUI() {
       if (this.state.businessData) {
         return (
-          <TouchableOpacity style={{width: "100%", height: "100%"}} onPress={this.props.onPress}>
+          <TouchableOpacity style={{height: "100%"}} onPress={this.props.onPress}>
             <Image
                 style={styles.galleryImage}
                 resizeMethod={"scale"}
@@ -69,10 +69,12 @@ export default class BusinessCard extends Component<Props, State> {
               position: "absolute",
               alignItems: "center",
               justifyContent: "center",
+              borderRadius: styleValues.bordRadius,
               top: 0, 
               bottom: 0,
               left: 0,
-              right: 0
+              right: 0,
+              backgroundColor: colors.whiteColor
             }}
           >
             <ActivityIndicator
@@ -85,7 +87,10 @@ export default class BusinessCard extends Component<Props, State> {
 
     render() {
       return (
-        <View style={styles.cardContainer}>
+        <View style={{
+          ...styles.cardContainer,
+          ...defaults.smallShadow,
+        }}>
           {this.renderUI()}
           {this.renderLoading()}
         </View>
@@ -96,10 +101,7 @@ export default class BusinessCard extends Component<Props, State> {
 const styles = StyleSheet.create({
     cardContainer: {
       backgroundColor: "#fff",
-      borderColor: colors.grayColor,
       borderRadius: styleValues.bordRadius,
-      borderWidth: styleValues.minorBorderWidth,
-      width: styleValues.winWidth * 0.6,
       padding: styleValues.minorPadding,
       justifyContent: "space-between",
     },

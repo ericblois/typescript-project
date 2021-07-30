@@ -1,6 +1,6 @@
 
 import React, { Component } from "react";
-import { View, TouchableOpacity, Image, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { View, TouchableOpacity, Image, Text, StyleSheet, ActivityIndicator, ViewStyle } from "react-native";
 import { icons, styleValues, colors, defaults, textStyles, buttonStyles, } from "../HelperFiles/StyleSheet";
 import {  useNavigation } from "@react-navigation/native";
 import { PublicBusinessData } from "../HelperFiles/DataTypes";
@@ -9,6 +9,7 @@ import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
 
 type Props = {
   businessData: PublicBusinessData,
+  containerStyle?: ViewStyle,
   favorited?: boolean,
   onPress?: () => void
 }
@@ -28,7 +29,7 @@ export default class BusinessResult extends Component<Props, State> {
 
     render() {
         return (
-          <TouchableOpacity style={styles.resultItemContainer} onPress={this.props.onPress}>
+          <TouchableOpacity style={{...styles.resultItemContainer, ...this.props.containerStyle}} onPress={this.props.onPress}>
             <View>
             <Image
                 style={styles.resultImage}
@@ -80,8 +81,7 @@ const styles = StyleSheet.create({
         borderRadius: styleValues.bordRadius,
         borderWidth: styleValues.minorBorderWidth,
         height: styleValues.winWidth * 0.25,
-        width: styleValues.winWidth * 0.95,
-        marginTop: styleValues.mediumPadding,
+        width: "100%",
         padding: styleValues.minorPadding,
         flexDirection: "row",
         justifyContent: "space-between",

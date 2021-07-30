@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, textStyles, buttonStyles, icons, menuBarHeight, fonts } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import PageContainer from "../CustomComponents/PageContainer";
 import { CustomerMainStackParamList, CustomerTabParamList } from "../HelperFiles/Navigation";
@@ -53,7 +53,7 @@ export default class CustomerOrdersPage extends Component<Props, State> {
     if (orders) {
       return (
         <View style={{flex: 1}}>
-          <Text style={textStyles.large}>Current Orders</Text>
+          <Text style={{...textStyles.large, marginBottom: styleValues.mediumPadding}}>Current Orders</Text>
           {orders.map((orderData) => {
             return (
               <OrderCard
@@ -72,13 +72,17 @@ export default class CustomerOrdersPage extends Component<Props, State> {
     return (
       <PageContainer>
         <Text style={textStyles.larger}>Your Orders</Text>
-        <ScrollContainer style={{width: styleValues.winWidth}}>
+        <ScrollContainer>
           {this.renderOrders(this.state.activeOrders)}
           {this.renderOrders(this.state.previousOrders)}
         </ScrollContainer>
         <TextButton
           text={"View your cart"}
-          buttonStyle={{marginBottom: 0}}
+          appearance={"color"}
+          buttonStyle={{
+            marginBottom: menuBarHeight + styleValues.mediumPadding*2,
+            width: styleValues.winWidth - styleValues.mediumPadding*2
+          }}
           buttonFunc={() => this.props.navigation.navigate("cart")}
           rightIconSource={icons.chevron}
           rightIconStyle={{transform: [{scaleX: -1}]}}

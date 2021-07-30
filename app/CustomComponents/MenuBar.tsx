@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, StyleSheet, ViewStyle, GestureResponderEvent } from "react-native";
-import { styleValues, colors, icons, defaults, textStyles, buttonStyles, } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, icons, defaults, textStyles, buttonStyles, menuBarStyles, } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import IconButton from "./IconButton";
 import { useNavigation  } from "@react-navigation/native";
@@ -8,7 +8,8 @@ import { useNavigation  } from "@react-navigation/native";
 type Props = {
   buttonProps: IconButton['props'][],
   menuBarStyle?: ViewStyle,
-  buttonStyle?: ViewStyle
+  buttonStyle?: ViewStyle,
+  shadow?: boolean
 }
 
 type State = {}
@@ -30,12 +31,18 @@ export default class MenuBar extends Component<Props, State> {
 
   render() {
     return (
-      <View style={[defaults.menuBarLightColor, this.styles.menuBarStyle]}>
+      <View style={{
+          ...menuBarStyles.lightHover,
+          ...defaults.mediumShadow,
+          ...this.styles.menuBarStyle
+        }}
+      >
         {
           this.props.buttonProps.map((props, index) => {
             return <IconButton {...props} key={index}/>;
           })
         }
+
       </View>
     )
   }

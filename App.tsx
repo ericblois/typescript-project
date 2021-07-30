@@ -16,6 +16,10 @@ import * as Font from 'expo-font';
 import { SourceSansPro_400Regular, SourceSansPro_400Regular_Italic, SourceSansPro_700Bold } from '@expo-google-fonts/source-sans-pro';
 import { Rubik_400Regular_Italic, Rubik_500Medium, Rubik_400Regular } from '@expo-google-fonts/rubik';
 import { Lato_400Regular, Lato_400Regular_Italic, Lato_700Bold } from '@expo-google-fonts/lato';
+import { Nunito_400Regular, Nunito_400Regular_Italic, Nunito_700Bold } from '@expo-google-fonts/nunito';
+import { Roboto_400Regular, Roboto_400Regular_Italic, Roboto_700Bold } from '@expo-google-fonts/roboto';
+import { Montserrat_400Regular, Montserrat_500Medium, Montserrat_400Regular_Italic, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
+import { RobotoSlab_400Regular, RobotoSlab_700Bold } from '@expo-google-fonts/roboto-slab';
 import PageContainer from "./app/CustomComponents/PageContainer";
 
 LogBox.ignoreLogs(['Calling getNode()', 'VirtualizedLists should never be nested'])
@@ -57,6 +61,18 @@ export default class App extends Component<Props, State> {
         LatoRegular: Lato_400Regular,
         LatoItalic: Lato_400Regular_Italic,
         LatoBold: Lato_700Bold,
+        NunitoRegular: Nunito_400Regular,
+        NunitoItalic: Nunito_400Regular_Italic,
+        NunitoBold: Nunito_700Bold,
+        RobotoRegular: Roboto_400Regular,
+        RobotoItalic: Roboto_400Regular_Italic,
+        RobotoBold: Roboto_700Bold,
+        MontserratRegular: Montserrat_400Regular,
+        MontserratMedium: Montserrat_500Medium,
+        MontserratItalic: Montserrat_400Regular_Italic,
+        MontserratBold: Montserrat_700Bold,
+        RobotoSlabRegular: RobotoSlab_400Regular,
+        RobotoSlabBold: RobotoSlab_700Bold,
       })
       this.setState({fontsLoaded: true})
     } catch (e) {

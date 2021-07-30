@@ -22,7 +22,8 @@ export const menuBarHeight = winWidth * 0.15
 // --- Load fonts ---
 
 export const fonts = {
-  regular: "LatoRegular",
+  regular: "MontserratRegular",
+  medium: "MontserratMedium",
   italic: "RubikItalic",
   bold: "RubikBold",
 }
@@ -57,9 +58,10 @@ function hasRoundCorners() {
 })*/
 
 export const colors = {
-  lightColor: "#5BD77A",
-  mainColor: "#2CB557",
-  darkColor: "#24944D",
+  lightestColor: "#e3fff1",
+  lightColor: "#8ee6a6",
+  mainColor: "#61c97d",
+  darkColor: "#449e5c",
   whiteColor: "#fff",
   lightestGrayColor: "#ddd",
   lighterGrayColor: "#bbb",
@@ -70,7 +72,8 @@ export const colors = {
   blackColor: "#000",
   validColor: "#2CB557",
   invalidColor: "#DD404B",
-  yellowColor: "#FFCF56"
+  yellowColor: "#FFCF56",
+  backgroundColor: "#eee",
 }
 
 export const styleValues = {
@@ -112,7 +115,6 @@ const defaultTemplates = StyleSheet.create({
     width: "100%",
     height: winWidth* 0.125,
     padding: styleValues.mediumPadding,
-    borderWidth: styleValues.minorBorderWidth,
     borderRadius: styleValues.bordRadius,
     flexDirection: "row",
     marginBottom: styleValues.mediumPadding,
@@ -167,25 +169,104 @@ export const buttonStyles = StyleSheet.create({
   },
 })
 
+export const menuBarStyles = StyleSheet.create({
+  lightFade: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    alignSelf: "center",
+    width: styleValues.winWidth,
+    height: menuBarHeight,
+    padding: styleValues.mediumPadding,
+    backgroundColor: colors.whiteColor,
+    position: "absolute",
+    bottom: 0,
+  },
+  lightHover: {
+    width: styleValues.winWidth - styleValues.mediumPadding*2,
+    height: menuBarHeight,
+    position: "absolute",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    alignSelf: "center",
+    borderRadius: styleValues.bordRadius,
+    padding: styleValues.mediumPadding,
+    backgroundColor: colors.whiteColor,
+    bottom: styleValues.mediumPadding,
+  }
+})
+
+export const tabBarStyles = StyleSheet.create({
+  lightFade: {
+    width: styleValues.winWidth,
+    height: menuBarHeight,
+    position: "absolute",
+    borderTopWidth: 0,
+    paddingTop: styleValues.mediumPadding,
+    paddingBottom: styleValues.mediumPadding,
+    bottom: 0
+  },
+  lightHover: {
+    width: styleValues.winWidth - styleValues.mediumPadding*2,
+    height: menuBarHeight,
+    position: "absolute",
+    marginHorizontal: styleValues.mediumPadding,
+    borderRadius: styleValues.bordRadius,
+    borderTopWidth: 0,
+    paddingTop: styleValues.mediumPadding,
+    paddingBottom: styleValues.mediumPadding,
+    bottom: styleValues.mediumPadding,
+  }
+})
+
 export const defaults = StyleSheet.create({
   screenContainer: {
-    width: displayWidth,
-    height: displayHeight,
     paddingTop: initialWindowMetrics?.insets.top ? initialWindowMetrics!.insets.top : 0,
     paddingBottom: initialWindowMetrics?.insets.bottom ? initialWindowMetrics!.insets.bottom : 0,
     backgroundColor: "#777",
     position: "absolute",
+    top: 0,
+    bottom: 0,
     left: 0,
-    bottom: 0
+    right: 0
   },
   pageContainer: {
       alignItems: "center",
       justifyContent: "flex-start",
       width: winWidth,
       height: winHeight,
-      backgroundColor: "#fff",
-      padding: styleValues.mediumPadding,
-      paddingBottom: menuBarHeight
+      backgroundColor: colors.backgroundColor,
+  },
+  smallShadow: {
+    shadowColor: colors.blackColor,
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: styleValues.minorPadding,
+    elevation: 5,
+  },
+  mediumShadow: {
+    shadowColor: colors.blackColor,
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: styleValues.mediumPadding*0.75,
+    elevation: 10,
+  },
+  largeShadow: {
+    shadowColor: colors.blackColor,
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: styleValues.mediumPadding,
+    elevation: 15,
   },
   dividerBox: {
     alignItems: "center",
@@ -204,33 +285,6 @@ export const defaults = StyleSheet.create({
     paddingTop: styleValues.mediumPadding,
     paddingBottom: styleValues.mediumPadding,
   },
-  menuBarNoColor: {
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderColor: colors.darkColor,
-    borderRadius: styleValues.bordRadius,
-    borderWidth: styleValues.minorBorderWidth,
-    flexDirection: "row",
-    height: menuBarHeight,
-    justifyContent: "space-between",
-    position: "absolute",
-    bottom: styleValues.mediumPadding,
-    alignSelf: "center",
-    width: styleValues.winWidth - styleValues.mediumPadding*2,
-    paddingHorizontal: styleValues.majorPadding,
-  },
-  menuBarLightColor: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    alignSelf: "center",
-    width: styleValues.winWidth,
-    height: menuBarHeight,
-    padding: styleValues.mediumPadding,
-    backgroundColor: colors.whiteColor,
-    position: "absolute",
-    bottom: 0,
-  },
   iconButton: {
     alignContent: "center",
     justifyContent: "center",
@@ -243,20 +297,20 @@ export const defaults = StyleSheet.create({
     tintColor: colors.darkGrayColor,
   },
   inputBox: {
-    width: "100%",
-    height: styleValues.winWidth/10,
+    width: styleValues.winWidth - styleValues.mediumPadding*2,
+    height: styleValues.winWidth*0.1,
     backgroundColor: "#fff",
     borderWidth: styleValues.minorBorderWidth,
     borderRadius: styleValues.bordRadius,
     borderColor: colors.mainColor,
-    marginBottom: styleValues.mediumPadding,
+    marginVertical: styleValues.mediumPadding,
     alignItems: "center",
     justifyContent: "center",
   },
   inputText: {
     ...defaultTemplates.text,
-    width: "95%",
-    height: "95%",
+    flex: 1,
+    height: "100%",
     backgroundColor: "#fff",
     borderRadius: styleValues.bordRadius,
     fontSize: styleValues.smallTextSize,

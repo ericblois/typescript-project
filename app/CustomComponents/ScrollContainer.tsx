@@ -4,10 +4,12 @@ import { ScrollView } from "react-native-gesture-handler"
 import GradientView from "../CustomComponents/GradientView"
 import { defaults, textStyles, buttonStyles, styleValues, colors } from "../HelperFiles/StyleSheet"
 
-type Props = {
-    style?: ViewStyle,
-    scrollProps?: ScrollViewProps,
-    avoidKeyboard?: boolean
+type Props = ScrollViewProps & {
+    containerStyle?: ViewStyle,
+    avoidKeyboard?: boolean,
+    fade?: boolean,
+    fadeStartColor?: string,
+    fadeEndColor?: string,
 }
 
 type State = {}
@@ -34,13 +36,15 @@ export default class ScrollContainer extends Component<Props, State> {
 
     render() {
         return (
-            <View style={{...{flex: 1}, ...this.props.style}}>
+            <View style={this.props.containerStyle}>
                 <ScrollView
                     style={{width: "100%", height: "100%"}}
-                    contentContainerStyle={{paddingVertical: styleValues.mediumPadding, width: "100%"}}
+                    contentContainerStyle={{
+                        padding: styleValues.mediumPadding,
+                    }}
                     showsVerticalScrollIndicator={false}
                     showsHorizontalScrollIndicator={false}
-                    {...this.props.scrollProps}
+                    {...this.props}
                 >
                     <View
                         onStartShouldSetResponder={() => (true)}
@@ -49,7 +53,13 @@ export default class ScrollContainer extends Component<Props, State> {
                         {this.renderChildren()}
                     </View>
                 </ScrollView>
-                <GradientView/>
+                {this.props.fade === false ? undefined : 
+                    <GradientView
+                        horizontal={this.props.horizontal === true}
+                        fadeStartColor={this.props.fadeStartColor}
+                        fadeEndColor={this.props.fadeEndColor}
+                    />
+                }
             </View>
         )
     }

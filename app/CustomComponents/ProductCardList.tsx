@@ -8,7 +8,8 @@ import RatingVisual from "./RatingVisual";
 import { useNavigation } from "@react-navigation/native";
 import { CartItem, ProductCategory, ProductData } from "../HelperFiles/DataTypes";
 import ProductCard from "./ProductCard";
-import { ItemList, ProductCartCard } from "../HelperFiles/CompIndex";
+import ItemList from "./ItemList";
+import ProductCartCard from "./ProductCartCard";
 
 type ProductInfo = {
     businessID: string,

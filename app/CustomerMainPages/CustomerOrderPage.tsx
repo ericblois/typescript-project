@@ -54,7 +54,9 @@ export default class CustomerOrderPage extends Component<Props, State> {
       if (this.state.businessData) {
         const imgSrc = this.state.businessData.profileImage === "" ? icons.store : {uri: this.state.businessData.profileImage}
         return (
-            <ScrollContainer style={{width: styleValues.winWidth}}>
+            <ScrollContainer
+                containerStyle={{width: "100%"}}
+            >
                 <View
                     style={{
                         flexDirection: "row",

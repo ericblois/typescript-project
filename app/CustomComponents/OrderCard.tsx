@@ -122,7 +122,11 @@ export default class OrderCard extends Component<Props, State> {
     render() {
         return (
             <View
-                style={{...styles.cardContainer, ...this.props.style}}
+                style={{
+                    ...styles.cardContainer,
+                    ...defaults.smallShadow,
+                    ...this.props.style
+                }}
                 onStartShouldSetResponder={() => (true)}
             >
                 {this.renderUI()}
@@ -135,12 +139,10 @@ export default class OrderCard extends Component<Props, State> {
 const styles = StyleSheet.create({
     cardContainer: {
         backgroundColor: "#fff",
-        borderColor: colors.grayColor,
         borderRadius: styleValues.bordRadius,
-        borderWidth: styleValues.minorBorderWidth,
         minHeight: styleValues.winWidth * 0.25,
         width: "100%",
-        padding: styleValues.minorPadding,
+        padding: styleValues.mediumPadding,
         marginBottom: styleValues.mediumPadding,
         flexDirection: "row",
         alignItems: "center",
@@ -149,6 +151,6 @@ const styles = StyleSheet.create({
         width: styleValues.winWidth * 0.15,
         aspectRatio: 1,
         borderRadius: styleValues.minorPadding,
-        marginRight: styleValues.minorPadding
+        marginRight: styleValues.mediumPadding
     },
 })

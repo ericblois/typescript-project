@@ -1,7 +1,7 @@
 import React, { Component, ReactNode } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity } from "react-native";
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons, menuBarHeight } from "../HelperFiles/StyleSheet";
-import { ItemList, MenuBar, PageContainer, ProductCard } from "../HelperFiles/CompIndex";
+import { ItemList, MenuBar, PageContainer, ProductCard, ScrollContainer } from "../HelperFiles/CompIndex";
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { BusinessShopStackParamList, CustomerTabParamList } from "../HelperFiles/Navigation";
 import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
@@ -48,24 +48,38 @@ export default class BusinessProducts extends Component<Props, State> {
     }
 
     renderCategoryBar() {
+        console.log(this.props.businessData.productList)
         return (
-            <ItemList
+            <ScrollContainer
                 style={styles.categoryBar}
-                data={this.props.businessData.productList}
+                containerStyle={defaults.smallShadow}
+                contentContainerStyle={{
+                    height: "100%",
+                    alignItems: "center",
+                    justifyContent: "center"
+                }}
+                fade={true}
                 horizontal={true}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={({item, index}) => (
-                    <View style={{flexDirection: "row", height: "100%"}}>
-                        {this.renderCategorySeperator(index!)}
-                        <TouchableOpacity
-                            style={styles.barContent}
-                            onPress={() => this.setState({currentCategory: item})}
-                        >
-                            <Text style={textStyles.large}>{item.name}</Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
-            />
+            >
+                <View style={{
+                    flexDirection: "row"
+                }}>
+                {this.props.businessData.productList.map((category, index) => {
+                    return (
+                        <View style={{flexDirection: "row", height: "100%"}}>
+                            {this.renderCategorySeperator(index)}
+                            <TouchableOpacity
+                                style={styles.barContent}
+                                onPress={() => this.setState({currentCategory: category})}
+                            >
+                                <Text style={{...textStyles.large}}>{category.name}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )
+                })}
+                </View>
+            </ScrollContainer>
+
         )
     }
 
@@ -111,12 +125,11 @@ export default class BusinessProducts extends Component<Props, State> {
 const styles = StyleSheet.create({
     categoryBar: {
         width: styleValues.winWidth - styleValues.mediumPadding*2,
+        height: styleValues.winWidth*0.1,
         position: "absolute",
-        bottom: menuBarHeight,
-        padding: 0,
-        paddingVertical: styleValues.mediumPadding,
-        borderBottomWidth: styleValues.minorBorderWidth,
-        borderColor: colors.lightGrayColor,
+        alignSelf: "center",
+        backgroundColor: colors.whiteColor,
+        borderRadius: styleValues.bordRadius,
     },
     barContent: {
         height: "100%",

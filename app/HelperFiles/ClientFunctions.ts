@@ -108,3 +108,18 @@ export function extractKeywords(text: string) {
     })
     return result
 }
+// Convert a hex color to an rgba string
+export function hexToRGBA(hex: string, alpha: number) {
+    if (hex.length === 7) {
+        const r = parseInt(hex.substring(1, 3), 16),
+            g = parseInt(hex.substring(3, 5), 16),
+            b = parseInt(hex.substring(5, 7), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    } else if (hex.length === 4) {
+        const r = parseInt(hex.substring(1, 2), 16)*16,
+            g = parseInt(hex.substring(2, 3), 16)*16,
+            b = parseInt(hex.substring(3, 4), 16)*16;
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+    return "rgba(255, 255, 255, 1)"
+}

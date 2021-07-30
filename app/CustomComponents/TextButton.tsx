@@ -2,12 +2,13 @@ import React, { Component, Fragment } from "react";
 import { View, TouchableOpacity, Text, StyleSheet, TextStyle, ViewStyle, Image, GestureResponderEvent, ImageStyle } from "react-native";
 import PropTypes from 'prop-types';
 import { NavigationProp, useNavigation } from "@react-navigation/native"
-import { defaults, textStyles, buttonStyles, styleValues, colors } from "../HelperFiles/StyleSheet";
+import { defaults, textStyles, buttonStyles, styleValues, colors, fonts } from "../HelperFiles/StyleSheet";
 
 type Props = {
     text: string,
     textStyle?: TextStyle,
-    appearance?: "light" | "color" | "no-color"
+    appearance?: "light" | "color" | "no-color",
+    shadow?: boolean,
     subtext?: string,
     subtextStyle?: TextStyle,
     leftIconSource?: number,
@@ -37,11 +38,19 @@ export default class TextButton extends Component<Props, State> {
         } else if (props.appearance === "color") {
             this.defaultButtonStyle = buttonStyles.mainColor
         }
+        // Add a shadow
+        if (this.props.shadow !== false) {
+            this.defaultButtonStyle = {
+                ...this.defaultButtonStyle,
+                ...defaults.smallShadow
+            }
+        }
         // Update default text style
         if (props.appearance === "light") {
             this.defaultTextStyle.color = colors.mainColor
         } else if (props.appearance === "color") {
             this.defaultTextStyle.color = colors.whiteColor
+            this.defaultTextStyle.fontFamily = fonts.medium
         }
         // Update default icon style
         if (props.appearance === "light") {
