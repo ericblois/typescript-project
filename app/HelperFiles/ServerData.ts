@@ -11,7 +11,13 @@ export default class ServerData {
       try {
         // Get snapshot
         const docSnap = await docRef.get();
-        const data = docSnap.data()!
+        if (!docSnap.exists) {
+          throw new Error(`Could not find document at path: ${docRef.path}`)
+        }
+        const data = docSnap.data()
+        if (!data) {
+          throw new Error(`Could not find document at path: ${docRef.path}`)
+        }
         return data
       } catch (e) {
         throw e;
@@ -126,48 +132,5 @@ export default class ServerData {
       } catch (e) {
         throw e
       }
-    }
-    // Find businesses that match keywords within a certain range
-    static async findLocalBusinessesInRange(keywords: string[], location: {latitude: number, longitude: number}, rangeInKm?: number) {
-      let tenKeywords = keywords
-      if (keywords.length > 10) {
-        tenKeywords = keywords.slice(0,10)
-      }
-      // Get user data to find country to search
-      const userDoc = await UserFunctions.getUserDoc()
-      const colRef = firestore.collection("publicBusinessData/".concat(userDoc.country).concat("/businesses"))
-      const rangeInM = rangeInKm ? rangeInKm * 1000 : 50000
-      let currentLoc = [location.latitude, location.longitude]
-      // Get query bounds
-      const bounds = geofire.geohashQueryBounds(currentLoc, rangeInM)
-      // Get query promises
-      let promises = []
-      for (const bound of bounds) {
-        const query = colRef
-          .orderBy('geohash')
-          .startAt(bound[0])
-          .endAt(bound[1])
-          .where("keywords", "array-contains-any", tenKeywords)
-          .limit(10)
-        promises.push(query.get())
-      }
-      // Filter out false positives
-      const matchingBusinesses: PublicBusinessData[] = []
-      const querySnapshots = await Promise.all(promises)
-      querySnapshots.forEach((querySnap) => {
-        querySnap.docs.forEach((docSnap) => {
-          // Get data as public business data
-          const publicData = docSnap.data() as PublicBusinessData
-          // Check if the business's location is within range
-          if (publicData.coords.latitude && publicData.coords.longitude) {
-            const distanceInKm = geofire.distanceBetween([publicData.coords.latitude, publicData.coords.longitude], currentLoc);
-            const distanceInM = distanceInKm * 1000;
-            if (distanceInM <= rangeInM) {
-              matchingBusinesses.push(publicData);
-            }
-          }
-        })
-      })
-      return matchingBusinesses
     }
 }

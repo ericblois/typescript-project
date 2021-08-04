@@ -1,19 +1,20 @@
 import React, { Component } from "react";
+import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, Text, StyleSheet, KeyboardAvoidingView, } from "react-native";
-import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, textStyles, buttonStyles, icons, menuBarHeight } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { auth, geofire } from "../HelperFiles/Constants";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
-import { BusinessMainStackParamList } from "../HelperFiles/Navigation"
+import { BusinessEditStackParamList, BusinessMainStackParamList } from "../HelperFiles/Navigation"
 import { PrivateBusinessData, PublicBusinessData } from "../HelperFiles/DataTypes";
 import { LatLng } from "react-native-maps";
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 import { MapPopup, MenuBar, PageContainer, ScrollContainer, TextButton, TextDropdown, TextInputBox, ToggleSwitch } from "../HelperFiles/CompIndex"
 
-type BusinessEditLocationNavigationProp = StackNavigationProp<BusinessMainStackParamList, "editLocation">;
+type BusinessEditLocationNavigationProp = StackNavigationProp<BusinessEditStackParamList, "editLocation">;
 
-type BusinessEditLocationRouteProp = RouteProp<BusinessMainStackParamList, "editLocation">;
+type BusinessEditLocationRouteProp = RouteProp<BusinessEditStackParamList, "editLocation">;
 
 type BusinessEditLocationProps = {
     navigation: BusinessEditLocationNavigationProp,
@@ -30,7 +31,7 @@ type State = {
     saved: boolean
 }
 
-export default class BusinessEditLocationPage extends Component<BusinessEditLocationProps, State> {
+export default class BusinessEditLocationPage extends CustomComponent<BusinessEditLocationProps, State> {
 
     constructor(props: BusinessEditLocationProps) {
         super(props)
@@ -83,8 +84,6 @@ export default class BusinessEditLocationPage extends Component<BusinessEditLoca
             return (
                 <TextButton
                     text={"View current location"}
-                    buttonStyle={buttonStyles.noColor}
-                    textStyle={{}}
                     rightIconSource={icons.chevron}
                     rightIconStyle={{transform: [{scaleX: -1}]}}
                     buttonFunc={() => {
@@ -134,8 +133,17 @@ export default class BusinessEditLocationPage extends Component<BusinessEditLoca
   render() {
     return (
     <PageContainer>
-        <Text style={{...textStyles.large, ...{marginBottom: styleValues.mediumPadding}}}>Location & Delivery</Text>
-        <ScrollContainer avoidKeyboard>
+        <Text style={textStyles.largerHeader}>Location & Delivery</Text>
+        <ScrollContainer
+            containerStyle={{
+                width: styleValues.winWidth,
+            }}
+            contentContainerStyle={{
+                paddingHorizontal: styleValues.mediumPadding,
+                paddingBottom: menuBarHeight + styleValues.mediumPadding
+            }}
+            avoidKeyboard
+        >
             {this.renderViewLocationButton()}
             <View style={styles.divider}>
                 <Text style={{...textStyles.small, ...styles.dividerHeader}}>Edit your location</Text>
@@ -320,6 +328,15 @@ export default class BusinessEditLocationPage extends Component<BusinessEditLoca
                 }}
             ></TextDropdown>
         </ScrollContainer>
+        <View style={{
+                position: "absolute",
+                top: 0,
+                width: styleValues.winWidth,
+                backgroundColor: colors.backgroundColor
+            }}
+        >
+            <Text style={textStyles.largerHeader}>Location & Delivery</Text>
+        </View>
         <MenuBar
             buttonProps={[
                 {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},

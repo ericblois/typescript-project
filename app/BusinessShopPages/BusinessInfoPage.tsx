@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, Text, StyleSheet, ActivityIndicator, ScrollView } from "react-native";
 import PropTypes from 'prop-types';
 import { defaults, textStyles, buttonStyles, icons, styleValues, colors } from "../HelperFiles/StyleSheet";
@@ -29,7 +30,7 @@ type State = {
     favorited: boolean
 }
 
-export default class BusinessInfoPage extends Component<Props, State> {
+export default class BusinessInfoPage extends CustomComponent<Props, State> {
 
     businessData = this.props.businessData
 

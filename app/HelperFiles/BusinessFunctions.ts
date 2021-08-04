@@ -1,25 +1,42 @@
-import { OrderData, PrivateBusinessData, ProductCategory, ProductData, PublicBusinessData, UserData } from "./DataTypes"
+import { DefaultProductOption, OrderData, PrivateBusinessData, ProductCategory, ProductData, ProductOption, ProductOptionType, PublicBusinessData, UserData } from "./DataTypes"
 import ServerData from "./ServerData"
 import UserFunctions from "./UserFunctions"
-import { firestore, storage, functions } from "./Constants"
+import { firestore, storage, functions, getPrivateBusinessRef, getPublicBusinessRef } from "./Constants"
 import uuid from 'react-native-uuid';
 import { getCompressedImage } from "./ClientFunctions"
 
 export class BusinessFunctions {
 
     businessID: Readonly<string>
+    country?: Readonly<string>
+    hasUpdatedPrivate: boolean
+    hasUpdatedPublic: boolean
 
     constructor(businessID: string) {
         this.businessID = businessID
+        this.hasUpdatedPrivate = true
+        this.hasUpdatedPublic = true
     }
 
     public async getPrivateData() {
         try {
             const userID = UserFunctions.getCurrentUser().uid
-            const privateDocPath = "/userData/".concat(userID).concat("/businesses/").concat(this.businessID)
-            const privateDocRef = firestore.doc(privateDocPath)
-            const privateData = (await ServerData.getDoc(privateDocRef))
-            return {...privateData} as PrivateBusinessData
+            const privateDocRef = getPrivateBusinessRef(this.businessID)
+            let docSnap: firebase.default.firestore.DocumentSnapshot
+            if (this.hasUpdatedPrivate) {
+                docSnap = await privateDocRef.get({source: "server"})
+            } else {
+                try {
+                    docSnap = await privateDocRef.get({source: "cache"})
+                } catch (e) {
+                    docSnap = await privateDocRef.get({source: "server"})
+                }
+            }
+            if (!docSnap.exists) {
+                throw new Error(`Unable to find private data for business ID: ${this.businessID}`)
+            }
+            this.hasUpdatedPrivate = false
+            return {...docSnap.data()} as PrivateBusinessData
         } catch(e) {
             throw e
         }
@@ -27,11 +44,25 @@ export class BusinessFunctions {
 
     public async getPublicData() {
         try {
-            const userData = (await UserFunctions.getUserDoc()) as UserData
-            const publicDocPath = "/publicBusinessData/".concat(userData.country).concat("/businesses/").concat(this.businessID)
-            const publicDocRef = firestore.doc(publicDocPath)
-            const publicData = (await ServerData.getDoc(publicDocRef))
-            return {...publicData} as PublicBusinessData
+            if (!this.country) {
+                this.country = (await this.getPrivateData()).country
+            }
+            const publicDocRef = getPublicBusinessRef(this.country!, this.businessID)
+            let docSnap: firebase.default.firestore.DocumentSnapshot
+            if (this.hasUpdatedPublic) {
+                docSnap = await publicDocRef.get({source: "server"})
+            } else {
+                try {
+                    docSnap = await publicDocRef.get({source: "cache"})
+                } catch (e) {
+                    docSnap = await publicDocRef.get({source: "server"})
+                }
+            }
+            if (!docSnap.exists) {
+                throw new Error(`Unable to find private data for business ID: ${this.businessID}`)
+            }
+            this.hasUpdatedPublic = false
+            return {...docSnap.data()} as PublicBusinessData
         } catch(e) {
             throw e
         }
@@ -42,6 +73,7 @@ export class BusinessFunctions {
             const userID = UserFunctions.getCurrentUser().uid
             const privateDocPath = "/userData/".concat(userID).concat("/businesses/").concat(this.businessID)
             const privateDocRef = firestore.doc(privateDocPath)
+            this.hasUpdatedPrivate = true
             await ServerData.updateDoc(data, privateDocRef)
         } catch(e) {
             throw e
@@ -50,9 +82,11 @@ export class BusinessFunctions {
     // Update this business' public data, then return the changed result
     public async updatePublicData(data: Partial<PublicBusinessData>) {
         try {
-            const userData = (await UserFunctions.getUserDoc()) as UserData
-            const publicDocPath = "/publicBusinessData/".concat(userData.country).concat("/businesses/").concat(this.businessID)
-            const publicDocRef = firestore.doc(publicDocPath)
+            if (!this.country) {
+                this.country = (await this.getPrivateData()).country
+            }
+            const publicDocRef = getPublicBusinessRef(this.country!, this.businessID)
+            this.hasUpdatedPublic = true
             await ServerData.updateDoc(data, publicDocRef)
         } catch(e) {
             throw e
@@ -141,7 +175,11 @@ export class BusinessFunctions {
                 throw new Error("Tried to create new product, could not find business' country.")
             }
             // Add the product to this business' products collection
-            const productColRef = firestore.collection("/publicBusinessData/".concat(country).concat("/businesses/").concat(this.businessID).concat("/products"))
+            if (!this.country) {
+                this.country = (await this.getPrivateData()).country
+            }
+            const publicDocRef = getPublicBusinessRef(this.country!, this.businessID)
+            const productColRef = firestore.collection(`${publicDocRef.path}/products`)
             const newDocRef = productColRef.doc()
             // Update the product's product ID
             let newProductData = productData
@@ -160,10 +198,9 @@ export class BusinessFunctions {
                 productList[catIndex] = productCat
                 // Send transaction to server in a batch
                 await firestore.runTransaction(async (transaction) => {
-                    transaction.set(productColRef.doc(), newProductData)
-                    const businessRef = firestore.doc("/publicBusinessData/".concat(country).concat("/businesses/").concat(this.businessID))
+                    transaction.set(newDocRef, newProductData)
                     const updateData: Partial<PublicBusinessData> = {productList: productList}
-                    transaction.update(businessRef, updateData)
+                    transaction.update(publicDocRef, updateData)
                 })
                 return newProductData.productID
             } else {
@@ -181,7 +218,11 @@ export class BusinessFunctions {
             if (country === undefined) {
                 throw new Error("Tried to retrieve product ID ".concat(productID).concat(", could not find business' country."))
             }
-            const productDocRef = firestore.doc("/publicBusinessData/".concat(country).concat("/businesses/").concat(this.businessID).concat("/products/").concat(productID))
+            if (!this.country) {
+                this.country = (await this.getPrivateData()).country
+            }
+            const publicDocRef = getPublicBusinessRef(this.country!, this.businessID)
+            const productDocRef = firestore.doc(`${publicDocRef.path}/products/${productID}`)
             const productDoc = (await ServerData.getDoc(productDocRef)) as ProductData
             return productDoc
         } catch(e) {
@@ -196,7 +237,11 @@ export class BusinessFunctions {
             if (country === undefined) {
                 throw new Error("Tried to retrieve product ID ".concat(productID).concat(", could not find business' country."))
             }
-            const productDocRef = firestore.doc("/publicBusinessData/".concat(country).concat("/businesses/").concat(this.businessID).concat("/products/").concat(productID))
+            if (!this.country) {
+                this.country = (await this.getPrivateData()).country
+            }
+            const publicDocRef = getPublicBusinessRef(this.country!, this.businessID)
+            const productDocRef = firestore.doc(`${publicDocRef.path}/products/${productID}`)
             await ServerData.updateDoc(productData, productDocRef)
         } catch(e) {
             throw e
@@ -211,7 +256,11 @@ export class BusinessFunctions {
                 throw new Error("Tried to create new product, could not find business' country.")
             }
             // Add the product to this business' products collection
-            const productDocRef = firestore.doc("/publicBusinessData/".concat(country).concat("/businesses/").concat(this.businessID).concat("/products/").concat(productID))
+            if (!this.country) {
+                this.country = (await this.getPrivateData()).country
+            }
+            const publicDocRef = getPublicBusinessRef(this.country!, this.businessID)
+            const productDocRef = firestore.doc(`${publicDocRef.path}/products/${productID}`)
             // Get the product doc
             const productData = await this.getProduct(productID)
             // Update the corresponding product category
@@ -234,15 +283,135 @@ export class BusinessFunctions {
                     // Send transaction to server in a batch
                     await firestore.runTransaction(async (transaction) => {
                         transaction.delete(productDocRef)
-                        const businessRef = firestore.doc("/publicBusinessData/".concat(country).concat("/businesses/").concat(this.businessID))
                         const updateData: Partial<PublicBusinessData> = {productList: productList}
-                        transaction.update(businessRef, updateData)
+                        transaction.update(publicDocRef, updateData)
                     })
                 }
             }
         } catch(e) {
             throw e
         }
+    }
+
+    public async updateOptionType(productID: string, optionType: ProductOptionType) {
+        try {
+            let newProductData = await this.getProduct(productID)
+            // Get option type
+            const optionTypeIndex = newProductData.optionTypes.findIndex((currentType) => {
+                return currentType.name === optionType.name
+            })
+            if (optionTypeIndex < 0) {
+                throw new Error(`Could not find option type: ${optionType.name}`)
+            }
+            // Update product data
+            newProductData.optionTypes[optionTypeIndex] = optionType
+            await this.updateProduct(newProductData.productID, newProductData)
+          } catch (e) {
+            throw e
+          }
+    }
+
+    public async deleteOptionType(productID: string, optionType: ProductOptionType) {
+        try {
+            let newProductData = await this.getProduct(productID)
+            // Get option type
+            const optionTypeIndex = newProductData.optionTypes.findIndex((currentType) => {
+                return currentType.name === optionType.name
+            })
+            if (optionTypeIndex < 0) {
+                throw new Error(`Could not find option type: ${optionType.name}`)
+            }
+            // Delete all options (to get rid of images)
+            await Promise.all(newProductData.optionTypes[optionTypeIndex].options.map((option) => {
+                return this.deleteOption(productID, option)
+            }))
+            // Update product data
+            newProductData.optionTypes.splice(optionTypeIndex, 1)
+            await this.updateProduct(newProductData.productID, newProductData)
+          } catch (e) {
+            throw e
+          }
+    }
+
+    public async updateOption(productID: string, option: ProductOption) {
+        try {
+            let newOption = {...option} as ProductOption
+            let newProductData = await this.getProduct(productID)
+            // Get option type
+            const optionTypeIndex = newProductData.optionTypes.findIndex((optionType) => {
+                return optionType.name === newOption.optionType
+            })
+            if (optionTypeIndex < 0) {
+                throw new Error(`Could not find option type: ${newOption.optionType}`)
+            }
+            // Get option
+            const optionIndex = newProductData.optionTypes[optionTypeIndex].options.findIndex((currentOption) => {
+                return currentOption.name === newOption.name
+            })
+            if (optionIndex < 0) {
+                throw new Error(`Could not find option: ${newOption.name}`)
+            }
+            const oldOption = newProductData.optionTypes[optionTypeIndex].options[optionIndex]
+            // Find new images
+            let newImages: string[] = []
+            for (const url of newOption.images) {
+                if (!oldOption.images.includes(url)) {
+                    newImages.push(url)
+                }
+            }
+            // Find deleted images
+            let deletedImages: string[] = []
+            for (const url of oldOption.images) {
+                if (!newOption.images.includes(url)) {
+                    deletedImages.push(url)
+                }
+            }
+            // Add new images
+            let downloadURLs: string[] = await this.uploadImages(newImages)
+            // Replace local URIs with download URLs
+            newImages.forEach((newImagesURL, newImagesIndex) => {
+                // Get index of url in option's images list
+                const optionIndex = newOption.images.findIndex((optionURL) => {
+                    return optionURL === newImagesURL
+                })
+                // Replace the local URI with the download URL
+                newOption.images[optionIndex] = downloadURLs[newImagesIndex]
+            })
+            // Delete images
+            await this.deleteImages(deletedImages)
+            // Update product data
+            newProductData.optionTypes[optionTypeIndex].options[optionIndex] = newOption
+            await this.updateProduct(newProductData.productID, newProductData)
+          } catch (e) {
+            throw e
+          }
+    }
+
+    public async deleteOption(productID: string, option: ProductOption) {
+        try {
+            let newProductData = await this.getProduct(productID)
+            // Get option type
+            const optionTypeIndex = newProductData.optionTypes.findIndex((optionType) => {
+                return optionType.name === option.optionType
+            })
+            if (optionTypeIndex < 0) {
+                throw new Error(`Could not find option type: ${option.optionType}`)
+            }
+            // Get option
+            const optionIndex = newProductData.optionTypes[optionTypeIndex].options.findIndex((currentOption) => {
+                return currentOption.name === option.name
+            })
+            if (optionIndex < 0) {
+                throw new Error(`Could not find option: ${option.name}`)
+            }
+            // Delete images
+            await this.deleteImages(option.images)
+            // Update product data
+            newProductData.optionTypes[optionTypeIndex].options.splice(optionIndex, 1)
+            await this.updateProduct(newProductData.productID, newProductData)
+          } catch (e) {
+            throw e
+          }
     }
 
     public async uploadImages(imagePaths: string[]) {
@@ -270,10 +439,24 @@ export class BusinessFunctions {
         }
     }
 
+    public async getOrder(orderID: string) {
+        try {
+            const privateData = await this.getPrivateData()
+            const orderDocPath = `${getPrivateBusinessRef(this.businessID).path}/orders/${orderID}`
+            const orderDocSnap = await firestore.doc(orderDocPath).get()
+            if (!orderDocSnap.exists) {
+                throw new Error(`Could not find order ID: ${orderID}`)
+            }
+            return orderDocSnap.data() as OrderData
+        } catch (e) {
+            throw e
+        }
+    }
+
     public async getOrders(types?: OrderData["status"][]) {
         try {
             const privateData = await this.getPrivateData()
-            const ordersColPath = `privateBusinessData/${privateData.country}/businesses/${privateData.businessID}/orders`
+            const ordersColPath = `${getPrivateBusinessRef(this.businessID).path}/orders`
             const ordersColRef = firestore.collection(ordersColPath)
             if (types) {
                 const ordersQuery = await ordersColRef.where("status", "in", types).get()

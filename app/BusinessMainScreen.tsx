@@ -1,8 +1,9 @@
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponents/CustomComponent"
 import { StyleSheet, StatusBar, AppState, ActivityIndicator, View } from "react-native";
-import { BusinessEditMainPage, BusinessEditInfoPage, BusinessEditLocationPage, NotificationsPage, BusinessAccountPage, BusinessEditProductListPage, BusinessEditProductCategoryPage, BusinessEditProductPage, ProductEditOptionTypePage, ProductEditOptionPage } from "./HelperFiles/PageIndex";
-import { MenuBar } from "./HelperFiles/CompIndex"
-import { styleValues, colors } from "./HelperFiles/StyleSheet"
+import { BusinessAccountPage, BusinessEditMainPage, BusinessOrderPage, BusinessOrdersPage } from "./HelperFiles/PageIndex";
+import { MenuBar, TabIcon } from "./HelperFiles/CompIndex"
+import { styleValues, colors, tabBarStyles } from "./HelperFiles/StyleSheet"
 import { defaults, textStyles, buttonStyles, icons } from "./HelperFiles/StyleSheet";
 import { BusinessMainStack, CustomerMainStack } from "./HelperFiles/Navigation";
 import { initialWindowMetrics } from "react-native-safe-area-context";
@@ -12,6 +13,8 @@ import { RouteProp } from '@react-navigation/native';
 import { PrivateBusinessData, PublicBusinessData } from "./HelperFiles/DataTypes";
 import { BusinessFunctions } from "./HelperFiles/BusinessFunctions";
 import UserFunctions from "./HelperFiles/UserFunctions";
+import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import BusinessEditScreen from "./BusinessMainPages/BusinessEditScreen"
 
 type BusinessMainNavigationProp = StackNavigationProp<RootStackParamList, "businessMain">;
 
@@ -19,132 +22,65 @@ type BusinessMainRouteProp = RouteProp<RootStackParamList, "businessMain">;
 
 type Props = {
     navigation: BusinessMainNavigationProp,
-    route: BusinessMainRouteProp
+    route: BusinessMainRouteProp,
 }
 
 type State = {
-  headerShown: boolean
+
 }
 
-export default class BusinessMainScreen extends Component<Props, State> {
+export default class BusinessMainScreen extends CustomComponent<Props, State> {
 
   businessFuncs: BusinessFunctions
 
   constructor(props: Props) {
     super(props)
-    this.state= {
-      headerShown: true
-    }
     this.businessFuncs = props.route.params.businessFuncs
-  }
-
-  getEditButtons(props: StackHeaderProps) {
-    return [
-      {
-          iconSource: icons.chevron,
-          buttonFunc: () => {props.navigation.navigate("businessEdit")},
-      },
-      {
-          iconSource: icons.checkBox,
-          buttonFunc: () => {}
-      }
-    ]
-  }
-
-  getMainButtons(props: StackHeaderProps) {
-    return [
-      {
-          iconSource: icons.store,
-          buttonFunc: () => {props.navigation.navigate("businessEdit")},
-      },
-      {
-          iconSource: icons.profile,
-          buttonFunc: () => {props.navigation.navigate("account")}
-      }
-    ]
   }
 
   render() {
     return (
-      <View style={defaults.screenContainer}>
+        <View style={defaults.screenContainer}>
         <BusinessMainStack.Navigator
             initialRouteName={"businessEdit"}
-            screenOptions={(props) => ({
-              headerStatusBarHeight: 0,
-              headerShown: false,
-          })}
+            headerMode={"none"}
+            screenOptions={{
+                transitionSpec: {
+                    open: {
+                        animation: "timing",
+                        config: {
+                            duration: 50
+                        }
+                    }, close: {
+                        animation: "timing",
+                        config: {
+                            duration: 50
+                        }
+                    }
+                },
+                cardStyleInterpolator: (props) => ({cardStyle: {opacity: props.current.progress}})
+            }}
         >
           <BusinessMainStack.Screen
-              name={"businessEdit"}
-              children={(props) => {
-                return <BusinessEditMainPage {...props} businessFuncs={this.businessFuncs}/>
-              }}
-              listeners={{
-                beforeRemove: (event) => {
-                  if (event.target) {
-                    if (event.target === "editInfo") {
-                      this.setState({headerShown: false})
-                    }
-                  }
-                }
-              }}
+                name={"businessEdit"}
+                children={(props) => <BusinessEditScreen {...props} businessFuncs={this.businessFuncs}/>}
+                
+
           />
           <BusinessMainStack.Screen
-              name={"editInfo"}
-              children={(props) => {
-                return <BusinessEditInfoPage {...props} businessFuncs={this.businessFuncs}/>
-              }}
-              listeners={{
-                focus: (event) => {
-                  this.setState({headerShown: false})
-                }
-              }}
+                name={"orders"}
+                children={(props) => <BusinessOrdersPage {...props} businessFuncs={this.businessFuncs}/>}
           />
           <BusinessMainStack.Screen
-              name={"editProductList"}
-              children={(props) => {
-                return <BusinessEditProductListPage {...props} businessFuncs={this.businessFuncs}/>
-              }}
+                name={"order"}
+                children={(props) => <BusinessOrderPage {...props} businessFuncs={this.businessFuncs}/>}
           />
           <BusinessMainStack.Screen
-              name={"editProductCat"}
-              children={(props) => {
-                return <BusinessEditProductCategoryPage {...props} businessFuncs={this.businessFuncs}/>
-              }}
-          />
-          <BusinessMainStack.Screen
-              name={"editProduct"}
-              children={(props) => {
-                return <BusinessEditProductPage {...props} businessFuncs={this.businessFuncs}/>
-              }}
-          />
-          <BusinessMainStack.Screen
-              name={"editOptionType"}
-              children={(props) => {
-                return <ProductEditOptionTypePage {...props} businessFuncs={this.businessFuncs}/>
-              }}
-          />
-          <BusinessMainStack.Screen
-              name={"editOption"}
-              children={(props) => {
-                return <ProductEditOptionPage {...props} businessFuncs={this.businessFuncs}/>
-              }}
-          />
-          <BusinessMainStack.Screen
-              name={"editLocation"}
-              children={(props) => {
-                return <BusinessEditLocationPage {...props} businessFuncs={this.businessFuncs}/>
-              }}
-          />
-          <BusinessMainStack.Screen
-              name={"account"}
-              component={BusinessAccountPage}
-              options={{
-                animationEnabled: false
-              }}
+                name={"account"}
+                children={(props) => <BusinessAccountPage {...props} businessFuncs={this.businessFuncs}/>}
           />
         </BusinessMainStack.Navigator>
-      </View>
+        </View>
     );
   }
 }

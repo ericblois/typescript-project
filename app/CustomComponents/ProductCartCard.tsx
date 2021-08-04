@@ -1,5 +1,6 @@
 
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponent"
 import { View, TouchableOpacity, Image, Text, StyleSheet, GestureResponderEvent, ActivityIndicator } from "react-native";
 import { defaults, textStyles, buttonStyles, icons, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
@@ -8,7 +9,8 @@ import RatingVisual from "./RatingVisual";
 import { useNavigation } from "@react-navigation/native";
 import { CartItem, ProductData } from "../HelperFiles/DataTypes";
 import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
-import { IconButton } from "../HelperFiles/CompIndex";
+import IconButton from "./IconButton";
+import LoadingCover from "./LoadingCover"
 
 type Props = {
     cartItem: CartItem,
@@ -25,7 +27,7 @@ type State = {
     imageLoaded: boolean
 }
 
-export default class ProductCartCard extends Component<Props, State> {
+export default class ProductCartCard extends CustomComponent<Props, State> {
 
     constructor(props: Props) {
         super(props);
@@ -92,7 +94,8 @@ export default class ProductCartCard extends Component<Props, State> {
                     style={{
                         flexDirection: "row",
                         alignItems: "center",
-                        justifyContent: "center",
+                        justifyContent: "flex-start",
+                        flex: 0.5
                     }}
                 >
                     <IconButton
@@ -114,8 +117,14 @@ export default class ProductCartCard extends Component<Props, State> {
                         }}
                         buttonFunc={async () => {
                             if (this.state.cartItem.quantity > 0) {
-                                const newCartItem = await CustomerFunctions.updateCartQuantity(this.state.cartItem, this.state.cartItem.quantity - 1)
+                                const newCartItem = this.state.cartItem
+                                newCartItem.quantity -= 1
                                 this.setState({cartItem: newCartItem})
+                                await CustomerFunctions.updateCartQuantity(this.state.cartItem, this.state.cartItem.quantity - 1).catch((e) => {
+                                    // Undo the change if there is an error
+                                    newCartItem.quantity += 1
+                                    this.setState({cartItem: newCartItem})
+                                })
                             }
                         }}
                     />
@@ -133,8 +142,14 @@ export default class ProductCartCard extends Component<Props, State> {
                         }}
                         buttonFunc={async () => {
                             if (this.state.cartItem.quantity < 99) {
-                                const newCartItem = await CustomerFunctions.updateCartQuantity(this.state.cartItem, this.state.cartItem.quantity + 1)
+                                const newCartItem = this.state.cartItem
+                                newCartItem.quantity += 1
                                 this.setState({cartItem: newCartItem})
+                                await CustomerFunctions.updateCartQuantity(this.state.cartItem, this.state.cartItem.quantity - 1).catch((e) => {
+                                    // Undo the change if there is an error
+                                    newCartItem.quantity -= 1
+                                    this.setState({cartItem: newCartItem})
+                                })
                             }
                         }}
                     />
@@ -209,23 +224,21 @@ export default class ProductCartCard extends Component<Props, State> {
     renderLoading() {
         if (this.state.productData === undefined || !this.state.imageLoaded) {
             return (
-                <View style={{
-                    position: "absolute",
-                    width: "100%",
-                    height: "100%",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: colors.whiteColor
-                }}>
-                    <ActivityIndicator size={"small"}/>
-                </View>
+                <LoadingCover
+                    style={{backgroundColor: colors.whiteColor}}
+                />
             )
         }
     }
 
     render() {
         return (
-            <View style={styles.cardContainer}>
+            <View
+                style={{
+                    ...styles.cardContainer,
+                    ...defaults.smallShadow
+                }}
+            >
                 {this.renderUI()}
                 {this.renderLoading()}
             </View>
@@ -236,12 +249,10 @@ export default class ProductCartCard extends Component<Props, State> {
 const styles = StyleSheet.create({
     cardContainer: {
         backgroundColor: "#fff",
-        borderColor: colors.grayColor,
         borderRadius: styleValues.bordRadius,
-        borderWidth: styleValues.minorBorderWidth,
         width: "100%",
         marginTop: styleValues.mediumPadding,
-        padding: styleValues.minorPadding,
+        padding: styleValues.mediumPadding,
         flexDirection: "row",
         alignItems: "center",
     },
@@ -253,6 +264,7 @@ const styles = StyleSheet.create({
     },
     productInfoArea: {
         flex: 1,
+        marginTop: -styleValues.minorPadding
     },
     textRow: {
         flexDirection: "row",
@@ -272,7 +284,7 @@ const styles = StyleSheet.create({
     mainPriceText: {
         ...textStyles.medium,
         textAlign: "right",
-        flex: 0.3
+        flex: 0.5,
     },
     optionPriceText: {
         ...textStyles.small,
@@ -282,17 +294,17 @@ const styles = StyleSheet.create({
     },
     bottomContainer: {
         flexDirection: "row",
-        height: styleValues.mediumTextSize*2,
         width: "100%",
         alignItems: "center",
         justifyContent: "space-between",
         borderTopWidth: styleValues.minorBorderWidth,
         borderColor: colors.lightGrayColor,
-        marginTop: styleValues.minorPadding,
-        paddingTop: styleValues.minorPadding
+        marginTop: styleValues.mediumPadding,
+        paddingTop: styleValues.mediumPadding
     },
     deleteButton: {
-        height: "75%",
+        width: styleValues.winWidth*0.06,
+        aspectRatio: 1,
         marginRight: styleValues.mediumPadding
     },
 })

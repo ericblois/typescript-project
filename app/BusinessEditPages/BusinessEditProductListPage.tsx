@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, Text, StyleSheet, ImageURISource, ScrollView, ActivityIndicator } from "react-native";
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
@@ -6,21 +7,21 @@ import TextButton from "../CustomComponents/TextButton";
 import { auth } from "../HelperFiles/Constants";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
-import { BusinessMainStackParamList } from "../HelperFiles/Navigation"
+import { BusinessEditStackParamList, BusinessMainStackParamList } from "../HelperFiles/Navigation"
 import TextInputBox from "../CustomComponents/TextInputBox";
-import { ProductCategory, PublicBusinessData } from "../HelperFiles/DataTypes";
+import { DefaultProductCategory, ProductCategory, PublicBusinessData } from "../HelperFiles/DataTypes";
 import * as Permissions from 'expo-permissions';
-import { GradientView, ImageSliderSelector, MapPopup, MenuBar, PageContainer, TextInputPopup } from "../HelperFiles/CompIndex";
+import { GradientView, ImageSliderSelector, ItemList, LoadingCover, MapPopup, MenuBar, PageContainer, TextHeader, TextInputPopup } from "../HelperFiles/CompIndex";
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
-import { FlatList } from "react-native-gesture-handler";
+import { FlatList, TextInput } from "react-native-gesture-handler";
 import DraggableFlatList, { RenderItemParams } from 'react-native-draggable-flatlist'
 import SortableList from 'react-native-sortable-list';
 import Row from 'react-native-sortable-list';
 import UserFunctions from "../HelperFiles/UserFunctions";
 
-type BusinessEditProductListNavigationProp = StackNavigationProp<BusinessMainStackParamList, "editProductList">;
+type BusinessEditProductListNavigationProp = StackNavigationProp<BusinessEditStackParamList, "editProductList">;
 
-type BusinessEditProductListRouteProp = RouteProp<BusinessMainStackParamList, "editProductList">;
+type BusinessEditProductListRouteProp = RouteProp<BusinessEditStackParamList, "editProductList">;
 
 type BusinessEditProductListProps = {
     navigation: BusinessEditProductListNavigationProp,
@@ -34,7 +35,7 @@ type State = {
     saved: boolean
 }
 
-export default class BusinessEditProductListPage extends Component<BusinessEditProductListProps, State> {
+export default class BusinessEditProductListPage extends CustomComponent<BusinessEditProductListProps, State> {
 
     constructor(props: BusinessEditProductListProps) {
         super(props)
@@ -58,6 +59,19 @@ export default class BusinessEditProductListPage extends Component<BusinessEditP
       })
     }
 
+    renderAddButton() {
+      return (
+        <TextButton
+          text={"Add new category"}
+          appearance={"light"}
+          rightIconSource={icons.plus}
+          buttonFunc={async () => {
+              this.setState({showPopup: true})
+          }}
+        />
+      )
+    }
+
     renderTextPopup() {
       if (this.state.showPopup) {
         return (
@@ -67,8 +81,8 @@ export default class BusinessEditProductListPage extends Component<BusinessEditP
               let newPublicData = this.state.publicData
               if (newPublicData) {
                 newPublicData.productList.push({
+                  ...DefaultProductCategory,
                   name: text,
-                  productIDs: []
                 })
                 this.setState({
                   publicData: newPublicData,
@@ -112,87 +126,60 @@ export default class BusinessEditProductListPage extends Component<BusinessEditP
     renderUI() {
       if (this.state.publicData) {
         return (
-          <PageContainer>
-            <Text
-              style={textStyles.larger}
-            >
-              Categories
-            </Text>
-            <View style={{flex: 1}}>
-              <DraggableFlatList
-                containerStyle={styles.list}
-                data={this.state.publicData ? this.state.publicData.productList : []}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={(params) => {return this.renderCategoryCard(params)}}
-                onDragEnd={(params) => {
-                  let publicData = this.state.publicData
-                  if (publicData) {
-                    publicData.productList = params.data
-                  }
-                  this.setState({publicData: publicData, saved: false})
-                }}
-                ListHeaderComponent={() => (<View style={{height: styleValues.mediumPadding}}/>)}
-                ListFooterComponent={() => (<View style={{height: styleValues.mediumPadding}}/>)}
-              />
-              <GradientView/>
-            </View>
-            <MenuBar
-              buttonProps={[
-                {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
-                {iconSource: icons.plus, buttonFunc: () => {this.setState({showPopup: true})}},
-                {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? colors.validColor : colors.invalidColor}, buttonFunc: () => {
-                    if (this.state.publicData) {
-                        this.props.businessFuncs.updatePublicData(this.state.publicData).then(() => {
-                            this.setState({saved: true})
-                        }, (e) => {
-                            throw e;
-                        })
-                    }
-                }}
-              ]}
+          <View>
+            <ItemList
+              containerStyle={{width: styleValues.winWidth, paddingTop: defaults.textHeaderBox.height}}
+              data={this.state.publicData ? this.state.publicData.productList : []}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={(params) => {return this.renderCategoryCard(params)}}
+              onDragEnd={(params) => {
+                let publicData = this.state.publicData
+                if (publicData) {
+                  publicData.productList = params.data
+                }
+                this.setState({publicData: publicData, saved: false})
+              }}
+              ListHeaderComponent={() => this.renderAddButton()}
             />
-            {this.renderTextPopup()}
-          </PageContainer>
+            <TextHeader>Categories</TextHeader>
+          </View>
         )
       }
     }
     // Render a loading indicator over the UI while images and data load
     renderLoadScreen() {
-      if (this.state.publicData === undefined) {
+      if (!this.state.publicData) {
         return (
-          <View 
-            style={{...defaults.pageContainer, ...{
-              justifyContent: "center",
-              position: "absolute",
-              top: 0,
-              left: 0
-            }}}
-          >
-            <ActivityIndicator
-              size={"large"}
-            />
-            <MenuBar
-              buttonProps={[
-                {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
-              ]}
-              />
-          </View>
+          <LoadingCover size={"large"}/>
         )
       }
     }
     
     render() {
       return (
-        <View>
+        <PageContainer>
           {this.renderUI()}
           {this.renderLoadScreen()}
-        </View>
+          <MenuBar
+            buttonProps={[
+              {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
+              {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? colors.validColor : colors.invalidColor}, buttonFunc: () => {
+                  if (this.state.publicData) {
+                      this.props.businessFuncs.updatePublicData(this.state.publicData).then(() => {
+                          this.setState({saved: true})
+                      }, (e) => {
+                          throw e;
+                      })
+                  }
+              }}
+            ]}
+          ></MenuBar>
+          {this.renderTextPopup()}
+        </PageContainer>
       )
     }
 }
 
 const styles = StyleSheet.create({
-    list: {
-      width: "100%",
-    },
+    
 })

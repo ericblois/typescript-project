@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponent"
 import { View, Image, StyleSheet, FlatList, Text, ImageStyle } from "react-native";
 import { icons, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
@@ -18,7 +19,7 @@ type State = {
     saved: boolean
 }
 
-export default class ImageProfileSelector extends Component<Props, State> {
+export default class ImageProfileSelector extends CustomComponent<Props, State> {
 
     initialURI?: string
 

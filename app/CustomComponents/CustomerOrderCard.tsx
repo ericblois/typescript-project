@@ -1,5 +1,6 @@
 
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponent"
 import { View, TouchableOpacity, Image, Text, StyleSheet, GestureResponderEvent, ActivityIndicator, ViewStyle } from "react-native";
 import { defaults, textStyles, buttonStyles, styleValues, colors, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
@@ -22,7 +23,7 @@ type State = {
     imageLoaded: boolean
 }
 
-export default class OrderCard extends Component<Props, State> {
+export default class CustomerOrderCard extends CustomComponent<Props, State> {
 
     constructor(props: Props) {
         super(props);

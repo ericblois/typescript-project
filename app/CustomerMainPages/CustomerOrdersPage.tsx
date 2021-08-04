@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, Text, StyleSheet } from "react-native";
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons, menuBarHeight, fonts } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
@@ -11,8 +12,9 @@ import ItemList from "../CustomComponents/ItemList";
 import { OrderData } from "../HelperFiles/DataTypes";
 import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
 import { FlatList } from "react-native-gesture-handler";
-import OrderCard from "../CustomComponents/OrderCard";
+import CustomerOrderCard from "../CustomComponents/CustomerOrderCard";
 import ScrollContainer from "../CustomComponents/ScrollContainer";
+import LoadingCover from "../CustomComponents/LoadingCover";
 
 type CustomerOrdersNavigationProp = CompositeNavigationProp<
   StackNavigationProp<CustomerTabParamList, "orders">,
@@ -31,7 +33,7 @@ type State = {
     previousOrders?: OrderData[]
 }
 
-export default class CustomerOrdersPage extends Component<Props, State> {
+export default class CustomerOrdersPage extends CustomComponent<Props, State> {
 
   constructor(props: Props) {
     super(props)
@@ -49,14 +51,14 @@ export default class CustomerOrdersPage extends Component<Props, State> {
     this.setState({activeOrders: activeOrders, previousOrders: prevOrders})
   }
 
-  renderOrders(orders?: OrderData[]) {
+  renderOrders(header: string, orders?: OrderData[]) {
     if (orders) {
       return (
         <View style={{flex: 1}}>
-          <Text style={{...textStyles.large, marginBottom: styleValues.mediumPadding}}>Current Orders</Text>
+          <Text style={{...textStyles.large, marginBottom: styleValues.mediumPadding}}>{header}</Text>
           {orders.map((orderData) => {
             return (
-              <OrderCard
+              <CustomerOrderCard
                   orderData={orderData}
                   key={orderData.orderID}
                   onPress={() => this.props.navigation.navigate("order", {orderData: orderData})}
@@ -68,14 +70,25 @@ export default class CustomerOrdersPage extends Component<Props, State> {
     }
   }
 
+  renderLoading() {
+    if (!this.state.activeOrders || !this.state.previousOrders) {
+      return (
+        <LoadingCover size={"large"} style={{paddingBottom: styleValues.winWidth*0.5}}/>
+      )
+    }
+  }
+
   render() {
     return (
       <PageContainer>
-        <Text style={textStyles.larger}>Your Orders</Text>
-        <ScrollContainer>
-          {this.renderOrders(this.state.activeOrders)}
-          {this.renderOrders(this.state.previousOrders)}
+        <Text style={textStyles.largerHeader}>Your Orders</Text>
+        <ScrollContainer
+          containerStyle={{width: styleValues.winWidth}}
+        >
+          {this.renderOrders("Current Orders", this.state.activeOrders)}
+          {this.renderOrders("Previous Orders", this.state.previousOrders)}
         </ScrollContainer>
+        {this.renderLoading()}
         <TextButton
           text={"View your cart"}
           appearance={"color"}

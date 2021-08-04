@@ -1,5 +1,6 @@
 
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponent"
 import { View, TouchableOpacity, Image, Text, StyleSheet, GestureResponderEvent, FlatList, ActivityIndicator } from "react-native";
 import { defaults, textStyles, buttonStyles, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
@@ -21,58 +22,40 @@ const defaultAnimationConfig = {
   }
 
 type Props<T> = Omit<DraggableFlatListProps<T>, "animationConfig"> & {
-    animationConfig?: typeof defaultAnimationConfig
+    animationConfig?: typeof defaultAnimationConfig,
+    fadeTop?: boolean,
+    fadeBottom?: boolean
 }
 
 type State = {
 }
 
-export default class ItemList<T> extends Component<Props<T>, State> {
+export default class ItemList<T> extends CustomComponent<Props<T>, State> {
 
     constructor(props: Props<T>) {
         super(props);
     }
 
-    renderList() {
-        return (
-            <DraggableFlatList
-                animationConfig={defaultAnimationConfig}
-                {...this.props}
-                style={{
-                    top: 0,
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                }}
-                // Ensure spacing from edges so fade doesn't appear before scrolling
-                ListHeaderComponent={() => {
-                    return (
-                        <View>
-                            <View style={{
-                                width: this.props.horizontal === true ? styleValues.mediumPadding : "100%",
-                                height: this.props.horizontal === true ? "100%" : styleValues.mediumPadding,
-                            }}/>
-                            {this.props.ListHeaderComponent}
-                        </View>
-                    )
-                }}
-            />
-        )
-    }
-
-    renderGradient() {
-        return (
-            <GradientView
-                horizontal={this.props.horizontal === true}
-            />
-        )
-    }
-
     render() {
         return (
-            <View style={StyleSheet.compose({flex: 1}, this.props.style)}>
-                {this.renderList()}
-                {this.renderGradient()}
+            <View
+                style={StyleSheet.compose({flex: 1}, this.props.style)}
+                pointerEvents={"box-none"}
+            >
+                <DraggableFlatList
+                    animationConfig={defaultAnimationConfig}
+                    {...this.props}
+                    contentContainerStyle={{
+                        width: "100%",
+                        flex: 1,
+                        padding: styleValues.mediumPadding
+                    }}
+                />
+                <GradientView
+                    horizontal={this.props.horizontal === true}
+                    fadeTop={this.props.fadeTop}
+                    fadeBottom={this.props.fadeBottom}
+                />
             </View>
         )
     }

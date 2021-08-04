@@ -39,6 +39,10 @@ if (!firebase.default.apps.length) {
 export const auth = firebase.default.auth();
 
 export const firestore = firebase.default.firestore();
+// Set firestore cache to 256 MB
+firestore.settings({
+  cacheSizeBytes: 1024*1024*256
+})
 
 export const storage = firebase.default.storage();
 
@@ -53,6 +57,14 @@ export const currencyFormatter = new Intl.NumberFormat("en-CA", {
     currency: "CAD"
   } as Intl.NumberFormatOptions
 )
+
+export const getPublicBusinessRef = (country: string, businessID: string) => {
+  return firestore.doc(`/publicBusinessData/${country}/businesses/${businessID}`)
+}
+
+export const getPrivateBusinessRef = (businessID: string) => {
+  return firestore.doc(`/privateBusinessData/${businessID}`)
+}
 
 export const businessPropType = PropTypes.shape({
   "id": PropTypes.string.isRequired,

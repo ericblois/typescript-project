@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, ScrollView, Text, StyleSheet, TextInput, ActivityIndicator } from "react-native";
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import { IconButton, MenuBar } from "../HelperFiles/CompIndex";
@@ -26,7 +27,7 @@ type State = {
 }
 
 
-export default class AccountTypePage extends Component<Props, State> {
+export default class AccountTypePage extends CustomComponent<Props, State> {
 
     constructor(props: Props) {
         super(props)

@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponent"
 import { TouchableOpacity, Text, StyleSheet, TextStyle, ViewStyle, View, TextInput, KeyboardAvoidingView } from "react-native";
 import PropTypes from 'prop-types';
 import { NavigationProp, useNavigation } from "@react-navigation/native"
@@ -18,7 +19,7 @@ type State = {
     shouldAvoid: boolean
 }
 
-export default class CurrencyInputBox extends Component<CurrencyInputBoxProps, State> {
+export default class CurrencyInputBox extends CustomComponent<CurrencyInputBoxProps, State> {
 
     constructor(props: CurrencyInputBoxProps) {
         super(props)

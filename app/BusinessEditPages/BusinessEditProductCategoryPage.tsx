@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, Text, StyleSheet, ImageURISource, ScrollView, ActivityIndicator } from "react-native";
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
@@ -6,20 +7,20 @@ import TextButton from "../CustomComponents/TextButton";
 import { auth } from "../HelperFiles/Constants";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
-import { BusinessMainStackParamList } from "../HelperFiles/Navigation"
+import { BusinessEditStackParamList, BusinessMainStackParamList } from "../HelperFiles/Navigation"
 import TextInputBox from "../CustomComponents/TextInputBox";
 import { DefaultProductData, ProductCategory, ProductData, PublicBusinessData } from "../HelperFiles/DataTypes";
 import * as Permissions from 'expo-permissions';
-import { GradientView, ImageSliderSelector, MapPopup, MenuBar, PageContainer, TextInputPopup } from "../HelperFiles/CompIndex";
+import { GradientView, ImageSliderSelector, ItemList, MapPopup, MenuBar, PageContainer, TextHeader, TextInputPopup } from "../HelperFiles/CompIndex";
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 import { FlatList } from "react-native-gesture-handler";
 import DraggableFlatList, { RenderItemParams } from 'react-native-draggable-flatlist'
 import SortableList from 'react-native-sortable-list';
 import Row from 'react-native-sortable-list';
 
-type BusinessEditProductCategoryNavigationProp = StackNavigationProp<BusinessMainStackParamList, "editProductCat">;
+type BusinessEditProductCategoryNavigationProp = StackNavigationProp<BusinessEditStackParamList, "editProductCat">;
 
-type BusinessEditProductCategoryRouteProp = RouteProp<BusinessMainStackParamList, "editProductCat">;
+type BusinessEditProductCategoryRouteProp = RouteProp<BusinessEditStackParamList, "editProductCat">;
 
 type BusinessEditProductCategoryProps = {
     navigation: BusinessEditProductCategoryNavigationProp,
@@ -34,7 +35,7 @@ type State = {
     saved: boolean
 }
 
-export default class BusinessEditProductCategoryPage extends Component<BusinessEditProductCategoryProps, State> {
+export default class BusinessEditProductCategoryPage extends CustomComponent<BusinessEditProductCategoryProps, State> {
 
     constructor(props: BusinessEditProductCategoryProps) {
         super(props)
@@ -59,6 +60,19 @@ export default class BusinessEditProductCategoryPage extends Component<BusinessE
         return this.props.businessFuncs.getProduct(productID)
       }))
       this.setState({productCategory: productCat, products: products})
+    }
+
+    renderAddButton() {
+      return (
+        <TextButton
+          text={"Add new product"}
+          appearance={"light"}
+          rightIconSource={icons.plus}
+          buttonFunc={async () => {
+              this.setState({showPopup: true})
+          }}
+        />
+      )
     }
 
     renderTextPopup() {
@@ -113,6 +127,8 @@ export default class BusinessEditProductCategoryPage extends Component<BusinessE
           text={"Delete this category"}
           buttonStyle={buttonStyles.noColor}
           textStyle={{color: "red"}}
+          rightIconSource={icons.minus}
+          rightIconStyle={{tintColor: "red"}}
           buttonFunc={async () => {
             await this.props.businessFuncs.deleteProductCategory(this.props.route.params.productCategory).then(() => {
               this.props.navigation.goBack()
@@ -125,20 +141,16 @@ export default class BusinessEditProductCategoryPage extends Component<BusinessE
     renderUI() {
       if (this.state.productCategory && this.state.products) {
         return (
-          <PageContainer>
-            <Text
-              style={textStyles.larger}
-            >
-              {this.props.route.params.productCategory}
-            </Text>
+          <View>
             <View style={{flex: 1}}>
-              <DraggableFlatList
-                containerStyle={styles.list}
+              <ItemList
+                containerStyle={{width: styleValues.winWidth, paddingTop: defaults.textHeaderBox.height}}
                 data={this.state.products ? this.state.products : []}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={(params) => {return this.renderProductCard(params)}}
                 ListFooterComponent={this.renderDeleteButton()}
-                ListHeaderComponent={() => (<View style={{height: styleValues.mediumPadding}}/>)}
+                ListHeaderComponent={() => this.renderAddButton()}
+                fadeTop={false}
                 onDragEnd={(params) => {
                   if (this.state.productCategory) {
                     const products = params.data
@@ -154,23 +166,8 @@ export default class BusinessEditProductCategoryPage extends Component<BusinessE
               />
               <GradientView/>
             </View>
-            <MenuBar
-              buttonProps={[
-                {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
-                {iconSource: icons.plus, buttonFunc: () => {this.setState({showPopup: true})}},
-                {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? colors.validColor : colors.invalidColor}, buttonFunc: () => {
-                  if (this.state.productCategory) {
-                      this.props.businessFuncs.updateProductCategory(this.props.route.params.productCategory, this.state.productCategory).then(() => {
-                          this.setState({saved: true})
-                      }, (e) => {
-                          throw e;
-                      })
-                    }
-                }}
-              ]}
-            />
-            {this.renderTextPopup()}
-          </PageContainer>
+            <TextHeader>{this.props.route.params.productCategory}</TextHeader>
+          </View>
         )
       }
     }
@@ -201,10 +198,25 @@ export default class BusinessEditProductCategoryPage extends Component<BusinessE
 
     render() {
       return (
-        <View>
+        <PageContainer>
           {this.renderUI()}
           {this.renderLoadScreen()}
-        </View>
+          <MenuBar
+              buttonProps={[
+                {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
+                {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? colors.validColor : colors.invalidColor}, buttonFunc: () => {
+                  if (this.state.productCategory) {
+                      this.props.businessFuncs.updateProductCategory(this.props.route.params.productCategory, this.state.productCategory).then(() => {
+                          this.setState({saved: true})
+                      }, (e) => {
+                          throw e;
+                      })
+                    }
+                }}
+              ]}
+            />
+            {this.renderTextPopup()}
+        </PageContainer>
       )
     }
 }

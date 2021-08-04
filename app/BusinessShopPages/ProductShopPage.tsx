@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, Image, Text, StyleSheet, ActivityIndicator, ScrollView, SafeAreaView } from "react-native";
 
 import PropTypes from 'prop-types';
@@ -31,7 +32,7 @@ type State = {
     quantity: number,
 }
 
-export default class ProductShopPage extends Component<Props, State> {
+export default class ProductShopPage extends CustomComponent<Props, State> {
 
     constructor(props: Props) {
         super(props)

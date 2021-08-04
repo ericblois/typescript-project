@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponent"
 import { View, Image, StyleSheet, FlatList, Text, ImageStyle } from "react-native";
 import { defaults, textStyles, buttonStyles, icons, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
@@ -21,7 +22,7 @@ type State = {
     currentText: string
 }
 
-export default class TextInputPopup extends Component<Props, State> {
+export default class TextInputPopup extends CustomComponent<Props, State> {
 
     constructor(props: Props) {
         super(props)
@@ -41,6 +42,7 @@ export default class TextInputPopup extends Component<Props, State> {
                         this.props.onSaveText(this.state.currentText)
                     }
                 }}
+                showLoading={true}
             />
         )
     }
@@ -55,14 +57,14 @@ export default class TextInputPopup extends Component<Props, State> {
                     onPress={this.props.onTapAway}
                 >
                     <TextInputBox
-                        {...this.props.textInputProps}
                         style={{...buttonStyles.noColor, ...styles.textInput}}
                         textProps={{...{
                             onChangeText: (text) => {
                                 this.setState({currentText: text})
-                            }
-
+                            },
                         }, ...this.props.textInputProps?.textProps}}
+                        focusOnStart={true}
+                        {...this.props.textInputProps}
                     />
                 </TouchableOpacity>
                 {this.renderSaveButton()}

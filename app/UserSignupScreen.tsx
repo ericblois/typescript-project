@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponents/CustomComponent"
 import { StyleSheet, StatusBar, AppState, ActivityIndicator, View, Text } from "react-native";
 import { CustomerInfoPage, AccountTypePage } from "./HelperFiles/PageIndex";
 import { defaults, textStyles, buttonStyles, icons, styleValues, colors } from "./HelperFiles/StyleSheet";
@@ -27,7 +28,7 @@ type Props = {
 type State = {
 }
 
-export default class UserSignupScreen extends Component<Props, State> {
+export default class UserSignupScreen extends CustomComponent<Props, State> {
 
     render() {
         return (

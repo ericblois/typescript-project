@@ -1,4 +1,5 @@
 import React, { Component, ReactNode } from "react";
+import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity } from "react-native";
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons, menuBarHeight } from "../HelperFiles/StyleSheet";
 import { ItemList, MenuBar, PageContainer, ProductCard, ScrollContainer } from "../HelperFiles/CompIndex";
@@ -26,7 +27,7 @@ type State = {
     currentCategory: ProductCategory
 }
 
-export default class BusinessProducts extends Component<Props, State> {
+export default class BusinessProducts extends CustomComponent<Props, State> {
 
     constructor(props: Props) {
         super(props)
@@ -58,7 +59,6 @@ export default class BusinessProducts extends Component<Props, State> {
                     alignItems: "center",
                     justifyContent: "center"
                 }}
-                fade={true}
                 horizontal={true}
             >
                 <View style={{

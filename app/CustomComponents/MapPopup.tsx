@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponent"
 import { View, Image, StyleSheet, FlatList, Text, ImageStyle } from "react-native";
 import { icons, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
@@ -22,7 +23,7 @@ type Props = {
 type State = {
 }
 
-export default class MapPopup extends Component<Props, State> {
+export default class MapPopup extends CustomComponent<Props, State> {
 
     currentRegion?: Region
 

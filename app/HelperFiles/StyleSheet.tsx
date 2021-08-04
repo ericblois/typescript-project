@@ -17,6 +17,9 @@ const winHeight = initialWindowMetrics
   ? displayHeight - initialWindowMetrics.insets.bottom - initialWindowMetrics.insets.top
   : displayHeight;
 
+const topInset = initialWindowMetrics?.insets.top ? initialWindowMetrics!.insets.top : 0
+const bottomInset = initialWindowMetrics?.insets.bottom ? initialWindowMetrics!.insets.bottom : 0
+
 export const menuBarHeight = winWidth * 0.15
 
 // --- Load fonts ---
@@ -85,13 +88,13 @@ export const styleValues = {
   minorBorderWidth: winWidth * 0.005,
   majorBorderWidth: winWidth * 0.008,
   bordRadius: winWidth * 0.025,
-  iconSmallestSize: winWidth * 0.025,
+  iconSmallestSize: winWidth * 0.04,
   iconSmallerSize: winWidth * 0.05,
-  iconSmallSize: winWidth * 0.075,
-  iconMediumSize: winWidth * 0.1,
-  iconLargeSize: winWidth * 0.125,
-  iconLargerSize: winWidth * 0.15,
-  iconLargestSize: winWidth * 0.2,
+  iconSmallSize: winWidth * 0.06,
+  iconMediumSize: winWidth * 0.075,
+  iconLargeSize: winWidth * 0.09,
+  iconLargerSize: winWidth * 0.1,
+  iconLargestSize: winWidth * 0.125,
   statusBarHeight: StatusBar.currentHeight != null ? StatusBar.currentHeight : 20,
   roundedPadding: hasRoundCorners() ? winWidth * 0.05 : 0,
   largestTextSize: winWidth/12,
@@ -148,23 +151,36 @@ export const textStyles = StyleSheet.create({
     ...defaultTemplates.text,
     fontSize: styleValues.largestTextSize,
   },
+  mediumHeader: {
+    ...defaultTemplates.text,
+    fontSize: styleValues.mediumTextSize,
+    marginVertical: styleValues.mediumPadding
+  },
+  largeHeader: {
+    ...defaultTemplates.text,
+    fontSize: styleValues.largeTextSize,
+    marginVertical: styleValues.mediumPadding
+  },
+  largerHeader: {
+    ...defaultTemplates.text,
+    fontSize: styleValues.largerTextSize,
+    marginVertical: styleValues.mediumPadding
+  },
+  largestHeader: {
+    ...defaultTemplates.text,
+    fontSize: styleValues.largestTextSize,
+    marginVertical: styleValues.mediumPadding
+  },
 })
 
 export const buttonStyles = StyleSheet.create({
   mainColor: {
     ...defaultTemplates.button,
-    borderColor: colors.darkColor,
     backgroundColor: colors.mainColor,
     
   },
-  lightColor: {
-    ...defaultTemplates.button,
-    borderColor: colors.mainColor,
-    backgroundColor: colors.whiteColor,
-  },
   noColor: {
     ...defaultTemplates.button,
-    borderColor: colors.grayColor,
     backgroundColor: colors.whiteColor,
   },
 })
@@ -222,9 +238,9 @@ export const tabBarStyles = StyleSheet.create({
 
 export const defaults = StyleSheet.create({
   screenContainer: {
-    paddingTop: initialWindowMetrics?.insets.top ? initialWindowMetrics!.insets.top : 0,
-    paddingBottom: initialWindowMetrics?.insets.bottom ? initialWindowMetrics!.insets.bottom : 0,
-    backgroundColor: "#777",
+    paddingTop: topInset,
+    paddingBottom: bottomInset,
+    backgroundColor: colors.backgroundColor,
     position: "absolute",
     top: 0,
     bottom: 0,
@@ -236,6 +252,7 @@ export const defaults = StyleSheet.create({
       justifyContent: "flex-start",
       width: winWidth,
       height: winHeight,
+      paddingHorizontal: styleValues.mediumPadding,
       backgroundColor: colors.backgroundColor,
   },
   smallShadow: {
@@ -244,8 +261,8 @@ export const defaults = StyleSheet.create({
       width: 0,
       height: 0,
     },
-    shadowOpacity: 0.5,
-    shadowRadius: styleValues.minorPadding,
+    shadowOpacity: 0.2,
+    shadowRadius: styleValues.mediumPadding*0.5,
     elevation: 5,
   },
   mediumShadow: {
@@ -255,7 +272,7 @@ export const defaults = StyleSheet.create({
       height: 0,
     },
     shadowOpacity: 0.5,
-    shadowRadius: styleValues.mediumPadding*0.75,
+    shadowRadius: styleValues.mediumPadding*0.5,
     elevation: 10,
   },
   largeShadow: {
@@ -264,9 +281,18 @@ export const defaults = StyleSheet.create({
       width: 0,
       height: 0,
     },
-    shadowOpacity: 0.5,
-    shadowRadius: styleValues.mediumPadding,
+    shadowOpacity: 0.75,
+    shadowRadius: styleValues.mediumPadding*0.5,
     elevation: 15,
+  },
+  textHeaderBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+    height: styleValues.winWidth*0.125,
+    backgroundColor: colors.backgroundColor,
+    paddingHorizontal: styleValues.mediumPadding,
   },
   dividerBox: {
     alignItems: "center",
@@ -288,8 +314,8 @@ export const defaults = StyleSheet.create({
   iconButton: {
     alignContent: "center",
     justifyContent: "center",
-    height: styleValues.iconMediumSize,
-    width: styleValues.iconMediumSize,
+    height: styleValues.iconLargerSize,
+    width: styleValues.iconLargerSize,
   },
   iconImage: {
     height: "100%",
@@ -297,19 +323,21 @@ export const defaults = StyleSheet.create({
     tintColor: colors.darkGrayColor,
   },
   inputBox: {
-    width: styleValues.winWidth - styleValues.mediumPadding*2,
+    width: "100%",
     height: styleValues.winWidth*0.1,
     backgroundColor: "#fff",
     borderWidth: styleValues.minorBorderWidth,
     borderRadius: styleValues.bordRadius,
-    borderColor: colors.mainColor,
-    marginVertical: styleValues.mediumPadding,
+    borderColor: colors.lighterGrayColor,
+    marginBottom: styleValues.mediumPadding,
+    padding: styleValues.minorPadding,
     alignItems: "center",
     justifyContent: "center",
   },
   inputText: {
     ...defaultTemplates.text,
     flex: 1,
+    width: "100%",
     height: "100%",
     backgroundColor: "#fff",
     borderRadius: styleValues.bordRadius,
@@ -370,5 +398,7 @@ export const icons = {
   location: require("../../assets/locationIcon.png"),
   crosshair: require("../../assets/crosshairIcon.png"),
   image: require("../../assets/imageIcon.png"),
-  trash: require("../../assets/trashIcon.png")
+  trash: require("../../assets/trashIcon.png"),
+  info: require("../../assets/infoIcon.png"),
+  cross: require("../../assets/crossIcon.png")
 }

@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, StyleSheet, Text } from "react-native";
 import { BusinessShopStack } from "../HelperFiles/Navigation";
 import PropTypes from 'prop-types';
@@ -26,7 +27,7 @@ type State = {
   businessData: PublicBusinessData
 }
 
-export default class BusinessShopScreen extends Component<Props, State> {
+export default class BusinessShopScreen extends CustomComponent<Props, State> {
 
     businessData = this.props.route.params.businessData
 

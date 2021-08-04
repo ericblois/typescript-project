@@ -1,65 +1,77 @@
 import React, { Component } from "react"
-import { TouchableWithoutFeedback, Keyboard, View, ScrollViewProps, KeyboardAvoidingView, ViewStyle } from "react-native"
+import { TouchableWithoutFeedback, Keyboard, View, ScrollViewProps, KeyboardAvoidingView, ViewStyle, StyleSheet } from "react-native"
 import { ScrollView } from "react-native-gesture-handler"
 import GradientView from "../CustomComponents/GradientView"
-import { defaults, textStyles, buttonStyles, styleValues, colors } from "../HelperFiles/StyleSheet"
+import { defaults, textStyles, buttonStyles, styleValues, colors, menuBarHeight } from "../HelperFiles/StyleSheet"
+import CustomComponent from "./CustomComponent"
 
 type Props = ScrollViewProps & {
     containerStyle?: ViewStyle,
     avoidKeyboard?: boolean,
-    fade?: boolean,
+    fadeTop?: boolean,
+    fadeBottom?: boolean,
     fadeStartColor?: string,
     fadeEndColor?: string,
 }
 
 type State = {}
 
-export default class ScrollContainer extends Component<Props, State> {
+export default class ScrollContainer extends CustomComponent<Props, State> {
+
+    public scrollView: ScrollView | null = null
 
     constructor(props: Props) {
         super(props)
     }
 
-    renderChildren() {
-        if (this.props.avoidKeyboard === true) {
-            return (
-                <KeyboardAvoidingView
-                    behavior={"position"}
-                >
-                    {this.props.children}
-                </KeyboardAvoidingView>
-            )
-        } else {
-            return this.props.children
-        }
-    }
-
     render() {
         return (
-            <View style={this.props.containerStyle}>
-                <ScrollView
-                    style={{width: "100%", height: "100%"}}
-                    contentContainerStyle={{
-                        padding: styleValues.mediumPadding,
+            <View style={{flex: 1, width: styleValues.winWidth, ...this.props.containerStyle}}>
+                <KeyboardAvoidingView
+                    style={{
+                        position: "absolute",
+                        top: 0,
+                        bottom: 0,
+                        left: 0,
+                        right: 0
                     }}
-                    showsVerticalScrollIndicator={false}
-                    showsHorizontalScrollIndicator={false}
-                    {...this.props}
+                    behavior={"position"}
+                    enabled={this.props.avoidKeyboard === true}
                 >
-                    <View
-                        onStartShouldSetResponder={() => (true)}
-                        style={{alignItems: "center"}}
+                    <ScrollView
+                        showsVerticalScrollIndicator={false}
+                        showsHorizontalScrollIndicator={false}
+                        ref={(scrollView) => {this.scrollView = scrollView as ScrollView | null}}
+                        {...this.props}
+                        style={StyleSheet.compose(
+                            {
+                                width: "100%",
+                                height: "100%",
+                            },
+                            this.props.style
+                        )}
+                        contentContainerStyle={StyleSheet.compose({
+                                padding: styleValues.mediumPadding,
+                                paddingBottom: menuBarHeight + styleValues.mediumPadding*2
+                            },
+                            this.props.contentContainerStyle
+                        )}
                     >
-                        {this.renderChildren()}
-                    </View>
-                </ScrollView>
-                {this.props.fade === false ? undefined : 
-                    <GradientView
-                        horizontal={this.props.horizontal === true}
-                        fadeStartColor={this.props.fadeStartColor}
-                        fadeEndColor={this.props.fadeEndColor}
-                    />
-                }
+                        <View
+                            onStartShouldSetResponder={() => (true)}
+                            style={{alignItems: "center"}}
+                        >
+                            {this.props.children}
+                        </View>
+                    </ScrollView>
+                </KeyboardAvoidingView> 
+                <GradientView
+                    horizontal={this.props.horizontal === true}
+                    fadeStartColor={this.props.fadeStartColor}
+                    fadeEndColor={this.props.fadeEndColor}
+                    fadeTop={this.props.fadeTop}
+                    fadeBottom={this.props.fadeBottom}
+                />
             </View>
         )
     }

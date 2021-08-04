@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponents/CustomComponent"
 import { View, Text, Image, StyleSheet, TextInput, KeyboardAvoidingView, SafeAreaView } from "react-native";
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "./HelperFiles/StyleSheet";
 import { TextButton, IconButton } from "./HelperFiles/CompIndex";
@@ -25,7 +26,7 @@ type State = {
     responseText: string
 }
 
-export default class StartScreen extends Component<Props, State> {
+export default class StartScreen extends CustomComponent<Props, State> {
 
     state: Readonly<State> = {
         showLogin: false,

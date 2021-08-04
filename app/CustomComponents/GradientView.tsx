@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponent"
 import { TouchableOpacity, Text, StyleSheet, TextStyle, ViewStyle, View, TextInput, KeyboardAvoidingView } from "react-native";
 import PropTypes from 'prop-types';
 import { NavigationProp, useNavigation } from "@react-navigation/native"
@@ -9,6 +10,8 @@ import { hexToRGBA } from "../HelperFiles/ClientFunctions";
 
 type CurrencyInputBoxProps = {
     style?: ViewStyle,
+    fadeTop?: boolean,
+    fadeBottom?: boolean,
     fadeStartColor?: string,
     backgroundStartColor?: string,
     fadeEndColor?: string,
@@ -19,13 +22,47 @@ type CurrencyInputBoxProps = {
 
 type State = {}
 
-export default class CurrencyInputBox extends Component<CurrencyInputBoxProps, State> {
+export default class CurrencyInputBox extends CustomComponent<CurrencyInputBoxProps, State> {
 
     fadeLength: number
 
     constructor(props: CurrencyInputBoxProps) {
         super(props)
         this.fadeLength = props.fadeLength ? props.fadeLength : styleValues.mediumPadding
+    }
+
+    renderTopFade(startColor: string, startBackground: string) {
+        if (this.props.fadeTop !== false) {
+            return (
+                <LinearGradient
+                    colors={[startColor, startBackground]}
+                    locations={[0.2, 1]}
+                    start={this.props.horizontal === true ? {x: 0, y: 0.5} : undefined}
+                    end={this.props.horizontal === true ? {x: 1, y: 0.5} : undefined}
+                    style={{
+                        width: this.props.horizontal === true ? this.fadeLength : "100%",
+                        height: this.props.horizontal === true ? "100%" : this.fadeLength
+                    }}
+                />
+            )
+        }
+    }
+
+    renderBottomFade(endColor: string, endBackground: string) {
+        if (this.props.fadeBottom !== false) {
+            return (
+                <LinearGradient
+                    colors={[endBackground, endColor]}
+                    locations={[0, 0.8]}
+                    start={this.props.horizontal === true ? {x: 0, y: 0.5} : undefined}
+                    end={this.props.horizontal === true ? {x: 1, y: 0.5} : undefined}
+                    style={{
+                        width: this.props.horizontal === true ? this.fadeLength : "100%",
+                        height: this.props.horizontal === true ? "100%" : this.fadeLength
+                    }}
+                />
+            )
+        }
     }
 
     render() {
@@ -48,26 +85,9 @@ export default class CurrencyInputBox extends Component<CurrencyInputBoxProps, S
                 onStartShouldSetResponder={() => (false)}
                 pointerEvents={"none"}
             >
-                <LinearGradient
-                    colors={[startColor, startBackground]}
-                    locations={[0.2, 1]}
-                    start={this.props.horizontal === true ? {x: 0, y: 0.5} : undefined}
-                    end={this.props.horizontal === true ? {x: 1, y: 0.5} : undefined}
-                    style={{
-                        width: this.props.horizontal === true ? this.fadeLength : "100%",
-                        height: this.props.horizontal === true ? "100%" : this.fadeLength
-                    }}
-                />
-                <LinearGradient
-                    colors={[endBackground, endColor]}
-                    locations={[0, 0.8]}
-                    start={this.props.horizontal === true ? {x: 0, y: 0.5} : undefined}
-                    end={this.props.horizontal === true ? {x: 1, y: 0.5} : undefined}
-                    style={{
-                        width: this.props.horizontal === true ? this.fadeLength : "100%",
-                        height: this.props.horizontal === true ? "100%" : this.fadeLength
-                    }}
-                />
+                {this.renderTopFade(startColor, startBackground)}
+                <View/>
+                {this.renderBottomFade(endColor, endBackground)}
             </View>
         )
     }

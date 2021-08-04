@@ -1,11 +1,12 @@
 
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponent"
 import { View, TouchableOpacity, Image, Text, StyleSheet, ActivityIndicator, ViewStyle } from "react-native";
 import { icons, styleValues, colors, defaults, textStyles, buttonStyles, } from "../HelperFiles/StyleSheet";
 import {  useNavigation } from "@react-navigation/native";
 import { PublicBusinessData } from "../HelperFiles/DataTypes";
-import { IconButton } from "../HelperFiles/CompIndex";
 import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
+import IconButton from "./IconButton";
 
 type Props = {
   businessData: PublicBusinessData,
@@ -18,7 +19,7 @@ type State = {
   favorited: boolean
 }
 
-export default class BusinessResult extends Component<Props, State> {
+export default class BusinessResult extends CustomComponent<Props, State> {
 
     constructor(props: Props) {
       super(props)

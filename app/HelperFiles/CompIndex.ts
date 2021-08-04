@@ -22,9 +22,14 @@ import BusinessCard from "../CustomComponents/BusinessCard";
 import BusinessCardBrowseList from "../CustomComponents/BusinessCardBrowseList";
 import BusinessResult from "../CustomComponents/BusinessResult";
 import ItemList from "../CustomComponents/ItemList";
-import OrderCard from "../CustomComponents/OrderCard";
+import CustomerOrderCard from "../CustomComponents/CustomerOrderCard";
+import BusinessOrderCard from "../CustomComponents/BusinessOrderCard";
 import ProductCardList from "../CustomComponents/ProductCardList";
 import SearchBar from "../CustomComponents/SearchBar";
+import LoadingCover from "../CustomComponents/LoadingCover";
+import TextHeader from "../CustomComponents/TextHeader";
+import TextInfoPopup from "../CustomComponents/TextInfoPopup";
+import ConfirmationPopup from "../CustomComponents/ConfirmationPopup";
 
 export {
     MenuBar,
@@ -51,7 +56,12 @@ export {
     BusinessCardBrowseList,
     BusinessResult,
     ItemList,
-    OrderCard,
+    CustomerOrderCard,
+    BusinessOrderCard,
     ProductCardList,
-    SearchBar
+    SearchBar,
+    LoadingCover,
+    TextHeader,
+    TextInfoPopup,
+    ConfirmationPopup
 };

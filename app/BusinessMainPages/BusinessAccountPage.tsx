@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, Text, StyleSheet, } from "react-native";
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
@@ -9,6 +10,7 @@ import { BusinessMainStackParamList, RootStackParamList } from "../HelperFiles/N
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from "@react-navigation/stack";
+import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 
 type BusinessAccountNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<BusinessMainStackParamList, "account">,
@@ -19,13 +21,14 @@ type BusinessAccountRouteProp = RouteProp<BusinessMainStackParamList, "account">
 
 type BusinessAccountProps = {
     navigation: BusinessAccountNavigationProp,
-    route: BusinessAccountRouteProp
+    route: BusinessAccountRouteProp,
+    businessFuncs: BusinessFunctions
 }
 
 type BusinessAccountState = {
 }
 
-export default class BusinessAccountPage extends Component<BusinessAccountProps, BusinessAccountState> {
+export default class BusinessAccountPage extends CustomComponent<BusinessAccountProps, BusinessAccountState> {
 
   render() {
     return (
@@ -46,11 +49,21 @@ export default class BusinessAccountPage extends Component<BusinessAccountProps,
           }}
         />
         <MenuBar
-          //buttonProps={this.state.inEditMode ? this.getEditButtons(props) : this.getMainButtons(props)}
-          buttonProps={[
-            {iconSource: icons.store, buttonFunc: () => {this.props.navigation.navigate("businessEdit")},},
-            {iconSource: icons.profile, buttonFunc: () => {this.props.navigation.navigate("account")}}
-          ]}
+            buttonProps={[
+                {
+                  iconSource: icons.store,
+                  buttonFunc: () => {this.props.navigation.navigate("businessEdit")},
+                },
+                {
+                    iconSource: icons.document,
+                    buttonFunc: () => {this.props.navigation.navigate("orders")},
+                },
+                {
+                  iconSource: icons.profile,
+                  buttonFunc: () => {this.props.navigation.navigate("account")},
+                  iconStyle: {tintColor: colors.mainColor}
+                },
+            ]}
         />
       </PageContainer>
     );

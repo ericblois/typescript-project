@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import { TouchableWithoutFeedback, Keyboard, View, ScrollViewProps, ViewStyle } from "react-native"
 import { ScrollView } from "react-native-gesture-handler"
 import { defaults, textStyles, buttonStyles, styleValues, colors } from "../HelperFiles/StyleSheet"
+import CustomComponent from "./CustomComponent"
 
 type Props = {
     style?: ViewStyle
@@ -9,7 +10,7 @@ type Props = {
 
 type State = {}
 
-export default class PageContainer extends Component<Props, State> {
+export default class PageContainer extends CustomComponent<Props, State> {
 
     render() {
         return (

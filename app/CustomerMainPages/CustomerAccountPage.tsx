@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, Text, StyleSheet, } from "react-native";
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
@@ -12,6 +13,7 @@ import UserFunctions from "../HelperFiles/UserFunctions";
 import { StackNavigationProp } from "@react-navigation/stack";
 import PageContainer from "../CustomComponents/PageContainer";
 import { ScrollView } from "react-native-gesture-handler";
+import LoadingCover from "../CustomComponents/LoadingCover";
 
 type CustomerAccountNavigationProp = CompositeNavigationProp<
   CompositeNavigationProp<
@@ -29,15 +31,17 @@ type CustomerAccountProps = {
 }
 
 type CustomerAccountState = {
-  businessButtons: JSX.Element[]
+  businessButtons: JSX.Element[],
+  createBusinessLoading: boolean
 }
 
-export default class CustomerAccountPage extends Component<CustomerAccountProps, CustomerAccountState> {
+export default class CustomerAccountPage extends CustomComponent<CustomerAccountProps, CustomerAccountState> {
 
   constructor(props: CustomerAccountProps) {
     super(props)
     this.state = {
-      businessButtons: []
+      businessButtons: [],
+      createBusinessLoading: false
     }
     this.props.navigation.addListener("focus", (event) => {
       this.getBusinesses()
@@ -67,17 +71,28 @@ export default class CustomerAccountPage extends Component<CustomerAccountProps,
 
   renderCreateBusinessButton() {
     return (
-      <TextButton
-        text={"Create a new business"}
-        buttonStyle={{justifyContent: "space-between"}}
-        rightIconSource={icons.plus}
-        buttonFunc={async () => {
-          // Create a new business
-          const businessID = await UserFunctions.createNewBusiness()
-          const businessFuncs = new BusinessFunctions(businessID)
-          this.props.navigation.navigate("businessMain", {businessFuncs: businessFuncs})
+      <View 
+        style={{
+          width: "100%",
+          height: buttonStyles.noColor.height,
+          marginBottom: styleValues.mediumPadding
         }}
-      />
+      >
+        <TextButton
+          text={"Create a new business"}
+          buttonStyle={{justifyContent: "space-between"}}
+          rightIconSource={icons.plus}
+          buttonFunc={async () => {
+            this.setState({createBusinessLoading: true})
+            // Create a new business
+            const businessID = await UserFunctions.createNewBusiness()
+            const businessFuncs = new BusinessFunctions(businessID)
+            this.setState({createBusinessLoading: false})
+            this.props.navigation.navigate("businessMain", {businessFuncs: businessFuncs})
+          }}
+        />
+        {this.state.createBusinessLoading ? <LoadingCover/> : undefined}
+      </View>
     )
   }
 
@@ -111,7 +126,7 @@ export default class CustomerAccountPage extends Component<CustomerAccountProps,
     return (
       <PageContainer>
         <Text
-          style={textStyles.large}
+          style={textStyles.largerHeader}
         >
           Your Account
         </Text>
@@ -120,9 +135,10 @@ export default class CustomerAccountPage extends Component<CustomerAccountProps,
           buttonFunc={() => {
             auth.signOut().then(() => this.props.navigation.navigate("start"));
           }}
+          buttonStyle={{marginBottom: 0}}
         ></TextButton>
         <Text
-          style={textStyles.large}
+          style={textStyles.largeHeader}
         >
           Businesses
         </Text>

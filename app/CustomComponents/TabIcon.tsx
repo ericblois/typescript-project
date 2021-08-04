@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponent"
 import { TouchableOpacity, Image, StyleSheet, ImageStyle } from "react-native";
 import { styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
@@ -15,7 +16,7 @@ type Props = {
 
 type State = {}
 
-export default class TabIcon extends Component<Props, State> {
+export default class TabIcon extends CustomComponent<Props, State> {
 
   iconStyle: ImageStyle
 

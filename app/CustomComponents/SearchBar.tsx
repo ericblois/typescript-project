@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponent"
 import { TouchableOpacity, Text, Image, TextStyle, ViewStyle, View, TextInput, KeyboardAvoidingView, ImageStyle } from "react-native";
 import PropTypes from 'prop-types';
 import { NavigationProp, useNavigation } from "@react-navigation/native"
@@ -20,7 +21,7 @@ type State = {
     shouldAvoid: boolean
 }
 
-export default class SearchBar extends Component<SearchBarProps, State> {
+export default class SearchBar extends CustomComponent<SearchBarProps, State> {
 
     constructor(props: SearchBarProps) {
         super(props)

@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, Text, StyleSheet, KeyboardAvoidingView, ScrollView, ActivityIndicator } from "react-native";
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
@@ -6,18 +7,18 @@ import TextButton from "../CustomComponents/TextButton";
 import { auth } from "../HelperFiles/Constants";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
-import { BusinessMainStackParamList } from "../HelperFiles/Navigation"
+import { BusinessEditStackParamList, BusinessMainStackParamList } from "../HelperFiles/Navigation"
 import TextInputBox from "../CustomComponents/TextInputBox";
 import { PublicBusinessData } from "../HelperFiles/DataTypes";
 import * as Permissions from 'expo-permissions';
-import { ImageSliderSelector, MapPopup, MenuBar, PageContainer } from "../HelperFiles/CompIndex";
+import { ImageSliderSelector, LoadingCover, MapPopup, MenuBar, PageContainer } from "../HelperFiles/CompIndex";
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 import { extractKeywords, getCompressedImage, prefetchImages } from "../HelperFiles/ClientFunctions";
 import * as pluralize from "pluralize"
 
-type BusinessEditInfoNavigationProp = StackNavigationProp<BusinessMainStackParamList, "editInfo">;
+type BusinessEditInfoNavigationProp = StackNavigationProp<BusinessEditStackParamList, "editInfo">;
 
-type BusinessEditInfoRouteProp = RouteProp<BusinessMainStackParamList, "editInfo">;
+type BusinessEditInfoRouteProp = RouteProp<BusinessEditStackParamList, "editInfo">;
 
 type BusinessEditInfoProps = {
     navigation: BusinessEditInfoNavigationProp,
@@ -33,7 +34,7 @@ type State = {
     saved: boolean
 }
 
-export default class BusinessEditInfoPage extends Component<BusinessEditInfoProps, State> {
+export default class BusinessEditInfoPage extends CustomComponent<BusinessEditInfoProps, State> {
 
     constructor(props: BusinessEditInfoProps) {
         super(props)
@@ -57,25 +58,9 @@ export default class BusinessEditInfoPage extends Component<BusinessEditInfoProp
     }
 
     renderLoadScreen() {
-      if (this.state.publicData === undefined || !this.state.imagesLoaded) {
+      if (!this.state.publicData || !this.state.imagesLoaded) {
         return (
-          <View 
-            style={{...defaults.pageContainer, ...{
-              justifyContent: "center",
-              position: "absolute",
-              top: 0,
-              left: 0
-            }}}
-          >
-            <ActivityIndicator
-              size={"large"}
-            />
-            <MenuBar
-              buttonProps={[
-                {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
-              ]}
-              />
-          </View>
+          <LoadingCover/>
         )
       }
     }
@@ -83,7 +68,7 @@ export default class BusinessEditInfoPage extends Component<BusinessEditInfoProp
     renderUI() {
       if (this.state.publicData) {
         return (
-          <PageContainer>
+          <View style={{alignItems: "center", paddingTop: styleValues.mediumPadding}}>
           <ImageSliderSelector
             uris={this.state.publicData ? this.state.publicData.galleryImages: []}
             onChange={(uris) => {
@@ -141,52 +126,52 @@ export default class BusinessEditInfoPage extends Component<BusinessEditInfoProp
                   }}
                   avoidKeyboard={true}
                 ></TextInputBox>
-          <MenuBar
-            buttonProps={[
-              {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
-              {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? colors.validColor : colors.invalidColor}, buttonFunc: async () => {
-                if (this.state.publicData) {
-                  // Add new images
-                  let downloadURLs: string[] = await this.props.businessFuncs.uploadImages(this.state.newImages)
-                  // Delete images
-                  await this.props.businessFuncs.deleteImages(this.state.deletedImages)
-                  // Update public data
-                  const newPublicData = this.state.publicData
-                  // Delete URLs
-                  let prevURLs: string[] = []
-                  newPublicData.galleryImages.forEach((url) => {
-                    if (!this.state.deletedImages.includes(url)) {
-                      prevURLs.push(url)
-                    }
-                  })
-                  // Add new URLs
-                  newPublicData.galleryImages = prevURLs.concat(downloadURLs)
-                  const keywordsSource = newPublicData.name.concat(" ").concat(newPublicData.description)
-                  let keywords = extractKeywords(keywordsSource)
-                  keywords = keywords.map((keyword) => {
-                    return pluralize.singular(keyword)
-                  })
-                  newPublicData.keywords = keywords
-                  this.props.businessFuncs.updatePublicData(newPublicData).then(() => {
-                      this.setState({saved: true})
-                  }, (e) => {
-                      throw e;
-                  })
-                }
-              }}
-            ]}
-          ></MenuBar>
-      </PageContainer>
+      </View>
         )
       }
     }
 
   render() {
     return (
-      <View>
+      <PageContainer>
         {this.renderUI()}
         {this.renderLoadScreen()}
-      </View>
+        <MenuBar
+          buttonProps={[
+            {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
+            {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? colors.validColor : colors.invalidColor}, buttonFunc: async () => {
+              if (this.state.publicData) {
+                // Add new images
+                let downloadURLs: string[] = await this.props.businessFuncs.uploadImages(this.state.newImages)
+                // Delete images
+                await this.props.businessFuncs.deleteImages(this.state.deletedImages)
+                // Update public data
+                const newPublicData = this.state.publicData
+                // Delete URLs
+                let prevURLs: string[] = []
+                newPublicData.galleryImages.forEach((url) => {
+                  if (!this.state.deletedImages.includes(url)) {
+                    prevURLs.push(url)
+                  }
+                })
+                // Add new URLs
+                newPublicData.galleryImages = prevURLs.concat(downloadURLs)
+                const keywordsSource = newPublicData.name.concat(" ").concat(newPublicData.description)
+                let keywords = extractKeywords(keywordsSource)
+                keywords = keywords.map((keyword) => {
+                  return pluralize.singular(keyword)
+                })
+                newPublicData.keywords = keywords
+                this.props.businessFuncs.updatePublicData(newPublicData).then(() => {
+                    this.setState({saved: true})
+                }, (e) => {
+                    throw e;
+                })
+              }
+            }}
+          ]}
+        ></MenuBar>
+      </PageContainer>
     )
   }
 }

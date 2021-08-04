@@ -1,5 +1,6 @@
 
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponent"
 import { View, TouchableOpacity, Image, Text, StyleSheet, GestureResponderEvent, FlatList, ActivityIndicator, ViewStyle } from "react-native";
 import { defaults, textStyles, buttonStyles, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
@@ -8,7 +9,8 @@ import RatingVisual from "./RatingVisual";
 import { useNavigation } from "@react-navigation/native";
 import { CartItem, ProductCategory, ProductData, PublicBusinessData } from "../HelperFiles/DataTypes";
 import ProductCard from "./ProductCard";
-import { BusinessCard, ItemList, ProductCartCard, ScrollContainer } from "../HelperFiles/CompIndex";
+import BusinessCard from "./BusinessCard";
+import ScrollContainer from "./ScrollContainer";
 
 type Props = {
     businessIDs: string[],
@@ -23,7 +25,7 @@ type State = {
     cardsLoaded: boolean
 }
 
-export default class BusinessCardBrowseList extends Component<Props, State> {
+export default class BusinessCardBrowseList extends CustomComponent<Props, State> {
 
     loadCount = 0
 

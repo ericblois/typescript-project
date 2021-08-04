@@ -1,6 +1,7 @@
 import React, { Component } from "react";
+import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, Text, StyleSheet, FlatList, } from "react-native";
-import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, textStyles, buttonStyles, icons, menuBarHeight } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
 import { auth } from "../HelperFiles/Constants";
@@ -19,6 +20,7 @@ import ProductCardList from "../CustomComponents/ProductCardList";
 import MenuBar from "../CustomComponents/MenuBar";
 import TextDropdown from "../CustomComponents/TextDropdown";
 import ScrollContainer from "../CustomComponents/ScrollContainer";
+import LoadingCover from "../CustomComponents/LoadingCover";
 
 type CustomerCartNavigationProp = CompositeNavigationProp<
   StackNavigationProp<CustomerMainStackParamList, "cart">,
@@ -35,15 +37,17 @@ type CustomerCartProps = {
 type CustomerCartState = {
     businessCarts?: {[businessID: string]: CartItem[]}
     businesses?: {[businessID: string]: PublicBusinessData}
+    cartsLoading: number
 }
 
-export default class CustomerCartPage extends Component<CustomerCartProps, CustomerCartState> {
+export default class CustomerCartPage extends CustomComponent<CustomerCartProps, CustomerCartState> {
 
   constructor(props: CustomerCartProps) {
     super(props)
     this.state = {
         businessCarts: undefined,
-        businesses: undefined
+        businesses: undefined,
+        cartsLoading: 1
     }
     props.navigation.addListener("focus", () => this.refreshData())
     this.refreshData()
@@ -67,7 +71,9 @@ export default class CustomerCartPage extends Component<CustomerCartProps, Custo
                 businesses[cartItem.businessID] = publicData
             }
         }
-        this.setState({businessCarts: businessCarts, businesses: businesses})
+        this.setState({businessCarts: businessCarts, businesses: businesses, cartsLoading: Object.keys(businessCarts).length})
+    }).catch((e) => {
+      this.refreshData()
     })
   }
 
@@ -100,6 +106,7 @@ export default class CustomerCartPage extends Component<CustomerCartProps, Custo
 
   renderBusinessCarts() {
       if (this.state.businessCarts) {
+        
           return Object.entries(this.state.businessCarts).map(([businessID, items]) => {
               return (
                 <View
@@ -112,6 +119,7 @@ export default class CustomerCartPage extends Component<CustomerCartProps, Custo
                         showLoading={true}
                         scrollable={false}
                         onDeleteItem={() => this.refreshData()}
+                        onLoadEnd={() => this.setState({cartsLoading: this.state.cartsLoading - 1})}
                     />
                     <View
                         style={styles.checkoutBar}
@@ -148,15 +156,27 @@ export default class CustomerCartPage extends Component<CustomerCartProps, Custo
       }
   }
 
+  renderLoading() {
+    if (!this.state.businessCarts || !this.state.businesses || this.state.cartsLoading > 0) {
+      return (
+        <LoadingCover size={"large"}/>
+      )
+    }
+  }
+
   render() {
     return (
       <PageContainer>
         <Text
           style={textStyles.large}
         >Your Cart</Text>
-        <ScrollContainer>
+        <ScrollContainer
+          containerStyle={{width: styleValues.winWidth}}
+          contentContainerStyle={{paddingBottom: menuBarHeight + styleValues.mediumPadding}}
+        >
           {this.renderBusinessCarts()}
         </ScrollContainer>
+        {this.renderLoading()}
         <MenuBar
             buttonProps={[
                 {iconSource: icons.chevron, buttonFunc: () => this.props.navigation.goBack()},
@@ -171,15 +191,13 @@ export default class CustomerCartPage extends Component<CustomerCartProps, Custo
 const styles = StyleSheet.create({
   businessContainer: {
     width: "100%",
-    padding: styleValues.mediumPadding,
     paddingBottom: 0,
-    borderWidth: styleValues.minorBorderWidth,
     borderRadius: styleValues.bordRadius,
-    borderColor: colors.lightGrayColor,
   },
   checkoutBar: {
     flexDirection: "row",
     width: "100%",
+    marginTop: styleValues.mediumPadding,
   },
   checkoutButton: {
     width: "30%",

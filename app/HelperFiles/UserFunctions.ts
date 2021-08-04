@@ -19,7 +19,7 @@ export default abstract class UserFunctions {
             const docPath = "/userData/".concat(id)
             const docRef = firestore.doc(docPath)
             const userData = await ServerData.getDoc(docRef)
-            return userData as UserData
+            return {...userData} as UserData
         } catch(e) {
             throw e;
         }
@@ -65,39 +65,10 @@ export default abstract class UserFunctions {
     // Delete a business
     static async deleteBusiness(businessID: string) {
         try {
-            // Get user's data
-            const userData = (await UserFunctions.getUserDoc())
-            const userID = UserFunctions.getCurrentUser().uid
-            // Get private data
-            const privateDocPath = "/userData/".concat(userID).concat("/businesses/").concat(businessID)
-            const privateDocRef = firestore.doc(privateDocPath)
-            const privateDocData = (await privateDocRef.get()).data() as PrivateBusinessData
-            // Get public data reference
-            const publicDocPath = "/publicBusinessData/".concat(privateDocData.country).concat("/businesses/").concat(businessID)
-            const publicDocRef = firestore.doc(publicDocPath)
-            // Get products collection
-            const productsColPath = publicDocPath.concat("/products")
-            const productsColRef = firestore.collection(productsColPath)
-            const productSnaps = (await productsColRef.get()).docs
-            // Get updated business ID's
-            let newBusinessIDs = userData.businessIDs
-            const businessIndex = newBusinessIDs.indexOf(businessID)
-            newBusinessIDs.splice(businessIndex, 1)
-            const userDocRef = firestore.doc("userData/".concat(userID))
-            await firestore.runTransaction(async (transaction) => {
-                // Delete all product docs
-                for (const docSnap of productSnaps) {
-                    transaction.delete(docSnap.ref)
-                }
-                // Delete private and public data docs
-                transaction.delete(privateDocRef)
-                transaction.delete(publicDocRef)
-                // Delete business ID from user's business ID's
-                transaction.update(userDocRef, {businessIDs: newBusinessIDs})
-            })
-            return businessID
-        } catch(e) {
-            throw e;
+            const deleteBusiness = functions.httpsCallable("deleteBusiness")
+            return (await deleteBusiness({businessID: businessID})).data
+        } catch (e) {
+            throw e
         }
     }
 }

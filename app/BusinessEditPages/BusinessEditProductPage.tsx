@@ -1,4 +1,5 @@
 import React, { Component, useRef } from "react";
+import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, Text, StyleSheet, ImageURISource, ScrollView, Keyboard, Platform, ActivityIndicator } from "react-native";
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
@@ -6,20 +7,20 @@ import TextButton from "../CustomComponents/TextButton";
 import { auth, currencyFormatter } from "../HelperFiles/Constants";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
-import { BusinessMainStackParamList } from "../HelperFiles/Navigation"
+import { BusinessEditStackParamList, BusinessMainStackParamList } from "../HelperFiles/Navigation"
 import TextInputBox from "../CustomComponents/TextInputBox";
 import { DefaultProductOptionType, ProductCategory, ProductData, ProductOption, ProductOptionType, PublicBusinessData } from "../HelperFiles/DataTypes";
 import * as Permissions from 'expo-permissions';
-import { CurrencyInputBox, GradientView, IconButton, ImageSliderSelector, MapPopup, MenuBar, PageContainer, ScrollContainer, TextDropdown, TextInputPopup } from "../HelperFiles/CompIndex";
+import { CurrencyInputBox, GradientView, IconButton, ImageSliderSelector, ItemList, MapPopup, MenuBar, PageContainer, ScrollContainer, TextDropdown, TextHeader, TextInputPopup } from "../HelperFiles/CompIndex";
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 import { FlatList, TouchableWithoutFeedback } from "react-native-gesture-handler";
 import DraggableFlatList, { RenderItemParams} from "react-native-draggable-flatlist";
 import { DraggableGrid } from "react-native-draggable-grid"
 import { prefetchImages } from "../HelperFiles/ClientFunctions";
 
-type BusinessEditProductNavigationProp = StackNavigationProp<BusinessMainStackParamList, "editProduct">;
+type BusinessEditProductNavigationProp = StackNavigationProp<BusinessEditStackParamList, "editProduct">;
 
-type BusinessEditProductRouteProp = RouteProp<BusinessMainStackParamList, "editProduct">;
+type BusinessEditProductRouteProp = RouteProp<BusinessEditStackParamList, "editProduct">;
 
 type BusinessEditProductProps = {
     navigation: BusinessEditProductNavigationProp,
@@ -32,11 +33,15 @@ type State = {
     newImages: string[],
     deletedImages: string[],
     imagesLoaded: boolean,
+    priceChangeText: string,
+    editPriceMode: boolean,
     saved: boolean,
     optionNamePopup: boolean,
 }
 
-export default class BusinessEditProductPage extends Component<BusinessEditProductProps, State> {
+export default class BusinessEditProductPage extends CustomComponent<BusinessEditProductProps, State> {
+
+    scrollContainer: ScrollContainer | null = null
 
     constructor(props: BusinessEditProductProps) {
         super(props)
@@ -45,6 +50,8 @@ export default class BusinessEditProductPage extends Component<BusinessEditProdu
           newImages: [],
           deletedImages: [],
           imagesLoaded: false,
+          priceChangeText: "",
+          editPriceMode: false,
           saved: true,
           optionNamePopup: false,
         }
@@ -59,7 +66,10 @@ export default class BusinessEditProductPage extends Component<BusinessEditProdu
 
     async refreshData() {
       const productData = await this.props.businessFuncs.getProduct(this.props.route.params.productID)
-      this.setState({productData: productData})
+      this.setState({
+        productData: productData,
+        priceChangeText: productData.price !== null ? Math.abs(productData.price).toString() : "0"
+      })
     }
 
     renderOptionNamePopup() {
@@ -111,18 +121,10 @@ export default class BusinessEditProductPage extends Component<BusinessEditProdu
     }
 
     renderOptionTypes() {
-      /*if (this.state.productData) {
-        let buttons = this.state.productData.optionTypes.map((optionType) => {
-          return this.renderOptionTypeButton(optionType)
-        })
-        return buttons
-      }*/
         return (
-        <DraggableFlatList
+        <ItemList
           containerStyle={{
-            width: "100%",
-            maxHeight: styleValues.winWidth/2,
-            marginBottom: styleValues.minorPadding
+            width: styleValues.winWidth,
           }}
           data={this.state.productData ? this.state.productData.optionTypes : []}
           keyExtractor={(item, index) => index.toString()}
@@ -136,10 +138,17 @@ export default class BusinessEditProductPage extends Component<BusinessEditProdu
               this.setState({productData: newProductData, saved: false})
             }
           }}
-          showsVerticalScrollIndicator={false}
+          ListFooterComponent={() => (
+            <TextButton
+              text={"Add a new option type"}
+              appearance={"light"}
+              rightIconSource={icons.plus}
+              buttonFunc={() => this.setState({optionNamePopup: true})}
+            />
+          )}
           nestedScrollEnabled={true}
           pointerEvents={"box-none"}
-        ></DraggableFlatList>)
+        ></ItemList>)
     }
 
     renderDeleteButton() {
@@ -160,9 +169,13 @@ export default class BusinessEditProductPage extends Component<BusinessEditProdu
     renderUI() {
       if (this.state.productData) {
         return (
-        <PageContainer>
-          <Text style={textStyles.large}>{this.state.productData.name}</Text>
-          <ScrollContainer>
+        <View>
+          <ScrollContainer
+            avoidKeyboard={true}
+            containerStyle={{marginTop: defaults.textHeaderBox.height}}
+            fadeTop={false}
+            ref={(scrollContainer) => {this.scrollContainer = scrollContainer}}
+          >
             <ImageSliderSelector
               uris={this.state.productData ? this.state.productData.images : []}
               onChange={(uris) => {
@@ -206,20 +219,27 @@ export default class BusinessEditProductPage extends Component<BusinessEditProdu
               avoidKeyboard={true}
             ></TextInputBox>
             {/* Price */}
-            <CurrencyInputBox
-              currencyProps={{
-                value: this.state.productData?.price,
-                placeholder: "Price",
-                onChangeValue: (value) => {
-                  let newProductData = this.state.productData
+            <TextInputBox
+              textProps={{
+                value: this.state.editPriceMode ? this.state.priceChangeText : currencyFormatter.format(this.state.productData.price),
+                keyboardType: "numeric",
+                onChangeText: (text) => {
+                  this.setState({priceChangeText: text})
+                },
+                onFocus: () => this.setState({editPriceMode: true}),
+                onEndEditing: (event) => {
+                  const text = event.nativeEvent.text
+                  let newProductData = {...this.state.productData} as ProductData | undefined
                   if (newProductData) {
-                    newProductData.price = value
-                    this.setState({productData: newProductData, saved: false})
+                    let newPrice: number = parseFloat(text)
+                    newPrice = isNaN(newPrice) ? 0 : newPrice
+                    newProductData.price = newPrice
+                    const saved = newPrice === this.state.productData!.price ? this.state.saved : false
+                    this.setState({productData: newProductData, editPriceMode: false, saved: saved})
                   }
                 }
               }}
-              avoidKeyboard={true}
-            ></CurrencyInputBox>
+            />
             <View
               style={styles.optionsContainer}
             >
@@ -227,45 +247,11 @@ export default class BusinessEditProductPage extends Component<BusinessEditProdu
                 style={{...textStyles.medium, ...{marginBottom: styleValues.mediumPadding}}}
               >Option Types</Text>
               {this.renderOptionTypes()}
-              <IconButton
-                iconSource={icons.plus}
-                buttonStyle={buttonStyles.noColor}
-                buttonFunc={() => this.setState({optionNamePopup: true})}
-              />
             </View>
             {this.renderDeleteButton()}
           </ScrollContainer>
-          <MenuBar
-            buttonProps={[
-              {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
-              {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? colors.validColor : colors.invalidColor}, buttonFunc: async () => {
-                  if (this.state.productData) {
-                      // Add new images
-                      let downloadURLs: string[] = await this.props.businessFuncs.uploadImages(this.state.newImages)
-                      // Delete images
-                      await this.props.businessFuncs.deleteImages(this.state.deletedImages)
-                      // Update public data
-                      const newProductData = this.state.productData
-                      // Delete URLs
-                      let prevURLs: string[] = []
-                      newProductData.images.forEach((url) => {
-                        if (!this.state.deletedImages.includes(url)) {
-                          prevURLs.push(url)
-                        }
-                      })
-                      // Add new URLs
-                      newProductData.images = prevURLs.concat(downloadURLs)
-                      this.props.businessFuncs.updateProduct(this.state.productData.productID, newProductData).then(() => {
-                          this.setState({saved: true})
-                      }, (e) => {
-                          throw e;
-                      })
-                  }
-              }}
-            ]}
-          />
-          {this.renderOptionNamePopup()}
-        </PageContainer>
+          <TextHeader>{`${this.state.productData.category}: ${this.state.productData.name}`}</TextHeader>
+        </View>
         )
       }
     }
@@ -296,10 +282,40 @@ export default class BusinessEditProductPage extends Component<BusinessEditProdu
 
   render() {
     return (
-      <View>
+      <PageContainer>
         {this.renderUI()}
         {this.renderLoadScreen()}
-      </View>
+        <MenuBar
+          buttonProps={[
+            {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
+            {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? colors.validColor : colors.invalidColor}, buttonFunc: async () => {
+                if (this.state.productData) {
+                    // Add new images
+                    let downloadURLs: string[] = await this.props.businessFuncs.uploadImages(this.state.newImages)
+                    // Delete images
+                    await this.props.businessFuncs.deleteImages(this.state.deletedImages)
+                    // Update public data
+                    const newProductData = this.state.productData
+                    // Delete URLs
+                    let prevURLs: string[] = []
+                    newProductData.images.forEach((url) => {
+                      if (!this.state.deletedImages.includes(url)) {
+                        prevURLs.push(url)
+                      }
+                    })
+                    // Add new URLs
+                    newProductData.images = prevURLs.concat(downloadURLs)
+                    this.props.businessFuncs.updateProduct(this.state.productData.productID, newProductData).then(() => {
+                        this.setState({saved: true})
+                    }, (e) => {
+                        throw e;
+                    })
+                }
+            }}
+          ]}
+        ></MenuBar>
+        {this.renderOptionNamePopup()}
+      </PageContainer>
     )
   }
 }
@@ -310,9 +326,7 @@ const styles = StyleSheet.create({
   },
   optionsContainer: {
     alignItems: "center",
-    width: "100%",
-    borderWidth: styleValues.minorBorderWidth,
-    borderColor: colors.grayColor,
+    width: styleValues.winWidth,
     borderRadius: styleValues.bordRadius,
     padding: styleValues.mediumPadding,
     paddingBottom: 0,

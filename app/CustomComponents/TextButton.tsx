@@ -1,8 +1,10 @@
 import React, { Component, Fragment } from "react";
+import CustomComponent from "./CustomComponent"
 import { View, TouchableOpacity, Text, StyleSheet, TextStyle, ViewStyle, Image, GestureResponderEvent, ImageStyle } from "react-native";
 import PropTypes from 'prop-types';
 import { NavigationProp, useNavigation } from "@react-navigation/native"
 import { defaults, textStyles, buttonStyles, styleValues, colors, fonts } from "../HelperFiles/StyleSheet";
+import LoadingCover from "./LoadingCover";
 
 type Props = {
     text: string,
@@ -19,44 +21,20 @@ type Props = {
     buttonFunc?: (event?: GestureResponderEvent) => void,
     textProps?: Text['props'],
     subtextProps?: Text['props'],
-    touchableProps?: TouchableOpacity['props']
+    touchableProps?: TouchableOpacity['props'],
+    showLoading?: boolean
 }
 
-type State = {}
+type State = {
+    loading: boolean
+}
 
-export default class TextButton extends Component<Props, State> {
-
-    defaultButtonStyle = {...buttonStyles.noColor}
-    defaultTextStyle = {...styles.textStyle}
-    defaultIconStyle = {...styles.iconStyle}
+export default class TextButton extends CustomComponent<Props, State> {
 
     constructor(props: Props) {
         super(props)
-        // Update default button style
-        if (props.appearance === "light") {
-            this.defaultButtonStyle = buttonStyles.lightColor
-        } else if (props.appearance === "color") {
-            this.defaultButtonStyle = buttonStyles.mainColor
-        }
-        // Add a shadow
-        if (this.props.shadow !== false) {
-            this.defaultButtonStyle = {
-                ...this.defaultButtonStyle,
-                ...defaults.smallShadow
-            }
-        }
-        // Update default text style
-        if (props.appearance === "light") {
-            this.defaultTextStyle.color = colors.mainColor
-        } else if (props.appearance === "color") {
-            this.defaultTextStyle.color = colors.whiteColor
-            this.defaultTextStyle.fontFamily = fonts.medium
-        }
-        // Update default icon style
-        if (props.appearance === "light") {
-            this.defaultIconStyle.tintColor = colors.mainColor
-        } else if (props.appearance === "color") {
-            this.defaultIconStyle.tintColor = colors.whiteColor
+        this.state = {
+            loading: false
         }
     }
 
@@ -72,11 +50,18 @@ export default class TextButton extends Component<Props, State> {
     }
 
     renderLeftIcon() {
+        let defaultIconStyle = {...styles.iconStyle}
+        // Update default icon style
+        if (this.props.appearance === "light") {
+            defaultIconStyle.tintColor = colors.mainColor
+        } else if (this.props.appearance === "color") {
+            defaultIconStyle.tintColor = colors.whiteColor
+        }
         if (this.props.leftIconSource) {
             return (
                 <Image
                     source={this.props.leftIconSource}
-                    style = {{...this.defaultIconStyle, ...this.props.leftIconStyle}}
+                    style = {{...defaultIconStyle, ...this.props.leftIconStyle}}
                     resizeMethod={"scale"}
                     resizeMode={"contain"}
                 />
@@ -86,11 +71,18 @@ export default class TextButton extends Component<Props, State> {
     }
 
     renderRightIcon() {
+        let defaultIconStyle = {...styles.iconStyle}
+        // Update default icon style
+        if (this.props.appearance === "light") {
+            defaultIconStyle.tintColor = colors.mainColor
+        } else if (this.props.appearance === "color") {
+            defaultIconStyle.tintColor = colors.whiteColor
+        }
         if (this.props.rightIconSource) {
             return (
                 <Image
                     source={this.props.rightIconSource}
-                    style = {{...this.defaultIconStyle, ...this.props.rightIconStyle}}
+                    style = {{...defaultIconStyle, ...this.props.rightIconStyle}}
                     resizeMethod={"scale"}
                     resizeMode={"contain"}
                 />
@@ -100,22 +92,60 @@ export default class TextButton extends Component<Props, State> {
     }
 
     render() {
+        let defaultButtonStyle = {...buttonStyles.noColor}
+        let defaultTextStyle = {...styles.textStyle}
+        // Update default button style
+        if (this.props.appearance === "color") {
+            defaultButtonStyle = buttonStyles.mainColor
+        }
+        // Add a shadow
+        if (this.props.shadow !== false) {
+            defaultButtonStyle = {
+                ...defaultButtonStyle,
+                ...defaults.smallShadow
+            }
+        }
+        // Update default text style
+        if (this.props.appearance === "light") {
+            defaultTextStyle.color = colors.mainColor
+        } else if (this.props.appearance === "color") {
+            defaultTextStyle.color = colors.whiteColor
+        }
+        defaultTextStyle.fontFamily = fonts.regular
         return (
             <TouchableOpacity
-            style={{...this.defaultButtonStyle, ...this.props.buttonStyle, ...{
+            style={{...defaultButtonStyle, ...this.props.buttonStyle, ...{
                 justifyContent: this.props.rightIconSource != undefined || this.props.rightIconSource != undefined ? "space-between" : "center"
             }}}
-            onPress={this.props.buttonFunc}
+            onPress={async () => {
+                if (this.props.buttonFunc) {
+                  if (this.props.showLoading === true) {
+                    this.setState({loading: true})
+                  }
+                  await this.props.buttonFunc()
+                  if (this.props.showLoading === true) {
+                    this.setState({loading: false})
+                  }
+                }
+              }}
             {...this.props.touchableProps}
             >
-                {this.renderLeftIcon()}
-                <View style={{alignItems: "center", justifyContent: "center"}}>
-                    <Text style = {[this.defaultTextStyle, this.props.textStyle]} {...this.props.textProps}>
-                        {this.props.text}
-                    </Text>
-                    {this.renderSubtext()}
-                </View>
-                {this.renderRightIcon()}
+                {!this.state.loading ?
+                    <>
+                        {this.renderLeftIcon()}
+                        <View style={{alignItems: "center", justifyContent: "center"}}>
+                            <Text style = {[defaultTextStyle, this.props.textStyle]} {...this.props.textProps}>
+                                {this.props.text}
+                            </Text>
+                            {this.renderSubtext()}
+                        </View>
+                        {this.renderRightIcon()}
+                    </> :
+                    <LoadingCover
+                        size={"small"}
+                        style={{backgroundColor: "transparent"}}
+                    />
+                }
             </TouchableOpacity>
             )
     }

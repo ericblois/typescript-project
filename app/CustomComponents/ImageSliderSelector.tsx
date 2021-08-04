@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponent"
 import { View, Image, StyleSheet, FlatList, Text, ImageStyle, ViewStyle, TouchableWithoutFeedback } from "react-native";
 import { icons, styleValues, colors, defaults, textStyles, buttonStyles, } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
@@ -34,7 +35,7 @@ type State = {
     galleryHeight: number,
 }
 
-export default class ImageSliderSelector extends Component<Props, State> {
+export default class ImageSliderSelector extends CustomComponent<Props, State> {
 
     loadCount: number
 
@@ -207,15 +208,13 @@ export default class ImageSliderSelector extends Component<Props, State> {
                 <View style={{marginHorizontal: styleValues.mediumPadding}}>
                 <View style={[styles.gallery, {
                     height: this.state.galleryHeight,
-                    backgroundColor: colors.lightColor,
-                    borderWidth: styleValues.minorBorderWidth,
+                    backgroundColor: colors.lighterGrayColor,
                     borderRadius: styleValues.bordRadius,
-                    borderColor: colors.darkColor,
                     alignItems: "center",
                     justifyContent: "center",
                 }]}>
                     <Text style={{...textStyles.small, ...{
-                        color: colors.darkColor,
+                        color: colors.darkGrayColor,
                     }}}>
                         There are no images to show.
                     </Text>
@@ -229,7 +228,7 @@ export default class ImageSliderSelector extends Component<Props, State> {
         return (
             <IconButton
                 iconSource={icons.plus}
-                buttonStyle={styles.imageSelectButton}
+                buttonStyle={styles.addImageButton}
                 iconStyle={{tintColor: colors.whiteColor}}
                 buttonFunc={async () => {
                     const result = await accessPhotos()
@@ -263,9 +262,9 @@ const styles = StyleSheet.create({
     gallery: {
         width: "100%",
     },
-    imageSelectButton: {
-        width: styleValues.iconLargeSize,
-        height: styleValues.iconLargeSize,
+    addImageButton: {
+        width: styleValues.iconMediumSize,
+        height: styleValues.iconMediumSize,
         position: "absolute",
         margin: styleValues.mediumPadding,
         bottom: 0,

@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "../CustomComponents/CustomComponent"
 import { StyleSheet, StatusBar, AppState, ActivityIndicator, View } from "react-native";
 import BusinessShopScreen from "./BusinessShopScreen"
 import { defaults, textStyles, buttonStyles, icons, styleValues, colors, tabBarStyles } from "../HelperFiles/StyleSheet";
@@ -27,7 +28,7 @@ type Props = {
 type State = {
 }
 
-export default class CustomerTabScreen extends Component<Props, State> {
+export default class CustomerTabScreen extends CustomComponent<Props, State> {
 
   state: Readonly<State> = {};
 
@@ -43,7 +44,7 @@ export default class CustomerTabScreen extends Component<Props, State> {
               activeTintColor: colors.mainColor,
               inactiveTintColor: colors.lightGrayColor
             }}
-            initialRouteName={"browse"}
+            initialRouteName={"account"}
         >
             <CustomerTab.Screen
                 name={"fav"} 

@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, Text, StyleSheet, ImageURISource, ScrollView, ActivityIndicator } from "react-native";
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
@@ -6,11 +7,11 @@ import TextButton from "../CustomComponents/TextButton";
 import { auth } from "../HelperFiles/Constants";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
-import { BusinessMainStackParamList } from "../HelperFiles/Navigation"
+import { BusinessEditStackParamList, BusinessMainStackParamList } from "../HelperFiles/Navigation"
 import TextInputBox from "../CustomComponents/TextInputBox";
 import { DefaultProductOption, ProductCategory, ProductData, ProductOption, ProductOptionType, PublicBusinessData } from "../HelperFiles/DataTypes";
 import * as Permissions from 'expo-permissions';
-import { GradientView, ImageSliderSelector, MapPopup, MenuBar, PageContainer, TextInputPopup } from "../HelperFiles/CompIndex";
+import { GradientView, IconButton, ImageSliderSelector, ItemList, LoadingCover, MapPopup, MenuBar, PageContainer, TextHeader, TextInfoPopup, TextInputPopup, ConfirmationPopup, ToggleSwitch } from "../HelperFiles/CompIndex";
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 import { FlatList } from "react-native-gesture-handler";
 import DraggableFlatList, { RenderItemParams } from 'react-native-draggable-flatlist'
@@ -18,9 +19,9 @@ import SortableList from 'react-native-sortable-list';
 import Row from 'react-native-sortable-list';
 import UserFunctions from "../HelperFiles/UserFunctions";
 
-type ProductEditOptionTypeNavigationProp = StackNavigationProp<BusinessMainStackParamList, "editOptionType">;
+type ProductEditOptionTypeNavigationProp = StackNavigationProp<BusinessEditStackParamList, "editOptionType">;
 
-type ProductEditOptionTypeRouteProp = RouteProp<BusinessMainStackParamList, "editOptionType">;
+type ProductEditOptionTypeRouteProp = RouteProp<BusinessEditStackParamList, "editOptionType">;
 
 type ProductEditOptionTypeProps = {
     navigation: ProductEditOptionTypeNavigationProp,
@@ -31,18 +32,24 @@ type ProductEditOptionTypeProps = {
 type State = {
     productData?: ProductData,
     optionType?: ProductOptionType,
-    showPopup: boolean,
+    infoPopupText?: string,
+    showNameInputPopup: boolean,
+    showDeletePopup: boolean,
+    showSavePopup: boolean,
     saved: boolean
 }
 
-export default class ProductEditOptionTypePage extends Component<ProductEditOptionTypeProps, State> {
+export default class ProductEditOptionTypePage extends CustomComponent<ProductEditOptionTypeProps, State> {
 
     constructor(props: ProductEditOptionTypeProps) {
         super(props)
         this.state = {
           productData: undefined,
           optionType: undefined,
-          showPopup: false,
+          infoPopupText: undefined,
+          showNameInputPopup: false,
+          showDeletePopup: false,
+          showSavePopup: false,
           saved: true
         }
         props.navigation.addListener("focus", () => {
@@ -63,11 +70,11 @@ export default class ProductEditOptionTypePage extends Component<ProductEditOpti
         })
     }
 
-    renderTextPopup() {
-      if (this.state.showPopup) {
+    renderNameInput() {
+      if (this.state.showNameInputPopup) {
         return (
           <TextInputPopup
-            onTapAway={() => {this.setState({showPopup: false})}}
+            onTapAway={() => {this.setState({showNameInputPopup: false})}}
             onSaveText={async (text) => {
               let newProductData = this.state.productData
               let newOptionType = this.state.optionType
@@ -84,7 +91,7 @@ export default class ProductEditOptionTypePage extends Component<ProductEditOpti
                     this.setState({
                         productData: newProductData,
                         optionType: newOptionType,
-                        showPopup: false,
+                        showNameInputPopup: false,
                         saved: false
                     })
                 }
@@ -93,6 +100,70 @@ export default class ProductEditOptionTypePage extends Component<ProductEditOpti
             textInputProps={{
               textProps: {
                 placeholder: "Name of new option",
+              }
+            }}
+          />
+        )
+      }
+    }
+
+    renderInfoPopup() {
+      if (this.state.infoPopupText) {
+        return (
+          <TextInfoPopup
+          headerText={"Edit Option Type"}
+            onExit={() => this.setState({infoPopupText: undefined})}
+          >{this.state.infoPopupText}</TextInfoPopup>
+        )
+      }
+    }
+
+    renderSavePopup() {
+      if (this.state.showSavePopup) {
+        return (
+          <ConfirmationPopup
+            type={"save"}
+            onExit={() => this.setState({showSavePopup: false})}
+            onDeny={() => {
+              this.setState({saved: true, showSavePopup: false})
+              this.props.navigation.goBack()
+            }}
+            onConfirm={async () => {
+              if (this.state.productData) {
+                let newProductData = this.state.productData
+                await this.props.businessFuncs.updateProduct(this.props.route.params.productID, newProductData)
+                this.setState({saved: true, showSavePopup: false})
+                this.props.navigation.goBack()
+                return
+              }
+              this.props.navigation.goBack()
+            }}
+          />
+        )
+      }
+    }
+
+    renderDeletePopup() {
+      if (this.state.showDeletePopup) {
+        return (
+          <ConfirmationPopup
+            type={"delete"}
+            onDeny={() => this.setState({showDeletePopup: false})}
+            onConfirm={async () => {
+              let newProductData = this.state.productData
+              if (newProductData) {
+                  const optionTypeIndex = newProductData.optionTypes.findIndex((optionType) => {
+                      return optionType.name === this.props.route.params.optionType
+                  })
+                  if (optionTypeIndex > -1) {
+                      newProductData.optionTypes.splice(optionTypeIndex, 1)
+                      await this.props.businessFuncs.updateProduct(
+                          this.props.route.params.productID,
+                          newProductData
+                      )
+                  }
+                  this.setState({showDeletePopup: false})
+                  this.props.navigation.goBack()
               }
             }}
           />
@@ -129,28 +200,28 @@ export default class ProductEditOptionTypePage extends Component<ProductEditOpti
       )
     }
 
+    renderAddButton() {
+      return (
+        <TextButton
+          text={"Add new option"}
+          appearance={"light"}
+          rightIconSource={icons.plus}
+          buttonFunc={async () => {
+              this.setState({showNameInputPopup: true})
+          }}
+        />
+      )
+    }
+
     renderDeleteButton() {
         return (
           <TextButton
             text={"Delete this option type"}
             buttonStyle={buttonStyles.noColor}
             textStyle={{color: "red"}}
-            buttonFunc={async () => {
-                let newProductData = this.state.productData
-                if (newProductData) {
-                    const optionTypeIndex = newProductData.optionTypes.findIndex((optionType) => {
-                        return optionType.name === this.props.route.params.optionType
-                    })
-                    if (optionTypeIndex > -1) {
-                        newProductData.optionTypes.splice(optionTypeIndex, 1)
-                        await this.props.businessFuncs.updateProduct(
-                            this.props.route.params.productID,
-                            newProductData
-                        )
-                    }
-                    this.props.navigation.goBack()
-                }
-            }}
+            rightIconSource={icons.minus}
+            rightIconStyle={{tintColor: "red"}}
+            buttonFunc={() => this.setState({showDeletePopup: true})}
           />
         )
     }
@@ -158,15 +229,50 @@ export default class ProductEditOptionTypePage extends Component<ProductEditOpti
     renderUI() {
       if (this.state.optionType) {
       return (
-        <PageContainer>
-            <Text
-            style={textStyles.large}
+        <View style={{alignItems: "center", paddingTop: defaults.textHeaderBox.height}}>
+            <ToggleSwitch
+              text={"Optional"}
+              style={{width: styleValues.winWidth - styleValues.mediumPadding*2, marginTop: styleValues.mediumPadding*2}}
+              textStyle={textStyles.small}
+              onToggle={(value) => {
+                const newOptionType = this.state.optionType
+                if (newOptionType) {
+                  newOptionType.allowMultiple = value
+                  this.setState({optionType: newOptionType, saved: false})
+                }
+              }}
             >
-            {this.props.route.params.productName.concat(": ").concat(this.props.route.params.optionType)}
-            </Text>
+              <IconButton
+                iconSource={icons.info}
+                buttonStyle={{width: "8%"}}
+                buttonFunc={() => {
+                  this.setState({infoPopupText: "By setting this option type to be optional, customers can skip making a selection from this option type when adding this product to their cart."})
+                }}
+              />
+            </ToggleSwitch>
+            <ToggleSwitch
+              text={"Enable multiple selections"}
+              style={{width: styleValues.winWidth - styleValues.mediumPadding*2}}
+              textStyle={textStyles.small}
+              onToggle={(value) => {
+                const newOptionType = this.state.optionType
+                if (newOptionType) {
+                  newOptionType.allowMultiple = value
+                  this.setState({optionType: newOptionType, saved: false})
+                }
+              }}
+            >
+              <IconButton
+                iconSource={icons.info}
+                buttonStyle={{width: "8%"}}
+                buttonFunc={() => {
+                  this.setState({infoPopupText: "By enabling multiple selections, customers can make more than one selection from this option type when adding this product to their cart."})
+                }}
+              />
+            </ToggleSwitch>
             <View style={{flex: 1}}>
-              <DraggableFlatList
-              containerStyle={styles.list}
+              <ItemList
+              containerStyle={{width: styleValues.winWidth}}
               data={this.state.optionType ? this.state.optionType.options : []}
               keyExtractor={(item, index) => index.toString()}
               renderItem={(params) => {return this.renderOptionButton(params)}}
@@ -177,16 +283,44 @@ export default class ProductEditOptionTypePage extends Component<ProductEditOpti
                   }
                   this.setState({optionType: optionType, saved: false})
               }}
-              ListHeaderComponent={() => (<View style={{height: styleValues.mediumPadding}}/>)}
+              ListHeaderComponent={() => this.renderAddButton()}
               ListFooterComponent={() => this.renderDeleteButton()}
               />
               <GradientView/>
             </View>
-            <MenuBar
+            <TextHeader
+              infoButtonFunc={() => {
+                this.setState({infoPopupText: "Use this page to edit an option type. Option types show up as selectable menus on a product's info page. You can rearrange the order of options by pressing and holding on an option."})
+              }}
+            >{`${this.props.route.params.productName}: ${this.props.route.params.optionType}`}</TextHeader>
+        </View>
+      )
+      }
+    }
+    // Render a loading indicator over the UI while images and data load
+    renderLoading() {
+      if (this.state.optionType === undefined) {
+        return (
+          <LoadingCover/>
+        )
+      }
+    }
+
+    render() {
+      return (
+        <PageContainer>
+          {this.renderUI()}
+          {this.renderLoading()}
+          <MenuBar
             buttonProps={[
-                {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
-                {iconSource: icons.plus, buttonFunc: () => {this.setState({showPopup: true})}},
-                {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? colors.validColor : colors.invalidColor}, buttonFunc: () => {
+                {iconSource: icons.chevron, buttonFunc: () => {
+                  if (!this.state.saved) {
+                    this.setState({showSavePopup: true})
+                  } else {
+                    this.props.navigation.goBack()
+                  }
+                }},
+                {iconSource: icons.checkBox, showLoading: true, iconStyle: {tintColor: this.state.saved ? colors.validColor : colors.invalidColor}, buttonFunc: () => {
                     if (this.state.productData) {
                         let newProductData = this.state.productData
                         this.props.businessFuncs.updateProduct(this.props.route.params.productID, newProductData).then(() => {
@@ -197,49 +331,12 @@ export default class ProductEditOptionTypePage extends Component<ProductEditOpti
                     }
                 }}
             ]}
-            />
-            {this.renderTextPopup()}
+            ></MenuBar>
+            {this.renderNameInput()}
+            {this.renderInfoPopup()}
+            {this.renderSavePopup()}
+            {this.renderDeletePopup()}
         </PageContainer>
-      )
-      }
-    }
-    // Render a loading indicator over the UI while images and data load
-    renderLoadScreen() {
-      if (this.state.optionType === undefined) {
-        return (
-          <View 
-            style={{...defaults.pageContainer, ...{
-              justifyContent: "center",
-              position: "absolute",
-              top: 0,
-              left: 0
-            }}}
-          >
-            <ActivityIndicator
-              size={"large"}
-            />
-            <MenuBar
-              buttonProps={[
-                {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
-              ]}
-              />
-          </View>
-        )
-      }
-    }
-
-    render() {
-      return (
-        <View>
-          {this.renderUI()}
-          {this.renderLoadScreen()}
-        </View>
       )
   }
 }
-
-const styles = StyleSheet.create({
-    list: {
-      width: "100%",
-    },
-})

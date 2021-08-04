@@ -1,21 +1,25 @@
 import React, { Component } from "react";
+import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, Text, StyleSheet, } from "react-native";
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { auth } from "../HelperFiles/Constants";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
-import { BusinessMainStackParamList, RootStackParamList } from "../HelperFiles/Navigation"
+import { BusinessEditStackParamList, BusinessMainStackParamList, RootStackParamList } from "../HelperFiles/Navigation"
 import { ImageProfileSelector, TextButton, MenuBar, PageContainer } from "../HelperFiles/CompIndex";
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 import UserFunctions from "../HelperFiles/UserFunctions";
 
 type BusinessEditMainNavigationProp = CompositeNavigationProp<
-  StackNavigationProp<BusinessMainStackParamList, "businessEdit">,
+  CompositeNavigationProp<
+    StackNavigationProp<BusinessEditStackParamList, "editMain">,
+    StackNavigationProp<BusinessMainStackParamList>
+  >,
   StackNavigationProp<RootStackParamList>
 >
 
-type BusinessEditMainRouteProp = RouteProp<BusinessMainStackParamList, "businessEdit">;
+type BusinessEditMainRouteProp = RouteProp<BusinessEditStackParamList, "editMain">;
 
 type BusinessEditMainProps = {
     navigation: BusinessEditMainNavigationProp,
@@ -26,7 +30,7 @@ type BusinessEditMainProps = {
 type State = {
 }
 
-export default class BusinessEditMainPage extends Component<BusinessEditMainProps, State> {
+export default class BusinessEditMainPage extends CustomComponent<BusinessEditMainProps, State> {
 
   render() {
     return (
@@ -74,11 +78,21 @@ export default class BusinessEditMainPage extends Component<BusinessEditMainProp
             }}
         ></TextButton>
         <MenuBar
-          //buttonProps={this.state.inEditMode ? this.getEditButtons(props) : this.getMainButtons(props)}
-          buttonProps={[
-            {iconSource: icons.store, buttonFunc: () => {this.props.navigation.navigate("businessEdit")},},
-            {iconSource: icons.profile, buttonFunc: () => {this.props.navigation.navigate("account")}}
-          ]}
+            buttonProps={[
+                {
+                  iconSource: icons.store,
+                  buttonFunc: () => {this.props.navigation.navigate("businessEdit")},
+                  iconStyle: {tintColor: colors.mainColor}
+                },
+                {
+                    iconSource: icons.document,
+                    buttonFunc: () => {this.props.navigation.navigate("orders")},
+                },
+                {
+                  iconSource: icons.profile,
+                  buttonFunc: () => {this.props.navigation.navigate("account")}
+                },
+            ]}
         />
       </PageContainer>
     );

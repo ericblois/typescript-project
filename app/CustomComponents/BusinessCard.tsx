@@ -1,5 +1,6 @@
 
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponent"
 import { View, TouchableOpacity, Image, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { icons, styleValues, colors, defaults, textStyles, buttonStyles, } from "../HelperFiles/StyleSheet";
 import {  useNavigation } from "@react-navigation/native";
@@ -18,7 +19,7 @@ type State = {
   imageLoaded: boolean,
 }
 
-export default class BusinessCard extends Component<Props, State> {
+export default class BusinessCard extends CustomComponent<Props, State> {
 
     constructor(props: Props) {
       super(props)
@@ -30,9 +31,9 @@ export default class BusinessCard extends Component<Props, State> {
     }
 
     async refreshData() {
-      CustomerFunctions.getPublicBusinessData(this.props.businessID).then((publicData) => {
-        this.setState({businessData: publicData})
-      })
+      const publicData = await CustomerFunctions.getPublicBusinessData(this.props.businessID)
+      console.log(this.props.businessID)
+      this.setState({businessData: publicData})
     }
 
     renderUI() {
@@ -43,7 +44,7 @@ export default class BusinessCard extends Component<Props, State> {
                 style={styles.galleryImage}
                 resizeMethod={"scale"}
                 resizeMode={"cover"}
-                source={this.state.businessData.galleryImages[0] ? {uri: this.state.businessData.galleryImages[0]} : icons.profile}
+                source={this.state.businessData.galleryImages.length > 0 ? {uri: this.state.businessData.galleryImages[0]} : icons.profile}
                 onLoadEnd={() => {
                   this.setState({imageLoaded: true})
                   if (this.props.onLoadEnd) {

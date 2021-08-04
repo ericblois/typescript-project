@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, Text, StyleSheet, } from "react-native";
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
@@ -34,7 +35,7 @@ type CustomerEditShippingState = {
     saved: boolean
 }
 
-export default class CustomerEditShippingPage extends Component<CustomerEditShippingProps, CustomerEditShippingState> {
+export default class CustomerEditShippingPage extends CustomComponent<CustomerEditShippingProps, CustomerEditShippingState> {
 
   constructor(props: CustomerEditShippingProps) {
     super(props)
@@ -75,7 +76,7 @@ export default class CustomerEditShippingPage extends Component<CustomerEditShip
       return (
         <View>
           <Text
-            style={{...textStyles.medium, ...{alignSelf: "flex-start"}}}
+            style={{...textStyles.medium, ...{alignSelf: "flex-start", marginLeft: styleValues.mediumPadding}}}
           >Default address:</Text>
           <ItemList
             data={this.state.addresses}
@@ -93,7 +94,8 @@ export default class CustomerEditShippingPage extends Component<CustomerEditShip
                   buttonStyle={{
                     width: "100%",
                     height: undefined,
-                    borderColor: itemParams.index! === 0 ? colors.mainColor : colors.grayColor
+                    borderColor: itemParams.index! === 0 ? colors.mainColor : colors.grayColor,
+                    borderWidth: itemParams.index! === 0 ? styleValues.minorBorderWidth : 0,
                   }}
                   textStyle={{alignSelf: "flex-start"}}
                   subtextStyle={{alignSelf: "flex-start"}}
@@ -109,7 +111,8 @@ export default class CustomerEditShippingPage extends Component<CustomerEditShip
             onDragEnd={(dragParams) => {
               this.setState({addresses: dragParams.data, saved: false})
             }}
-            contentContainerStyle={{width: styleValues.winWidth - styleValues.mediumPadding*2}}
+            contentContainerStyle={{paddingHorizontal: styleValues.mediumPadding}}
+            containerStyle={{width: styleValues.winWidth}}
           />
         </View>
       )
@@ -120,7 +123,7 @@ export default class CustomerEditShippingPage extends Component<CustomerEditShip
     return (
       <PageContainer>
         <Text
-          style={textStyles.large}
+          style={textStyles.largerHeader}
         >
           Shipping info
         </Text>

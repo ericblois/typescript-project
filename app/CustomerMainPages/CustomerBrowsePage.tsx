@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, Text, StyleSheet, NativeSyntheticEvent, TextInputSubmitEditingEventData, FlatList, ActivityIndicator, } from "react-native";
 import PropTypes from 'prop-types';
 import { styleValues, colors, defaults, textStyles, buttonStyles, fonts, menuBarHeight } from "../HelperFiles/StyleSheet";
@@ -34,7 +35,7 @@ type State = {
     searchLoading: boolean
 }
 
-export default class CustomerBrowsePage extends Component<Props, State> {
+export default class CustomerBrowsePage extends CustomComponent<Props, State> {
     constructor (props: Props) {
         super(props)
         this.state = {
@@ -61,7 +62,7 @@ export default class CustomerBrowsePage extends Component<Props, State> {
         // Get current position
         navigator.geolocation.getCurrentPosition(async (pos) => {
           const location = {latitude: pos.coords.latitude, longitude: pos.coords.longitude}
-          const businesses = await ServerData.findLocalBusinessesInRange(getQueryTerms(search), location)
+          const businesses = await CustomerFunctions.findLocalBusinessesInRange(getQueryTerms(search), location)
           this.setState({businessResults: businesses, searchLoading: false})
         })
       } catch (e) {
@@ -93,23 +94,27 @@ export default class CustomerBrowsePage extends Component<Props, State> {
 
     renderFavorites() {
       if (this.state.userData) {
-        return (
-          <View style={{width: "100%",}}>
-            <Text 
-              style={{...textStyles.large, ...{
-                textAlign: "left",
-                marginLeft: styleValues.mediumPadding,
-                marginTop: styleValues.mediumPadding
-              }}}
-            >Favorites</Text>
-            <BusinessCardBrowseList
-              businessIDs={this.state.userData.favorites}
-              onCardPress={(publicData) => this.props.navigation.navigate("businessShop", {businessData: publicData})}
-              showLoading={false}
-              style={{width: styleValues.winWidth, marginHorizontal: -styleValues.mediumPadding}}
-            />
-          </View>
-        )
+        try {
+          return (
+            <View style={{width: "100%",}}>
+              <Text 
+                style={{...textStyles.large, ...{
+                  textAlign: "left",
+                  marginLeft: styleValues.mediumPadding,
+                  marginTop: styleValues.mediumPadding
+                }}}
+              >Favorites</Text>
+              <BusinessCardBrowseList
+                businessIDs={this.state.userData.favorites}
+                onCardPress={(publicData) => this.props.navigation.navigate("businessShop", {businessData: publicData})}
+                showLoading={false}
+                style={{width: styleValues.winWidth, marginHorizontal: -styleValues.mediumPadding}}
+              />
+            </View>
+          )
+        } catch (e) {
+          this.refreshData()
+        }
       }
     }
 

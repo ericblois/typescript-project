@@ -44,6 +44,17 @@ export const CustomerTab = createBottomTabNavigator<CustomerTabParamList>();
 
 export type BusinessMainStackParamList = {
     businessEdit: undefined,
+    orders: undefined,
+    order: {
+        orderData: OrderData
+    },
+    account: undefined,
+}
+
+export const BusinessMainStack = createStackNavigator<BusinessMainStackParamList>();
+
+export type BusinessEditStackParamList = {
+    editMain: undefined,
     editInfo: undefined,
     editLocation: undefined,
     editProductList: undefined,
@@ -63,11 +74,9 @@ export type BusinessMainStackParamList = {
         optionType: string,
         option: string
     },
-    notif: undefined,
-    account: undefined,
 }
 
-export const BusinessMainStack = createStackNavigator<BusinessMainStackParamList>();
+export const BusinessEditStack = createStackNavigator<BusinessEditStackParamList>()
 
 export type BusinessShopStackParamList = {
     info: undefined,

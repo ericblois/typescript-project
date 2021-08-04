@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponent"
 import { TouchableOpacity, Text, StyleSheet, TextStyle, ViewStyle, View, GestureResponderEvent } from "react-native";
 import PropTypes from 'prop-types';
 import { NavigationProp, useNavigation } from "@react-navigation/native"
@@ -14,7 +15,7 @@ type TextDropdownProps = {
 
 type State = {}
 
-export default class TextDropdown extends Component<TextDropdownProps, State> {
+export default class TextDropdown extends CustomComponent<TextDropdownProps, State> {
 
     render() {
         return (

@@ -1,8 +1,9 @@
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponent"
 import { Text, View, StyleSheet, TextStyle, GestureResponderEvent, ImageStyle, ViewStyle } from "react-native";
 import { defaults, textStyles, buttonStyles, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
-import { Icon } from "react-native-elements";
+import { Icon, SwitchProps } from "react-native-elements";
 import { Switch } from "react-native-gesture-handler";
 
 type ToggleSwitchProps = {
@@ -11,7 +12,8 @@ type ToggleSwitchProps = {
     textStyle?: TextStyle,
     textProps?: Text["props"],
     switchStyle?: ViewStyle,
-    switchProps?: Switch['propTypes'],
+    switchProps?: SwitchProps,
+    shadow?: boolean,
     onToggle?: (value: boolean) => void
 }
 
@@ -19,7 +21,7 @@ type State = {
     switchValue: boolean
 }
 
-export default class ToggleSwitch extends Component<ToggleSwitchProps, State> {
+export default class ToggleSwitch extends CustomComponent<ToggleSwitchProps, State> {
 
     constructor(props: ToggleSwitchProps) {
         super(props)
@@ -32,7 +34,7 @@ export default class ToggleSwitch extends Component<ToggleSwitchProps, State> {
         if (this.props.text) {
             return (
                 <Text
-                    style={{...textStyles.small, ...this.props.textStyle}}
+                    style={{...textStyles.medium, ...this.props.textStyle}}
                 >
                     {this.props.text}
                 </Text>
@@ -43,18 +45,29 @@ export default class ToggleSwitch extends Component<ToggleSwitchProps, State> {
   render() {
     return (
         <View
-            style={{...styles.container, ...this.props.style}}
+            style={{
+                ...defaults.inputBox,
+                ...styles.container,
+                ...(this.props.shadow === true ? defaults.smallShadow : undefined),
+                ...this.props.style
+            }}
         >
+            {this.props.children}
             {this.renderText()}
             <Switch
                 style={{...styles.switch, ...this.props.switchStyle}}
                 value={this.state.switchValue}
+                trackColor={{
+                    true: colors.mainColor,
+                    false: colors.darkGrayColor
+                }}
                 onValueChange={(value) => {
                     this.setState({switchValue: value})
                     if (this.props.onToggle) {
                         this.props.onToggle(value)
                     }
                 }}
+                {...this.props.switchProps}
             />
         </View>
     )
@@ -67,10 +80,11 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         width: "100%",
-        padding: styleValues.mediumPadding,
+        height: styleValues.winWidth*0.125,
+        padding: styleValues.minorPadding,
+        paddingHorizontal: styleValues.mediumPadding,
         borderRadius: styleValues.bordRadius,
-        borderWidth: styleValues.minorBorderWidth,
-        borderColor: colors.grayColor
+        backgroundColor: colors.whiteColor
     },
     switch: {
 

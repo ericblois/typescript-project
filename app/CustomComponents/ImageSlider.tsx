@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponent"
 import { View, Image, StyleSheet, FlatList, Text, ImageStyle, ViewStyle, TouchableWithoutFeedback } from "react-native";
 import { icons, styleValues, colors, defaults, textStyles, buttonStyles, } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
@@ -27,7 +28,7 @@ type State = {
     galleryHeight: number,
 }
 
-export default class ImageSlider extends Component<Props, State> {
+export default class ImageSlider extends CustomComponent<Props, State> {
 
     loadCount: number
 

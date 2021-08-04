@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, Text, StyleSheet, } from "react-native";
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
@@ -36,7 +37,7 @@ type CustomerEditAddressState = {
     saved: boolean,
 }
 
-export default class CustomerEditAddressPage extends Component<CustomerEditAddressProps, CustomerEditAddressState> {
+export default class CustomerEditAddressPage extends CustomComponent<CustomerEditAddressProps, CustomerEditAddressState> {
 
   constructor(props: CustomerEditAddressProps) {
     super(props)
@@ -58,7 +59,7 @@ export default class CustomerEditAddressPage extends Component<CustomerEditAddre
             }}
           >
             <TextInputBox
-                style={{...buttonStyles.lightColor, ...{
+                style={{...buttonStyles.noColor, ...{
                     borderColor: colors.invalidColor
                 }}}
                 textProps={{
@@ -72,7 +73,7 @@ export default class CustomerEditAddressPage extends Component<CustomerEditAddre
                 }}
             ></TextInputBox>
             <TextInputBox
-                style={{...buttonStyles.lightColor, ...{
+                style={{...buttonStyles.noColor, ...{
                     borderColor: colors.invalidColor
                 }}}
                 textProps={{
@@ -86,7 +87,7 @@ export default class CustomerEditAddressPage extends Component<CustomerEditAddre
                 }}
             ></TextInputBox>
             <TextInputBox
-                style={{...buttonStyles.lightColor, ...{
+                style={{...buttonStyles.noColor, ...{
                     borderColor: colors.invalidColor
                 }}}
                 textProps={{
@@ -100,7 +101,7 @@ export default class CustomerEditAddressPage extends Component<CustomerEditAddre
                 }}
             ></TextInputBox>
             <TextInputBox
-                style={{...buttonStyles.lightColor, ...{
+                style={{...buttonStyles.noColor, ...{
                     borderColor: colors.invalidColor
                 }}}
                 textProps={{
@@ -114,7 +115,7 @@ export default class CustomerEditAddressPage extends Component<CustomerEditAddre
                 }}
             ></TextInputBox>
             <TextInputBox
-                style={{...buttonStyles.lightColor, ...{
+                style={{...buttonStyles.noColor, ...{
                     borderColor: colors.invalidColor
                 }}}
                 textProps={{
@@ -128,7 +129,7 @@ export default class CustomerEditAddressPage extends Component<CustomerEditAddre
                 }}
             ></TextInputBox>
             <TextInputBox
-                style={{...buttonStyles.lightColor, ...{
+                style={{...buttonStyles.noColor, ...{
                     borderColor: colors.invalidColor
                 }}}
                 textProps={{
@@ -142,7 +143,7 @@ export default class CustomerEditAddressPage extends Component<CustomerEditAddre
                 }}
             ></TextInputBox>
             <TextInputBox
-                style={{...buttonStyles.lightColor, ...{
+                style={{...buttonStyles.noColor, ...{
                     borderColor: colors.validColor
                 }}}
                 textProps={{
@@ -156,7 +157,7 @@ export default class CustomerEditAddressPage extends Component<CustomerEditAddre
                 }}
             ></TextInputBox>
             <TextInputBox
-                style={{...buttonStyles.lightColor, ...{
+                style={{...buttonStyles.noColor, ...{
                     borderColor: colors.validColor,
                     height: styleValues.winWidth*0.25
                 }}}
@@ -194,7 +195,7 @@ export default class CustomerEditAddressPage extends Component<CustomerEditAddre
     return (
       <PageContainer>
         <Text
-          style={textStyles.large}
+          style={{...textStyles.large, marginVertical: styleValues.mediumPadding}}
         >Edit Address</Text>
         {this.renderInputs()}
         <MenuBar

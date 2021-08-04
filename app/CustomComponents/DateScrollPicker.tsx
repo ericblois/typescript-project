@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponent"
 import { TouchableOpacity, Text, StyleSheet, TextStyle, ViewStyle, View, GestureResponderEvent } from "react-native";
 import PropTypes from 'prop-types';
 import { NavigationProp, useNavigation } from "@react-navigation/native"
@@ -13,7 +14,7 @@ type DateScrollPickerProps = {
 
 type State = {}
 
-export default class DateScrollPicker extends Component<DateScrollPickerProps, State> {
+export default class DateScrollPicker extends CustomComponent<DateScrollPickerProps, State> {
 
     render() {
         return (

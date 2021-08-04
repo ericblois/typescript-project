@@ -23,6 +23,8 @@ import ProductEditOptionPage from "../BusinessEditPages/ProductEditOptionPage"
 import BusinessAccountPage from "../BusinessMainPages/BusinessAccountPage"
 import CustomerEditShippingPage from "../CustomerMainPages/CustomerEditShippingPage"
 import CustomerEditAddressPage from "../CustomerMainPages/CustomerEditAddressPage"
+import BusinessOrdersPage from "../BusinessMainPages/BusinessOrdersPage"
+import BusinessOrderPage from "../BusinessMainPages/BusinessOrderPage"
 
 export { 
     CustomerBrowsePage,
@@ -47,5 +49,7 @@ export {
     ProductEditOptionPage,
     BusinessAccountPage,
     CustomerEditShippingPage,
-    CustomerEditAddressPage
+    CustomerEditAddressPage,
+    BusinessOrdersPage,
+    BusinessOrderPage
 }

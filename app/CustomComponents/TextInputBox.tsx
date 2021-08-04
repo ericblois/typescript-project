@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponent"
 import { TouchableOpacity, Text, StyleSheet, TextStyle, ViewStyle, View, TextInput, KeyboardAvoidingView } from "react-native";
 import PropTypes from 'prop-types';
 import { NavigationProp, useNavigation } from "@react-navigation/native"
@@ -9,14 +10,18 @@ type TextInputBoxProps = {
     textStyle?: TextStyle,
     boxProps?: KeyboardAvoidingView['props'],
     textProps?: TextInput['props'],
-    avoidKeyboard?: boolean
+    avoidKeyboard?: boolean,
+    focusOnStart?: boolean,
+    shadow?: boolean
 }
 
 type State = {
     shouldAvoid: boolean
 }
 
-export default class TextInputBox extends Component<TextInputBoxProps, State> {
+export default class TextInputBox extends CustomComponent<TextInputBoxProps, State> {
+
+    textInput: TextInput | null = null
 
     constructor(props: TextInputBoxProps) {
         super(props)
@@ -30,7 +35,11 @@ export default class TextInputBox extends Component<TextInputBoxProps, State> {
             <KeyboardAvoidingView
                 {...this.props.boxProps}
                 style={{width: "100%"}}
-                contentContainerStyle={[defaults.inputBox, this.props.style]}
+                contentContainerStyle={{
+                    ...defaults.inputBox,
+                    //...(this.props.shadow !== false ? defaults.smallShadow : undefined),
+                    ...this.props.style
+                }}
                 behavior={"position"}
                 enabled={this.state.shouldAvoid && this.props.avoidKeyboard === true}
             >
@@ -42,6 +51,12 @@ export default class TextInputBox extends Component<TextInputBoxProps, State> {
                     textAlignVertical={"center"}
                     autoCorrect={false}
                     clearButtonMode={"while-editing"}
+                    ref={(textInput) => {this.textInput = textInput}}
+                    onLayout={() => {
+                        if (this.props.focusOnStart === true && this.textInput !== null) {
+                            this.textInput.focus()
+                        }
+                    }}
                     {...this.props.textProps}
                     onFocus={(e) => {
                         this.setState({shouldAvoid: true})

@@ -42,12 +42,13 @@ export type OrderData = {
   cartItems: CartItem[],
   subtotalPrice: number,
   totalPrice: number,
+  shippingInfo: ShippingInfo,
   deliveryMethod: "pickup" | "local" | "country" | "international",
   deliveryPrice: number,
   creationTime: string,
   responseTime: string | null,
   completionTime: string | null,
-  status: "pending" | "accepted" | "rejected" | "shipped" | "completed"
+  status: "pending" | "accepted" | "rejected" | "completed" | "received"
 }
 
 export type UserData = {
@@ -80,24 +81,30 @@ export const DefaultUserData: Readonly<UserData> = {
 
 export type ProductOption = {
   name: string,
+  optionType: string,
+  allowQuantity: boolean,
   priceChange: number | null,
   images: string[]
 }
 
 export const DefaultProductOption: Readonly<ProductOption> = {
   name: "",
+  optionType: "",
+  allowQuantity: false,
   priceChange: null,
   images: []
 }
 
 export type ProductOptionType = {
   name: string,
+  allowMultiple: boolean,
   optional: boolean,
   options: ProductOption[]
 }
 
 export const DefaultProductOptionType: Readonly<ProductOptionType> = {
     name: "",
+    allowMultiple: false,
     optional: false,
     options: []
 }
@@ -107,7 +114,7 @@ export type ProductData = {
   productID: string,
   category: string,
   name: string,
-  price: number | null,
+  price: number,
   description: string,
   images: string[],
   optionTypes: ProductOptionType[],
@@ -121,7 +128,7 @@ export const DefaultProductData: Readonly<ProductData> = {
   productID: "",
   category: "",
   name: "",
-  price: null,
+  price: 0,
   description: "",
   images: [],
   optionTypes: [],
@@ -131,8 +138,13 @@ export const DefaultProductData: Readonly<ProductData> = {
 }
 
 export type ProductCategory = {
-name: string,
-productIDs: string[]
+  name: string,
+  productIDs: string[]
+}
+
+export const DefaultProductCategory: ProductCategory = {
+  name: "",
+  productIDs: []
 }
 
 export type PublicBusinessData = {

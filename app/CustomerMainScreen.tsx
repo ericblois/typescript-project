@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CustomComponent from "./CustomComponents/CustomComponent"
 import { StyleSheet, StatusBar, AppState, ActivityIndicator, View } from "react-native";
 import { ProductShopPage, CustomerCartPage, CustomerOrderPage, CustomerEditShippingPage, CustomerEditAddressPage } from "./HelperFiles/PageIndex";
 import BusinessShopScreen from "./CustomerMainPages/BusinessShopScreen"
@@ -22,7 +23,7 @@ type Props = {
 type State = {
 }
 
-export default class CustomerMainScreen extends Component<Props, State> {
+export default class CustomerMainScreen extends CustomComponent<Props, State> {
 
   state: Readonly<State> = {};
 

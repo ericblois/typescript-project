@@ -1,7 +1,7 @@
 import { CartItem, OrderData, PrivateBusinessData, ProductCategory, ProductData, PublicBusinessData, ShippingInfo, UserData } from "./DataTypes"
 import ServerData from "./ServerData"
 import UserFunctions from "./UserFunctions"
-import { firestore, functions, storage } from "./Constants"
+import { firestore, functions, storage, geofire, getPublicBusinessRef } from "./Constants"
 import uuid from 'react-native-uuid';
 import { getCompressedImage } from "./ClientFunctions"
 
@@ -9,12 +9,46 @@ export abstract class CustomerFunctions {
     /* ONLY FOR CANADA CURRENTLY */
     public static async getPublicBusinessData(businessID: string) {
         try {
-            const userData = (await UserFunctions.getUserDoc()) as UserData
-            const publicDocPath = "/publicBusinessData/".concat(userData.country).concat("/businesses/").concat(businessID)
-            const publicDocRef = firestore.doc(publicDocPath)
-            const publicData = (await ServerData.getDoc(publicDocRef))
-            return {...publicData} as PublicBusinessData
+            const userData = await UserFunctions.getUserDoc()
+            const publicDocRef = getPublicBusinessRef(userData.country, businessID)
+            const docSnap = await publicDocRef.get()
+            if (!docSnap.exists) {
+                await CustomerFunctions.removeBusinessReferences(businessID)
+                console.log(businessID)
+                throw new Error(`Could not find business ID: ${businessID}`)
+            }
+            return {...docSnap.data()} as PublicBusinessData
         } catch(e) {
+            throw e
+        }
+    }
+    // In the case that a business is deleted, run this function to clear user data of any references to the business
+    public static async removeBusinessReferences(businessID : string) {
+        try {
+            // Clear favourites
+            let newUserData = await UserFunctions.getUserDoc()
+            if (newUserData.favorites.includes(businessID)) {
+                const favIndex = newUserData.favorites.findIndex((id) => {
+                    return id === businessID
+                })
+                if (favIndex > -1) {
+                    newUserData.favorites.splice(favIndex, 1)
+                }
+            }
+            // Clear cart
+            const cartIndices: number[] = []
+            newUserData.cartItems.forEach((item, index) => {
+                if (item.businessID === businessID) {
+                    cartIndices.push(index)
+                }
+            })
+            // Go through indices in descending order and remove them
+            cartIndices.sort()
+            for (const index of cartIndices.reverse()) {
+                newUserData.cartItems.splice(index, 1)
+            }
+            await UserFunctions.updateUserDoc(newUserData)
+        } catch (e) {
             throw e
         }
     }
@@ -42,7 +76,7 @@ export abstract class CustomerFunctions {
             if (country === undefined) {
                 throw new Error("Tried to retrieve product ID '".concat(productID).concat("', could not find business' country."))
             }
-            const productDocRef = firestore.doc("/publicBusinessData/".concat(country).concat("/businesses/").concat(businessID).concat("/products/").concat(productID))
+            const productDocRef = firestore.doc(`${getPublicBusinessRef(publicData.country, businessID).path}/products/${productID}`)
             const productDoc = (await ServerData.getDoc(productDocRef)) as ProductData
             return productDoc
         } catch(e) {
@@ -255,4 +289,48 @@ export abstract class CustomerFunctions {
     public static async deleteOrder() {
 
     }
+
+    // Find businesses that match keywords within a certain range
+    static async findLocalBusinessesInRange(keywords: string[], location: {latitude: number, longitude: number}, rangeInKm?: number) {
+        let tenKeywords = keywords
+        if (keywords.length > 10) {
+          tenKeywords = keywords.slice(0,10)
+        }
+        // Get user data to find country to search
+        const userDoc = await UserFunctions.getUserDoc()
+        const colRef = firestore.collection("publicBusinessData/".concat(userDoc.country).concat("/businesses"))
+        const rangeInM = rangeInKm ? rangeInKm * 1000 : 50000
+        let currentLoc = [location.latitude, location.longitude]
+        // Get query bounds
+        const bounds = geofire.geohashQueryBounds(currentLoc, rangeInM)
+        // Get query promises
+        let promises = []
+        for (const bound of bounds) {
+          const query = colRef
+            .orderBy('geohash')
+            .startAt(bound[0])
+            .endAt(bound[1])
+            .where("keywords", "array-contains-any", tenKeywords)
+            .limit(10)
+          promises.push(query.get())
+        }
+        // Filter out false positives
+        const matchingBusinesses: PublicBusinessData[] = []
+        const querySnapshots = await Promise.all(promises)
+        querySnapshots.forEach((querySnap) => {
+          querySnap.docs.forEach((docSnap) => {
+            // Get data as public business data
+            const publicData = docSnap.data() as PublicBusinessData
+            // Check if the business's location is within range
+            if (publicData.coords.latitude && publicData.coords.longitude) {
+              const distanceInKm = geofire.distanceBetween([publicData.coords.latitude, publicData.coords.longitude], currentLoc);
+              const distanceInM = distanceInKm * 1000;
+              if (distanceInM <= rangeInM) {
+                matchingBusinesses.push(publicData);
+              }
+            }
+          })
+        })
+        return matchingBusinesses
+      }
 }

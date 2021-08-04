@@ -3,7 +3,7 @@ import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, Text, StyleSheet, ActivityIndicator, Image } from "react-native";
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
-import { CustomerMainStackParamList, CustomerTabParamList } from "../HelperFiles/Navigation";
+import { BusinessMainStackParamList } from "../HelperFiles/Navigation";
 import { CompositeNavigationProp, RouteProp } from "@react-navigation/core";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { OrderData, PublicBusinessData } from "../HelperFiles/DataTypes";
@@ -11,17 +11,19 @@ import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
 import { FlatList } from "react-native-gesture-handler";
 import { PageContainer, ScrollContainer, ProductCardList, MenuBar, TextButton, ItemList, LoadingCover } from "../HelperFiles/CompIndex"
 import { currencyFormatter } from "../HelperFiles/Constants";
+import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 
-type CustomerOrderNavigationProp = CompositeNavigationProp<
-  StackNavigationProp<CustomerMainStackParamList, "order">,
-  StackNavigationProp<CustomerMainStackParamList>
+type BusinessOrderNavigationProp = CompositeNavigationProp<
+  StackNavigationProp<BusinessMainStackParamList, "order">,
+  StackNavigationProp<BusinessMainStackParamList>
 >
 
-type CustomerOrderRouteProp = RouteProp<CustomerMainStackParamList, "order">;
+type BusinessOrderRouteProp = RouteProp<BusinessMainStackParamList, "order">;
 
 type Props = {
-  navigation: CustomerOrderNavigationProp,
-  route: CustomerOrderRouteProp
+  navigation: BusinessOrderNavigationProp,
+  route: BusinessOrderRouteProp,
+  businessFuncs: BusinessFunctions
 }
 
 type State = {
@@ -31,7 +33,7 @@ type State = {
     productImagesLoaded: boolean
 }
 
-export default class CustomerOrderPage extends CustomComponent<Props, State> {
+export default class BusinessOrderPage extends CustomComponent<Props, State> {
 
   constructor(props: Props) {
     super(props)

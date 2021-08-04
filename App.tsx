@@ -8,7 +8,6 @@ import { RootStack, CustomerMainStack } from "./app/HelperFiles/Navigation";
 import StartScreen from "./app/StartScreen";
 import UserSignupScreen from "./app/UserSignupScreen";
 import CustomerMainScreen from "./app/CustomerMainScreen";
-import BusinessMainScreen from "./app/BusinessMainScreen";
 import BusinessShopScreen from "./app/CustomerMainPages/BusinessShopScreen";
 import ProductShopScreen from "./app/BusinessShopPages/ProductShopPage";
 import { installWebGeolocationPolyfill } from "expo-location"
@@ -21,6 +20,7 @@ import { Roboto_400Regular, Roboto_400Regular_Italic, Roboto_700Bold } from '@ex
 import { Montserrat_400Regular, Montserrat_500Medium, Montserrat_400Regular_Italic, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
 import { RobotoSlab_400Regular, RobotoSlab_700Bold } from '@expo-google-fonts/roboto-slab';
 import PageContainer from "./app/CustomComponents/PageContainer";
+import BusinessMainScreen from "./app/BusinessMainScreen";
 
 LogBox.ignoreLogs(['Calling getNode()', 'VirtualizedLists should never be nested'])
 
