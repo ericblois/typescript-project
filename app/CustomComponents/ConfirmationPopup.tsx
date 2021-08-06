@@ -79,12 +79,15 @@ export default class ConfirmationPopup extends CustomComponent<Props, State> {
                     ...textStyles.medium,
                     ...this.confirmTextStyle
                 }}
-                buttonFunc={() => {
+                buttonFunc={async () => {
                     if (this.props.onConfirm) {
-                        this.props.onConfirm()
+                        await this.props.onConfirm()
                     }
                 }}
-                showLoading={this.props.showConfirmLoading}
+                showLoading={this.props.showConfirmLoading ? this.props.showConfirmLoading : true}
+                loadIndicatorProps={{
+                    color: this.props.type === "save" ? colors.whiteColor : undefined
+                }}
             />
         )
     }
@@ -101,12 +104,12 @@ export default class ConfirmationPopup extends CustomComponent<Props, State> {
                     flex: 1,
                     ...this.denyButtonStyle
                 }}
-                buttonFunc={() => {
+                buttonFunc={async () => {
                     if (this.props.onDeny) {
-                        this.props.onDeny()
+                        await this.props.onDeny()
                     }
                 }}
-                showLoading={this.props.showDenyLoading}
+                showLoading={this.props.showDenyLoading ? this.props.showDenyLoading : true}
             />
         )
     }

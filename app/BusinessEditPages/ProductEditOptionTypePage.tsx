@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, ImageURISource, ScrollView, ActivityIndicator }
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
-import { auth } from "../HelperFiles/Constants";
+import { auth, iconButtonTemplates } from "../HelperFiles/Constants";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { BusinessEditStackParamList, BusinessMainStackParamList } from "../HelperFiles/Navigation"
@@ -30,7 +30,6 @@ type ProductEditOptionTypeProps = {
 }
 
 type State = {
-    productData?: ProductData,
     optionType?: ProductOptionType,
     infoPopupText?: string,
     showNameInputPopup: boolean,
@@ -44,7 +43,6 @@ export default class ProductEditOptionTypePage extends CustomComponent<ProductEd
     constructor(props: ProductEditOptionTypeProps) {
         super(props)
         this.state = {
-          productData: undefined,
           optionType: undefined,
           infoPopupText: undefined,
           showNameInputPopup: false,
@@ -58,16 +56,31 @@ export default class ProductEditOptionTypePage extends CustomComponent<ProductEd
     }
 
     componentDidMount() {
-        this.refreshData()
+      this.refreshData()
     }
 
-    refreshData() {
-        this.props.businessFuncs.getProduct(this.props.route.params.productID).then((productData) => {
-            const optionType = productData.optionTypes.find((optionType) => {
-                return (optionType.name === this.props.route.params.optionType)
-            })
-            this.setState({productData: productData, optionType: optionType})
-        })
+    async refreshData() {
+      const optionType = await this.props.businessFuncs.getOptionType(
+        this.props.route.params.productID,
+        this.props.route.params.optionTypeName
+      )
+      this.setState({optionType: optionType})
+    }
+
+    updateOptionType(optionType: Partial<ProductOptionType>, stateUpdates?: Partial<State>, callback?: () => void) {
+      let newOptionType = {...this.state.optionType} as ProductOptionType | undefined
+      if (newOptionType) {
+        newOptionType = {
+          ...newOptionType,
+          ...optionType
+        }
+        let stateUpdate: Partial<State> = {
+          ...stateUpdates,
+          optionType: newOptionType,
+          saved: false
+        }
+        this.setState(stateUpdate, callback)
+      }
     }
 
     renderNameInput() {
@@ -76,25 +89,14 @@ export default class ProductEditOptionTypePage extends CustomComponent<ProductEd
           <TextInputPopup
             onTapAway={() => {this.setState({showNameInputPopup: false})}}
             onSaveText={async (text) => {
-              let newProductData = this.state.productData
-              let newOptionType = this.state.optionType
-              if (newProductData && newOptionType) {
-                  newOptionType.options.push({
-                      ...DefaultProductOption,
-                      name: text
-                  })
-                  const optionTypeIndex = newProductData.optionTypes.findIndex((optionType) => {
-                      return optionType.name === newOptionType!.name
-                  })
-                  if (optionTypeIndex > -1) {
-                    newProductData.optionTypes[optionTypeIndex] = newOptionType
-                    this.setState({
-                        productData: newProductData,
-                        optionType: newOptionType,
-                        showNameInputPopup: false,
-                        saved: false
-                    })
-                }
+              let newOptionType = {...this.state.optionType} as ProductOptionType | undefined
+              if (newOptionType) {
+                newOptionType.options.push({
+                    ...DefaultProductOption,
+                    name: text,
+                    optionType: newOptionType.name,
+                })
+                this.setState({optionType: newOptionType, showNameInputPopup: false, saved: false})
               }
             }}
             textInputProps={{
@@ -125,18 +127,20 @@ export default class ProductEditOptionTypePage extends CustomComponent<ProductEd
             type={"save"}
             onExit={() => this.setState({showSavePopup: false})}
             onDeny={() => {
-              this.setState({saved: true, showSavePopup: false})
-              this.props.navigation.goBack()
+              this.setState({saved: true, showSavePopup: false}, () => {
+                this.props.navigation.goBack()
+              })
             }}
             onConfirm={async () => {
-              if (this.state.productData) {
-                let newProductData = this.state.productData
-                await this.props.businessFuncs.updateProduct(this.props.route.params.productID, newProductData)
-                this.setState({saved: true, showSavePopup: false})
-                this.props.navigation.goBack()
-                return
+              if (this.state.optionType) {
+                await this.props.businessFuncs.updateOptionType(
+                  this.props.route.params.productID,
+                  this.state.optionType
+                )
               }
-              this.props.navigation.goBack()
+              this.setState({saved: true}, () => {
+                this.props.navigation.goBack()
+              })
             }}
           />
         )
@@ -150,22 +154,13 @@ export default class ProductEditOptionTypePage extends CustomComponent<ProductEd
             type={"delete"}
             onDeny={() => this.setState({showDeletePopup: false})}
             onConfirm={async () => {
-              let newProductData = this.state.productData
-              if (newProductData) {
-                  const optionTypeIndex = newProductData.optionTypes.findIndex((optionType) => {
-                      return optionType.name === this.props.route.params.optionType
-                  })
-                  if (optionTypeIndex > -1) {
-                      newProductData.optionTypes.splice(optionTypeIndex, 1)
-                      await this.props.businessFuncs.updateProduct(
-                          this.props.route.params.productID,
-                          newProductData
-                      )
-                  }
-                  this.setState({showDeletePopup: false})
-                  this.props.navigation.goBack()
+              await this.props.businessFuncs.deleteOptionType(
+                this.props.route.params.productID,
+                this.props.route.params.optionTypeName
+              )
+              this.props.navigation.goBack()
               }
-            }}
+            }
           />
         )
       }
@@ -179,18 +174,14 @@ export default class ProductEditOptionTypePage extends CustomComponent<ProductEd
           rightIconSource={icons.chevron}
           rightIconStyle={{transform: [{scaleX: -1}]}}
           buttonFunc={async () => {
-            if (!this.state.saved && this.state.productData) {
-                await this.props.businessFuncs.updateProduct(
-                    this.props.route.params.productID,
-                    this.state.productData
-                )
+            if (!this.state.saved && this.state.optionType) {
+                await this.props.businessFuncs.updateOptionType(this.props.route.params.productID, this.state.optionType)
                 this.setState({saved: true})
             }
             this.props.navigation.navigate("editOption", {
                 productID: this.props.route.params.productID,
-                optionType: this.props.route.params.optionType,
-                option: params.item.name,
-                
+                optionTypeName: this.props.route.params.optionTypeName,
+                optionName: params.item.name,
             })
           }}
           touchableProps={{
@@ -229,15 +220,32 @@ export default class ProductEditOptionTypePage extends CustomComponent<ProductEd
     renderUI() {
       if (this.state.optionType) {
       return (
-        <View style={{alignItems: "center", paddingTop: defaults.textHeaderBox.height}}>
+        <View
+          style={{
+            alignItems: "center",
+            paddingTop: defaults.textHeaderBox.height,
+          }}
+        >
+            <TextInputBox
+            style={{width: styleValues.winWidth - 2*styleValues.mediumPadding, marginTop: styleValues.mediumPadding*2}}
+              textProps={{
+                  defaultValue: this.state.optionType.name,
+                  placeholder: "Option type name",
+                  onChangeText: (text) => this.updateOptionType({name: text})
+              }}
+              avoidKeyboard={true}
+            ></TextInputBox>
             <ToggleSwitch
               text={"Optional"}
-              style={{width: styleValues.winWidth - styleValues.mediumPadding*2, marginTop: styleValues.mediumPadding*2}}
+              style={{width: styleValues.winWidth - styleValues.mediumPadding*2}}
               textStyle={textStyles.small}
+              switchProps={{
+                value: this.state.optionType.optional
+              }}
               onToggle={(value) => {
-                const newOptionType = this.state.optionType
+                const newOptionType = {...this.state.optionType} as ProductOptionType | undefined
                 if (newOptionType) {
-                  newOptionType.allowMultiple = value
+                  newOptionType.optional = value
                   this.setState({optionType: newOptionType, saved: false})
                 }
               }}
@@ -254,8 +262,11 @@ export default class ProductEditOptionTypePage extends CustomComponent<ProductEd
               text={"Enable multiple selections"}
               style={{width: styleValues.winWidth - styleValues.mediumPadding*2}}
               textStyle={textStyles.small}
+              switchProps={{
+                value: this.state.optionType.allowMultiple
+              }}
               onToggle={(value) => {
-                const newOptionType = this.state.optionType
+                const newOptionType = {...this.state.optionType} as ProductOptionType | undefined
                 if (newOptionType) {
                   newOptionType.allowMultiple = value
                   this.setState({optionType: newOptionType, saved: false})
@@ -277,11 +288,11 @@ export default class ProductEditOptionTypePage extends CustomComponent<ProductEd
               keyExtractor={(item, index) => index.toString()}
               renderItem={(params) => {return this.renderOptionButton(params)}}
               onDragEnd={(params) => {
-                  let optionType = this.state.optionType
-                  if (optionType) {
-                  optionType.options = params.data
+                  const newOptionType = {...this.state.optionType} as ProductOptionType | undefined
+                  if (newOptionType) {
+                    newOptionType.options = params.data
                   }
-                  this.setState({optionType: optionType, saved: false})
+                  this.setState({optionType: newOptionType, saved: false})
               }}
               ListHeaderComponent={() => this.renderAddButton()}
               ListFooterComponent={() => this.renderDeleteButton()}
@@ -292,7 +303,7 @@ export default class ProductEditOptionTypePage extends CustomComponent<ProductEd
               infoButtonFunc={() => {
                 this.setState({infoPopupText: "Use this page to edit an option type. Option types show up as selectable menus on a product's info page. You can rearrange the order of options by pressing and holding on an option."})
               }}
-            >{`${this.props.route.params.productName}: ${this.props.route.params.optionType}`}</TextHeader>
+            >{`${this.props.route.params.productName}: ${this.state.optionType.name}`}</TextHeader>
         </View>
       )
       }
@@ -301,7 +312,7 @@ export default class ProductEditOptionTypePage extends CustomComponent<ProductEd
     renderLoading() {
       if (this.state.optionType === undefined) {
         return (
-          <LoadingCover/>
+          <LoadingCover size={"large"}/>
         )
       }
     }
@@ -313,23 +324,28 @@ export default class ProductEditOptionTypePage extends CustomComponent<ProductEd
           {this.renderLoading()}
           <MenuBar
             buttonProps={[
-                {iconSource: icons.chevron, buttonFunc: () => {
+              {
+                ...iconButtonTemplates.back,
+                buttonFunc: () => {
                   if (!this.state.saved) {
                     this.setState({showSavePopup: true})
                   } else {
                     this.props.navigation.goBack()
                   }
-                }},
-                {iconSource: icons.checkBox, showLoading: true, iconStyle: {tintColor: this.state.saved ? colors.validColor : colors.invalidColor}, buttonFunc: () => {
-                    if (this.state.productData) {
-                        let newProductData = this.state.productData
-                        this.props.businessFuncs.updateProduct(this.props.route.params.productID, newProductData).then(() => {
-                            this.setState({saved: true})
-                        }, (e) => {
-                            throw e;
-                        })
-                    }
-                }}
+                }
+              }, {
+                ...iconButtonTemplates.save,
+                iconStyle: {tintColor: this.state.saved ? colors.validColor : colors.invalidColor},
+                buttonFunc: async () => {
+                  if (this.state.optionType) {
+                      await this.props.businessFuncs.updateOptionType(
+                        this.props.route.params.productID,
+                        this.state.optionType
+                      )
+                  }
+                  this.setState({saved: true})
+                }
+              }
             ]}
             ></MenuBar>
             {this.renderNameInput()}

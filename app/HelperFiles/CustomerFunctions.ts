@@ -10,7 +10,7 @@ export abstract class CustomerFunctions {
     public static async getPublicBusinessData(businessID: string) {
         try {
             const userData = await UserFunctions.getUserDoc()
-            const publicDocRef = getPublicBusinessRef(userData.country, businessID)
+            const publicDocRef = getPublicBusinessRef(businessID, userData.country)
             const docSnap = await publicDocRef.get()
             if (!docSnap.exists) {
                 await CustomerFunctions.removeBusinessReferences(businessID)

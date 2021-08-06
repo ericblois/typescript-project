@@ -59,7 +59,7 @@ export type BusinessEditStackParamList = {
     editLocation: undefined,
     editProductList: undefined,
     editProductCat: {
-        productCategory: string
+        productCategoryName: string
     },
     editProduct: {
         productID: string
@@ -67,12 +67,12 @@ export type BusinessEditStackParamList = {
     editOptionType: {
         productID: string,
         productName: string,
-        optionType: string
+        optionTypeName: string
     },
     editOption: {
         productID: string,
-        optionType: string,
-        option: string
+        optionTypeName: string,
+        optionName: string
     },
 }
 

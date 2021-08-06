@@ -83,7 +83,7 @@ export type ProductOption = {
   name: string,
   optionType: string,
   allowQuantity: boolean,
-  priceChange: number | null,
+  priceChange: number,
   images: string[]
 }
 
@@ -91,7 +91,7 @@ export const DefaultProductOption: Readonly<ProductOption> = {
   name: "",
   optionType: "",
   allowQuantity: false,
-  priceChange: null,
+  priceChange: 0,
   images: []
 }
 

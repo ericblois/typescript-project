@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, ImageURISource, ScrollView, ActivityIndicator }
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
-import { auth, currencyFormatter } from "../HelperFiles/Constants";
+import { auth, currencyFormatter, iconButtonTemplates } from "../HelperFiles/Constants";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { BusinessEditStackParamList, BusinessMainStackParamList } from "../HelperFiles/Navigation"
@@ -32,9 +32,7 @@ type ProductEditOptionProps = {
 
 type State = {
     option?: ProductOption,
-    newImages: string[],
-    deletedImages: string[],
-    priceChange: "increase" | "decrease" | "none",
+    priceChangeType: "increase" | "decrease" | "none",
     editPriceMode: boolean,
     priceChangeText: string,
     imagesLoaded: boolean,
@@ -49,10 +47,8 @@ export default class ProductEditOptionPage extends CustomComponent<ProductEditOp
     constructor(props: ProductEditOptionProps) {
         super(props)
         this.state = {
-          newImages: [],
-          deletedImages: [],
           option: undefined,
-          priceChange: "none",
+          priceChangeType: "none",
           editPriceMode: false,
           priceChangeText: "",
           imagesLoaded: false,
@@ -68,31 +64,40 @@ export default class ProductEditOptionPage extends CustomComponent<ProductEditOp
 
     componentDidMount() {
       this.refreshData()
+      console.log(this.props.route.params)
   }
 
     async refreshData() {
-      const productData = await this.props.businessFuncs.getProduct(this.props.route.params.productID)
-      const optionType = productData.optionTypes.find((optionType) => {
-          return (optionType.name === this.props.route.params.optionType)
-      })
-      let option: ProductOption | undefined
-      if (optionType) {
-        option = optionType.options.find((option) => {
-          return (option.name === this.props.route.params.option)
-        })
-      }
-      if (option === undefined) {
-        throw new Error("Could not retrieve option by the name of ".concat(this.props.route.params.option))
-      }
-      let priceChange: State["priceChange"] = "none"
-      if (option.priceChange !== null) {
-        priceChange = option.priceChange < 0 ? "decrease" : "increase"
+      const option = await this.props.businessFuncs.getOption(
+        this.props.route.params.productID,
+        this.props.route.params.optionTypeName,
+        this.props.route.params.optionName
+      )
+      let priceChangeType: State["priceChangeType"] = "none"
+      if (option.priceChange !== 0) {
+        priceChangeType = option.priceChange < 0 ? "decrease" : "increase"
       }
       this.setState({
         option: option,
-        priceChange: priceChange,
-        priceChangeText: option.priceChange !== null ? Math.abs(option.priceChange).toString() : "0"
+        priceChangeType: priceChangeType,
+        priceChangeText: Math.abs(option.priceChange).toString()
       })
+    }
+
+    updateOption(option: Partial<ProductOption>, stateUpdates?: Partial<State>, callback?: () => void) {
+      let newOption = {...this.state.option} as ProductOption | undefined
+      if (newOption) {
+        newOption = {
+          ...newOption,
+          ...option
+        }
+        let stateUpdate: Partial<State> = {
+          ...stateUpdates,
+          option: newOption,
+          saved: false
+        }
+        this.setState(stateUpdate, callback)
+      }
     }
 
     renderInfoPopup() {
@@ -113,15 +118,17 @@ export default class ProductEditOptionPage extends CustomComponent<ProductEditOp
             type={"save"}
             onExit={() => this.setState({showSavePopup: false})}
             onDeny={() => {
-              this.setState({saved: true, showSavePopup: false})
-              this.props.navigation.goBack()
+              this.setState({saved: true, showSavePopup: false}, () => {
+                this.props.navigation.goBack()
+              })
             }}
             onConfirm={async () => {
               if (this.state.option) {
                 await this.props.businessFuncs.updateOption(this.props.route.params.productID, this.state.option)
               }
-              this.setState({showSavePopup: false, saved: true})
-              this.props.navigation.goBack()
+              this.setState({showSavePopup: false, saved: true}, () => {
+                this.props.navigation.goBack()
+              })
             }}
           />
         )
@@ -138,8 +145,9 @@ export default class ProductEditOptionPage extends CustomComponent<ProductEditOp
               if (this.state.option) {
                 await this.props.businessFuncs.deleteOption(this.props.route.params.productID, this.state.option)
               }
-              this.setState({showDeletePopup: false, saved: true})
-              this.props.navigation.goBack()
+              this.setState({showDeletePopup: false, saved: true}, () => {
+                this.props.navigation.goBack()
+              })
             }}
             showConfirmLoading={true}
           />
@@ -148,7 +156,7 @@ export default class ProductEditOptionPage extends CustomComponent<ProductEditOp
     }
 
     renderPriceChangeBox() {
-      if (this.state.priceChange !== "none" && this.state.option!.priceChange !== null) {
+      if (this.state.priceChangeType !== "none") {
         return (
           <View style={{flexDirection: "row", alignItems: "center", justifyContent: "space-between"}}>
             <Text style={{...textStyles.medium, width: "30%"}}>Amount:</Text>
@@ -163,23 +171,17 @@ export default class ProductEditOptionPage extends CustomComponent<ProductEditOp
                 onFocus: () => this.setState({editPriceMode: true}),
                 onEndEditing: (event) => {
                   const text = event.nativeEvent.text
-                  let newOption = {...this.state.option} as ProductOption | undefined
-                  if (newOption) {
-                    let newPriceChange: number = parseFloat(text)
-                    newPriceChange = isNaN(newPriceChange) ? 0 : newPriceChange
-                    if (this.state.priceChange === "increase") {
-                      newOption.priceChange = Math.abs(newPriceChange)
-                    } else if (this.state.priceChange === "decrease") {
-                      newOption.priceChange = -Math.abs(newPriceChange)
-                    } else {
-                      newOption.priceChange = null
-                    }
-                    const saved = newPriceChange === this.state.option!.priceChange ? this.state.saved : false
-                    this.setState({option: newOption, editPriceMode: false, saved: saved})
+                  let newPriceChange: number = parseFloat(text)
+                  newPriceChange = isNaN(newPriceChange) ? 0 : newPriceChange
+                  if (this.state.priceChangeType === "increase") {
+                    newPriceChange = Math.abs(newPriceChange)
+                  } else if (this.state.priceChangeType === "decrease") {
+                    newPriceChange = -Math.abs(newPriceChange)
                   }
+                  this.updateOption({priceChange: newPriceChange}, {editPriceMode: false})
                 }
               }}
-            />
+            ></TextInputBox>
           </View>
         )
       }
@@ -203,9 +205,7 @@ export default class ProductEditOptionPage extends CustomComponent<ProductEditOp
           <ScrollContainer fadeTop={false}>
             <ImageSliderSelector
               uris={this.state.option ? this.state.option.images : []}
-              onChange={(uris) => {
-                this.setState({newImages: uris.new, deletedImages: uris.deleted, saved: false})
-              }}
+              onChange={(uris) => this.updateOption({images: uris.all})}
               onImagesLoaded={() => {
                 this.setState({imagesLoaded: true})
               }}
@@ -214,14 +214,8 @@ export default class ProductEditOptionPage extends CustomComponent<ProductEditOp
             <TextInputBox
               textProps={{
                   defaultValue: this.state.option?.name,
-                  placeholder: "Option Name",
-                  onChangeText: (text) => {
-                    const newOption = {...this.state.option} as ProductOption | undefined
-                    if (newOption) {
-                      newOption.name = text
-                      this.setState({option: newOption, saved: false})
-                    }
-                  }
+                  placeholder: "Option name",
+                  onChangeText: (text) => this.updateOption({name: text})
               }}
               avoidKeyboard={true}
             ></TextInputBox>
@@ -231,13 +225,7 @@ export default class ProductEditOptionPage extends CustomComponent<ProductEditOp
               switchProps={{
                 value: this.state.option?.allowQuantity
               }}
-              onToggle={(value) => {
-                const newOption = {...this.state.option} as ProductOption | undefined
-                if (newOption) {
-                  newOption.allowQuantity = value
-                  this.setState({option: newOption, saved: false})
-                }
-              }}
+              onToggle={(value) => this.updateOption({allowQuantity: value})}
             >
             <IconButton
                 iconSource={icons.info}
@@ -254,12 +242,11 @@ export default class ProductEditOptionPage extends CustomComponent<ProductEditOp
                 <TextButton
                   text={"Increase"}
                   buttonStyle={styles.priceButton}
-                  appearance={this.state.priceChange === "increase" ? "color" : "no-color"}
+                  appearance={this.state.priceChangeType === "increase" ? "color" : "no-color"}
                   buttonFunc={() => {
                     let newOption = {...this.state.option} as ProductOption | undefined
-                    if (newOption?.priceChange) {
-                      newOption.priceChange = Math.abs(newOption.priceChange)
-                      this.setState({option: newOption, saved: false, priceChange: "increase"})
+                    if (newOption) {
+                      this.updateOption({priceChange: Math.abs(newOption.priceChange)}, {priceChangeType: "increase"})
                     }
                   }}
                 ></TextButton>
@@ -267,12 +254,11 @@ export default class ProductEditOptionPage extends CustomComponent<ProductEditOp
                 <TextButton
                   text={"Decrease"}
                   buttonStyle={styles.priceButton}
-                  appearance={this.state.priceChange === "decrease" ? "color" : "no-color"}
+                  appearance={this.state.priceChangeType === "decrease" ? "color" : "no-color"}
                   buttonFunc={() => {
                     let newOption = {...this.state.option} as ProductOption | undefined
-                    if (newOption?.priceChange) {
-                      newOption.priceChange = -Math.abs(newOption.priceChange)
-                      this.setState({option: newOption, saved: false, priceChange: "decrease"})
+                    if (newOption) {
+                      this.updateOption({priceChange: -Math.abs(newOption.priceChange)}, {priceChangeType: "decrease"})
                     }
                   }}
                 ></TextButton>
@@ -280,14 +266,8 @@ export default class ProductEditOptionPage extends CustomComponent<ProductEditOp
                 <TextButton
                   text={"None"}
                   buttonStyle={styles.priceButton}
-                  appearance={this.state.priceChange === "none" ? "color" : "no-color"}
-                  buttonFunc={() => {
-                    let newOption = {...this.state.option} as ProductOption | undefined
-                    if (newOption) {
-                      newOption.priceChange = 0
-                      this.setState({option: newOption, saved: false, priceChange: "none"})
-                    }
-                  }}
+                  appearance={this.state.priceChangeType === "none" ? "color" : "no-color"}
+                  buttonFunc={() => this.updateOption({priceChange: 0}, {priceChangeType: "none"})}
                 ></TextButton>
               </View>
               {/* Price change */}
@@ -295,7 +275,7 @@ export default class ProductEditOptionPage extends CustomComponent<ProductEditOp
             </View>
             {this.renderDeleteButton()}
           </ScrollContainer>
-          <TextHeader>{`${this.props.route.params.optionType}: ${this.state.option.name}`}</TextHeader>
+          <TextHeader>{`${this.props.route.params.optionTypeName}: ${this.state.option.name}`}</TextHeader>
           </View>
         )
       }
@@ -316,19 +296,25 @@ export default class ProductEditOptionPage extends CustomComponent<ProductEditOp
         {this.renderLoading()}
         <MenuBar
           buttonProps={[
-            {iconSource: icons.chevron, buttonFunc: () => {
-              if (!this.state.saved) {
-                this.setState({showSavePopup: true})
-              } else {
-                this.props.navigation.goBack()
+            {
+              ...iconButtonTemplates.back,
+              buttonFunc: () => {
+                if (!this.state.saved) {
+                  this.setState({showSavePopup: true})
+                } else {
+                  this.props.navigation.goBack()
+                }
               }
-            }},
-            {iconSource: icons.checkBox, showLoading: true, iconStyle: {tintColor: this.state.saved ? colors.validColor : colors.invalidColor}, buttonFunc: async () => {
-              if (this.state.option && !this.state.saved) {
-                await this.props.businessFuncs.updateOption(this.props.route.params.productID, this.state.option)
-                this.setState({saved: true})
+            }, {
+              ...iconButtonTemplates.save,
+              iconStyle: {tintColor: this.state.saved ? colors.validColor : colors.invalidColor},
+              buttonFunc: async () => {
+                if (this.state.option && !this.state.saved) {
+                  await this.props.businessFuncs.updateOption(this.props.route.params.productID, this.state.option)
+                  this.setState({saved: true})
+                }
               }
-            }}
+            }
           ]}
         ></MenuBar>
         {this.renderInfoPopup()}

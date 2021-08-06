@@ -45,11 +45,10 @@ export default class ItemList<T> extends CustomComponent<Props<T>, State> {
                 <DraggableFlatList
                     animationConfig={defaultAnimationConfig}
                     {...this.props}
-                    contentContainerStyle={{
+                    contentContainerStyle={StyleSheet.compose({
                         width: "100%",
-                        flex: 1,
                         padding: styleValues.mediumPadding
-                    }}
+                    }, this.props.contentContainerStyle)}
                 />
                 <GradientView
                     horizontal={this.props.horizontal === true}

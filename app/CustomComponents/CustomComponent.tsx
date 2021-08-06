@@ -3,14 +3,7 @@ import ProductShopPage from "../BusinessShopPages/ProductShopPage";
 
 export default class CustomComponent<P = {}, S = {}, SS = any> extends Component<P, S, SS> {
     
-    componentMounted = false
-
-    componentDidMount() {
-        this.componentMounted = true
-        if (super.componentDidMount) {
-            super.componentDidMount()
-        }
-    }
+    componentMounted = true
 
     componentWillUnmount() {
         this.componentMounted = false

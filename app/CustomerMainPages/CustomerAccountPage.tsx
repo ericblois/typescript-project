@@ -113,11 +113,11 @@ export default class CustomerAccountPage extends CustomComponent<CustomerAccount
       <TextButton
         text={"Delete this account"}
         textStyle={{color: "red"}}
-        buttonFunc={() => {
-          UserFunctions.deleteAccount().then(() => {
-            this.props.navigation.navigate("start")
-          })
+        buttonFunc={async () => {
+          await UserFunctions.deleteAccount()
+          this.props.navigation.navigate("start")
         }}
+        showLoading={true}
       />
     )
   }

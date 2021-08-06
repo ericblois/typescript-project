@@ -1,7 +1,7 @@
 import { DefaultProductOption, OrderData, PrivateBusinessData, ProductCategory, ProductData, ProductOption, ProductOptionType, PublicBusinessData, UserData } from "./DataTypes"
 import ServerData from "./ServerData"
 import UserFunctions from "./UserFunctions"
-import { firestore, storage, functions, getPrivateBusinessRef, getPublicBusinessRef } from "./Constants"
+import { firestore, storage, functions } from "./Constants"
 import uuid from 'react-native-uuid';
 import { getCompressedImage } from "./ClientFunctions"
 
@@ -18,10 +18,27 @@ export class BusinessFunctions {
         this.hasUpdatedPublic = true
     }
 
+    getPrivateRef() {
+        return firestore.doc(`/privateBusinessData/${this.businessID}`)
+    }
+
+    async getPublicRef() {
+        try {
+            if (this.country) {
+                return firestore.doc(`/publicBusinessData/${this.country}/businesses/${this.businessID}`)
+            }
+            const privateData = await this.getPrivateData()
+            this.country = privateData.country
+            return firestore.doc(`/publicBusinessData/${this.country}/businesses/${this.businessID}`)
+        } catch (e) {
+            throw e
+        }
+    }
+
     public async getPrivateData() {
         try {
             const userID = UserFunctions.getCurrentUser().uid
-            const privateDocRef = getPrivateBusinessRef(this.businessID)
+            const privateDocRef = this.getPrivateRef()
             let docSnap: firebase.default.firestore.DocumentSnapshot
             if (this.hasUpdatedPrivate) {
                 docSnap = await privateDocRef.get({source: "server"})
@@ -47,7 +64,7 @@ export class BusinessFunctions {
             if (!this.country) {
                 this.country = (await this.getPrivateData()).country
             }
-            const publicDocRef = getPublicBusinessRef(this.country!, this.businessID)
+            const publicDocRef = await this.getPublicRef()
             let docSnap: firebase.default.firestore.DocumentSnapshot
             if (this.hasUpdatedPublic) {
                 docSnap = await publicDocRef.get({source: "server"})
@@ -70,9 +87,7 @@ export class BusinessFunctions {
 
     public async updatePrivateData(data: Partial<PrivateBusinessData>) {
         try {
-            const userID = UserFunctions.getCurrentUser().uid
-            const privateDocPath = "/userData/".concat(userID).concat("/businesses/").concat(this.businessID)
-            const privateDocRef = firestore.doc(privateDocPath)
+            const privateDocRef = this.getPrivateRef()
             this.hasUpdatedPrivate = true
             await ServerData.updateDoc(data, privateDocRef)
         } catch(e) {
@@ -80,14 +95,50 @@ export class BusinessFunctions {
         }
     }
     // Update this business' public data, then return the changed result
-    public async updatePublicData(data: Partial<PublicBusinessData>) {
+    public async updatePublicData(data: PublicBusinessData) {
         try {
             if (!this.country) {
-                this.country = (await this.getPrivateData()).country
+                this.country = data.country
             }
-            const publicDocRef = getPublicBusinessRef(this.country!, this.businessID)
+            // Get new and old data
+            let newPublicData = {...data} as PublicBusinessData
+            const oldPublicData = (await this.getPublicData()) as Readonly<PublicBusinessData>
+            // Check if gallery images have changed
+            let newImages: string[] = []
+            let deletedImages: string[] = []
+            // Find new images
+            for (const url of newPublicData.galleryImages) {
+                if (!oldPublicData.galleryImages.includes(url)) {
+                    newImages.push(url)
+                }
+            }
+            // Find deleted images
+            for (const url of oldPublicData.galleryImages) {
+                if (!newPublicData.galleryImages.includes(url)) {
+                    deletedImages.push(url)
+                }
+            }
+            // Add new images
+            let downloadURLs: string[] = await this.uploadImages(newImages)
+            // Replace local URIs with download URLs
+            newImages.forEach((newImagesURL, newImagesIndex) => {
+                // Get index of url in newPublicData's images list
+                const publicDataIndex = newPublicData.galleryImages.findIndex((publicDataURL) => {
+                    return publicDataURL === newImagesURL
+                })
+                // Replace the local URI with the download URL
+                newPublicData.galleryImages[publicDataIndex] = downloadURLs[newImagesIndex]
+            })
+            // Delete images
+            await this.deleteImages(deletedImages)
             this.hasUpdatedPublic = true
-            await ServerData.updateDoc(data, publicDocRef)
+            const updateData = {
+                businessID: this.businessID,
+                publicData: data
+            }
+            const updatePublicBusinessData = functions.httpsCallable("updatePublicBusinessData")
+            const result = await updatePublicBusinessData(updateData)
+            return result.data
         } catch(e) {
             throw e
         }
@@ -96,14 +147,13 @@ export class BusinessFunctions {
     public async getProductCategory(name: string) {
         try {
             const publicData = await this.getPublicData()
-            let productList = publicData.productList ? publicData.productList : []
-            // Find the index of the product category to retrieve
-            let catIndex = productList.findIndex((value, index) => {
-                if (value.name === name) {
-                  return true
-                }
+            let category = publicData.productList.find((productCat) => {
+                return productCat.name === name
             })
-            return productList[catIndex]
+            if (!category) {
+                throw new Error(`Could not find product category: '${name}'`)
+            }
+            return category
         } catch(e) {
             throw e
         }
@@ -134,17 +184,16 @@ export class BusinessFunctions {
 
     public async updateProductCategory(name: string, category: ProductCategory) {
         try {
-            const publicData = await this.getPublicData()
-            let productList = publicData.productList ? publicData.productList : []
+            const newPublicData = {...await this.getPublicData()} as PublicBusinessData
             // Find the index of the product category to retrieve
-            let catIndex = productList.findIndex((value, index) => {
-                if (value.name === name) {
-                  return true
-                }
+            let catIndex = newPublicData.productList.findIndex((value) => {
+                return value.name === name
             })
-            productList[catIndex] = category
-            publicData.productList = productList
-            await this.updatePublicData(publicData)
+            if (catIndex < 0) {
+                throw new Error(`Could not find product category: '${name}'`)
+            }
+            newPublicData.productList[catIndex] = category
+            await this.updatePublicData(newPublicData)
         } catch(e) {
             throw e
         }
@@ -169,43 +218,33 @@ export class BusinessFunctions {
 
     public async createProduct(productData: ProductData) {
         try {
-            const publicData = await this.getPublicData()
-            const country = publicData.country
-            if (country === undefined) {
-                throw new Error("Tried to create new product, could not find business' country.")
-            }
             // Add the product to this business' products collection
-            if (!this.country) {
-                this.country = (await this.getPrivateData()).country
+            const publicDocRef = await this.getPublicRef()
+            const docSnap = await publicDocRef.get()
+            if (!docSnap.exists) {
+                throw new Error(`Could not find public business ID: '${this.businessID}'`)
             }
-            const publicDocRef = getPublicBusinessRef(this.country!, this.businessID)
+            const publicData = docSnap.data() as PublicBusinessData
             const productColRef = firestore.collection(`${publicDocRef.path}/products`)
             const newDocRef = productColRef.doc()
             // Update the product's product ID
             let newProductData = productData
             newProductData.productID = newDocRef.id
             // Update the corresponding product category
-            let productCat = await this.getProductCategory(newProductData.category)
-            productCat.productIDs.push(newProductData.productID)
-            // Get product list
-            let productList = publicData.productList
-            // Find the index of the corresponding product category
-            const catIndex = productList.findIndex((productCat) => {
-                return productCat.name === productData.category
+            const catIndex = publicData.productList.findIndex((currentCat) => {
+                return currentCat.name === productData.category
             })
-            if (catIndex > -1) {
-                // Update the category
-                productList[catIndex] = productCat
-                // Send transaction to server in a batch
-                await firestore.runTransaction(async (transaction) => {
-                    transaction.set(newDocRef, newProductData)
-                    const updateData: Partial<PublicBusinessData> = {productList: productList}
-                    transaction.update(publicDocRef, updateData)
-                })
-                return newProductData.productID
-            } else {
-                throw new Error("Could not find product category: ".concat(productData.category))
+            if (catIndex < 0) {
+                throw new Error(`Could not find category: '${productData.category}' in public business ID: '${this.businessID}'`)
             }
+            publicData.productList[catIndex].productIDs.push(newProductData.productID)
+            // Send transaction to server in a batch
+            await firestore.runTransaction(async (transaction) => {
+                transaction.set(newDocRef, newProductData)
+                transaction.update(publicDocRef, publicData)
+            })
+            this.hasUpdatedPublic = true
+            return newProductData.productID
         } catch(e) {
             throw e
         }
@@ -213,36 +252,64 @@ export class BusinessFunctions {
 
     public async getProduct(productID: string) {
         try {
-            const publicData = await this.getPublicData()
-            const country = publicData.country
-            if (country === undefined) {
-                throw new Error("Tried to retrieve product ID ".concat(productID).concat(", could not find business' country."))
-            }
-            if (!this.country) {
-                this.country = (await this.getPrivateData()).country
-            }
-            const publicDocRef = getPublicBusinessRef(this.country!, this.businessID)
+            const publicDocRef = await this.getPublicRef()
             const productDocRef = firestore.doc(`${publicDocRef.path}/products/${productID}`)
-            const productDoc = (await ServerData.getDoc(productDocRef)) as ProductData
-            return productDoc
+            let docSnap: firebase.default.firestore.DocumentSnapshot
+            try {
+                docSnap = await productDocRef.get({source: "cache"})
+            } catch (e) {
+                docSnap = await productDocRef.get({source: "server"})
+            }
+            if (!docSnap.exists) {
+                throw new Error(`Could not find product ID: '${productID}'`)
+            }
+            return docSnap.data() as ProductData
         } catch(e) {
             throw e
         }
     }
 
-    public async updateProduct(productID: string, productData: ProductData) {
+    public async updateProduct(productData: ProductData) {
         try {
-            const publicData = await this.getPublicData()
-            const country = publicData.country
-            if (country === undefined) {
-                throw new Error("Tried to retrieve product ID ".concat(productID).concat(", could not find business' country."))
+            // Get new and old data
+            let newProductData = {...productData} as ProductData
+            const oldProductData = (await this.getProduct(productData.productID)) as Readonly<ProductData>
+            // Find new images
+            let newImages: string[] = []
+            for (const url of newProductData.images) {
+                if (!oldProductData.images.includes(url)) {
+                    newImages.push(url)
+                }
             }
-            if (!this.country) {
-                this.country = (await this.getPrivateData()).country
+            // Find deleted images
+            let deletedImages: string[] = []
+            for (const url of oldProductData.images) {
+                if (!newProductData.images.includes(url)) {
+                    deletedImages.push(url)
+                }
             }
-            const publicDocRef = getPublicBusinessRef(this.country!, this.businessID)
-            const productDocRef = firestore.doc(`${publicDocRef.path}/products/${productID}`)
-            await ServerData.updateDoc(productData, productDocRef)
+            // Add new images
+            let downloadURLs: string[] = await this.uploadImages(newImages)
+            // Replace local URIs with download URLs
+            newImages.forEach((newImagesURL, newImagesIndex) => {
+                // Get index of url in productData's images list
+                const productIndex = newProductData.images.findIndex((productURL) => {
+                    return productURL === newImagesURL
+                })
+                // Replace the local URI with the download URL
+                newProductData.images[productIndex] = downloadURLs[newImagesIndex]
+            })
+            // Delete images
+            await this.deleteImages(deletedImages)
+            // Update product data
+            const updateData = {
+                businessID: this.businessID,
+                productID: productData.productID,
+                productData: newProductData
+            }
+            const updateProduct = functions.httpsCallable("updateProduct")
+            const result = await updateProduct(updateData)
+            return result.data
         } catch(e) {
             throw e
         }
@@ -251,44 +318,63 @@ export class BusinessFunctions {
     public async deleteProduct(productID: string) {
         try {
             const publicData = await this.getPublicData()
-            const country = publicData.country
-            if (country === undefined) {
-                throw new Error("Tried to create new product, could not find business' country.")
-            }
-            // Add the product to this business' products collection
-            if (!this.country) {
-                this.country = (await this.getPrivateData()).country
-            }
-            const publicDocRef = getPublicBusinessRef(this.country!, this.businessID)
+            const publicDocRef = await this.getPublicRef()
             const productDocRef = firestore.doc(`${publicDocRef.path}/products/${productID}`)
             // Get the product doc
             const productData = await this.getProduct(productID)
-            // Update the corresponding product category
-            let productCat = await this.getProductCategory(productData.category)
-            // Get index of product
-            const productIndex = productCat.productIDs.findIndex((id) => {
-                return id === productID
-            })
-            if (productIndex > -1) {
-                productCat.productIDs.splice(productIndex, 1)
-                // Get product list
-                let productList = publicData.productList
-                // Find the index of the corresponding product category
-                const catIndex = productList.findIndex((productCat) => {
-                    return productCat.name === productData.category
-                })
-                if (catIndex > -1) {
-                    // Update the category
-                    productList[catIndex] = productCat
-                    // Send transaction to server in a batch
-                    await firestore.runTransaction(async (transaction) => {
-                        transaction.delete(productDocRef)
-                        const updateData: Partial<PublicBusinessData> = {productList: productList}
-                        transaction.update(publicDocRef, updateData)
-                    })
+            let deletedImages: string[] = productData.images
+            // Search through options to find any images to delete
+            for (const optionType of productData.optionTypes) {
+                for (const option of optionType.options) {
+                    deletedImages = deletedImages.concat(option.images)
                 }
             }
+            // Update the corresponding product category
+            let category = await this.getProductCategory(productData.category)
+            // Get index of product
+            const productIndex = category.productIDs.findIndex((id) => {
+                return id === productID
+            })
+            if (productIndex < 0) {
+                throw new Error(`Could not find product ID: '${productID}' in category: '${productData.category}'`)
+            }
+            category.productIDs.splice(productIndex, 1)
+            // Get product list
+            let productList = publicData.productList
+            // Find the index of the corresponding product category
+            const catIndex = productList.findIndex((productCat) => {
+                return productCat.name === productData.category
+            })
+            if (catIndex < 0) {
+                throw new Error(`Could not find category: '${category.name}' in business ID: '${publicData.businessID}'`)
+            }
+            // Update the category
+            productList[catIndex] = category
+            // Delete images
+            await this.deleteImages(deletedImages)
+            // Send transaction to server in a batch
+            await firestore.runTransaction(async (transaction) => {
+                transaction.delete(productDocRef)
+                const updateData: Partial<PublicBusinessData> = {productList: productList}
+                transaction.update(publicDocRef, updateData)
+            })
+            return
         } catch(e) {
+            throw e
+        }
+    }
+
+    public async getOptionType(productID: string, optionTypeName: string) {
+        try {
+            const productData = await this.getProduct(productID)
+            const optionType = productData.optionTypes.find((currentOptionType) => {
+                return (currentOptionType.name === optionTypeName)
+            })
+            if (!optionType) {
+                throw new Error(`Could not find option type: '${optionTypeName}' in product ID: '${productID}'`)
+            }
+            return optionType
+        } catch (e) {
             throw e
         }
     }
@@ -305,32 +391,61 @@ export class BusinessFunctions {
             }
             // Update product data
             newProductData.optionTypes[optionTypeIndex] = optionType
-            await this.updateProduct(newProductData.productID, newProductData)
+            const updateData = {
+                businessID: this.businessID,
+                productID: productID,
+                productData: newProductData
+            }
+            const updateProduct = functions.httpsCallable("updateProduct")
+            const result = await updateProduct(updateData)
+            return result.data
           } catch (e) {
             throw e
           }
     }
 
-    public async deleteOptionType(productID: string, optionType: ProductOptionType) {
+    public async deleteOptionType(productID: string, optionTypeName: string) {
         try {
             let newProductData = await this.getProduct(productID)
             // Get option type
             const optionTypeIndex = newProductData.optionTypes.findIndex((currentType) => {
-                return currentType.name === optionType.name
+                return currentType.name === optionTypeName
             })
             if (optionTypeIndex < 0) {
-                throw new Error(`Could not find option type: ${optionType.name}`)
+                throw new Error(`Could not find option type: ${optionTypeName}`)
             }
-            // Delete all options (to get rid of images)
+            // Delete all options' images
             await Promise.all(newProductData.optionTypes[optionTypeIndex].options.map((option) => {
-                return this.deleteOption(productID, option)
+                return this.deleteImages(option.images)
             }))
             // Update product data
             newProductData.optionTypes.splice(optionTypeIndex, 1)
-            await this.updateProduct(newProductData.productID, newProductData)
+            const updateData = {
+                businessID: this.businessID,
+                productID: productID,
+                productData: newProductData
+            }
+            const updateProduct = functions.httpsCallable("updateProduct")
+            const result = await updateProduct(updateData)
+            return result.data
           } catch (e) {
             throw e
           }
+    }
+
+    public async getOption(productID: string, optionTypeName: string, optionName: string) {
+        try {
+            const optionType = await this.getOptionType(productID, optionTypeName)
+            const option = optionType.options.find((currentOption) => {
+                return (currentOption.name === optionName)
+            })
+            if (!option) {
+                throw new Error(`Could not find option: '${optionName}' in option type: '${optionTypeName}' in product ID: '${productID}'`)
+            }
+            return option
+        } catch (e) {
+            throw e
+        }
     }
 
     public async updateOption(productID: string, option: ProductOption) {
@@ -381,7 +496,14 @@ export class BusinessFunctions {
             await this.deleteImages(deletedImages)
             // Update product data
             newProductData.optionTypes[optionTypeIndex].options[optionIndex] = newOption
-            await this.updateProduct(newProductData.productID, newProductData)
+            const updateData = {
+                businessID: this.businessID,
+                productID: productID,
+                productData: newProductData
+            }
+            const updateProduct = functions.httpsCallable("updateProduct")
+            const result = await updateProduct(updateData)
+            return result.data
           } catch (e) {
             throw e
           }
@@ -408,7 +530,14 @@ export class BusinessFunctions {
             await this.deleteImages(option.images)
             // Update product data
             newProductData.optionTypes[optionTypeIndex].options.splice(optionIndex, 1)
-            await this.updateProduct(newProductData.productID, newProductData)
+            const updateData = {
+                businessID: this.businessID,
+                productID: productID,
+                productData: newProductData
+            }
+            const updateProduct = functions.httpsCallable("updateProduct")
+            const result = await updateProduct(updateData)
+            return result.data
           } catch (e) {
             throw e
           }
@@ -442,7 +571,7 @@ export class BusinessFunctions {
     public async getOrder(orderID: string) {
         try {
             const privateData = await this.getPrivateData()
-            const orderDocPath = `${getPrivateBusinessRef(this.businessID).path}/orders/${orderID}`
+            const orderDocPath = `${this.getPrivateRef().path}/orders/${orderID}`
             const orderDocSnap = await firestore.doc(orderDocPath).get()
             if (!orderDocSnap.exists) {
                 throw new Error(`Could not find order ID: ${orderID}`)
@@ -455,8 +584,7 @@ export class BusinessFunctions {
 
     public async getOrders(types?: OrderData["status"][]) {
         try {
-            const privateData = await this.getPrivateData()
-            const ordersColPath = `${getPrivateBusinessRef(this.businessID).path}/orders`
+            const ordersColPath = `${this.getPrivateRef().path}/orders`
             const ordersColRef = firestore.collection(ordersColPath)
             if (types) {
                 const ordersQuery = await ordersColRef.where("status", "in", types).get()

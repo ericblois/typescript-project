@@ -7,6 +7,8 @@ import * as geofireSource from "geofire-common"
 //import * as functionsSource from "firebase-functions"
 //import * as adminSource from "firebase-admin"
 import "firebase/functions";
+import { icons } from "./StyleSheet";
+import { IconButton } from "./CompIndex";
 
 //const functionsSource = require("firebase-functions")
 
@@ -58,8 +60,10 @@ export const currencyFormatter = new Intl.NumberFormat("en-CA", {
   } as Intl.NumberFormatOptions
 )
 
-export const getPublicBusinessRef = (country: string, businessID: string) => {
-  return firestore.doc(`/publicBusinessData/${country}/businesses/${businessID}`)
+export const getPublicBusinessRef = (businessID: string, country: string) => {
+
+    return firestore.doc(`/publicBusinessData/${country}/businesses/${businessID}`)
+
 }
 
 export const getPrivateBusinessRef = (businessID: string) => {
@@ -118,4 +122,25 @@ export const regionCodes = {
   "Northwest Territories": "NT",
   "Nunavut": "NU",
   "Yukon": "YT"
+}
+
+export const iconButtonTemplates = {
+  save: {
+    iconSource: icons.checkBox,
+    showLoading: true,
+    infoProps: {
+      text: "Save",
+      positionHorizontal: "left",
+      positionVertical: "above"
+    }
+  } as IconButton["props"],
+  back: {
+    iconSource: icons.chevron,
+    showLoading: true,
+    infoProps: {
+      text: "Go back",
+      positionHorizontal: "right",
+      positionVertical: "above"
+    }
+  } as IconButton["props"],
 }

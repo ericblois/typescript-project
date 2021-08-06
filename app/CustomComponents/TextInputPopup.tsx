@@ -58,13 +58,19 @@ export default class TextInputPopup extends CustomComponent<Props, State> {
                 >
                     <TextInputBox
                         style={{...buttonStyles.noColor, ...styles.textInput}}
-                        textProps={{...{
-                            onChangeText: (text) => {
-                                this.setState({currentText: text})
-                            },
-                        }, ...this.props.textInputProps?.textProps}}
                         focusOnStart={true}
                         {...this.props.textInputProps}
+                        textProps={{
+                            ...this.props.textInputProps?.textProps,
+                            ...{
+                                onChangeText: (text) => {
+                                    this.setState({currentText: text})
+                                    if (this.props.textInputProps?.textProps?.onChangeText) {
+                                        this.props.textInputProps?.textProps?.onChangeText(text)
+                                    }
+                                },
+                            }
+                        }}
                     />
                 </TouchableOpacity>
                 {this.renderSaveButton()}

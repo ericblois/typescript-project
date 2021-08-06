@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from "react";
 import CustomComponent from "./CustomComponent"
-import { View, TouchableOpacity, Text, StyleSheet, TextStyle, ViewStyle, Image, GestureResponderEvent, ImageStyle } from "react-native";
+import { View, TouchableOpacity, Text, StyleSheet, TextStyle, ViewStyle, Image, GestureResponderEvent, ImageStyle, ActivityIndicatorProps } from "react-native";
 import PropTypes from 'prop-types';
 import { NavigationProp, useNavigation } from "@react-navigation/native"
 import { defaults, textStyles, buttonStyles, styleValues, colors, fonts } from "../HelperFiles/StyleSheet";
@@ -22,7 +22,7 @@ type Props = {
     textProps?: Text['props'],
     subtextProps?: Text['props'],
     touchableProps?: TouchableOpacity['props'],
-    showLoading?: boolean
+    showLoading?: boolean,
 }
 
 type State = {
@@ -144,6 +144,10 @@ export default class TextButton extends CustomComponent<Props, State> {
                     <LoadingCover
                         size={"small"}
                         style={{backgroundColor: "transparent"}}
+                        indicatorProps={{
+                            // Match the indicator color to the text color
+                            color: this.props.textStyle?.color ? this.props.textStyle.color : defaultTextStyle.color
+                        }}
                     />
                 }
             </TouchableOpacity>

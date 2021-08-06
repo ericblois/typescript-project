@@ -71,11 +71,11 @@ export default class BusinessEditMainPage extends CustomComponent<BusinessEditMa
             text={"Delete this business"}
             buttonStyle={buttonStyles.noColor}
             textStyle={{fontSize: styleValues.smallTextSize, color: "red"}}
-            buttonFunc={() => {
-              UserFunctions.deleteBusiness(this.props.businessFuncs.businessID).then(() => {
-                this.props.navigation.navigate("customerMain")
-              })
+            buttonFunc={async () => {
+              await UserFunctions.deleteBusiness(this.props.businessFuncs.businessID)
+              this.props.navigation.navigate("customerMain")
             }}
+            showLoading={true}
         ></TextButton>
         <MenuBar
             buttonProps={[

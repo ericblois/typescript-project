@@ -4,14 +4,14 @@ import { View, Text, StyleSheet, KeyboardAvoidingView, ScrollView, ActivityIndic
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
-import { auth } from "../HelperFiles/Constants";
+import { auth, iconButtonTemplates } from "../HelperFiles/Constants";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { BusinessEditStackParamList, BusinessMainStackParamList } from "../HelperFiles/Navigation"
 import TextInputBox from "../CustomComponents/TextInputBox";
 import { PublicBusinessData } from "../HelperFiles/DataTypes";
 import * as Permissions from 'expo-permissions';
-import { ImageSliderSelector, LoadingCover, MapPopup, MenuBar, PageContainer } from "../HelperFiles/CompIndex";
+import { ConfirmationPopup, ImageSliderSelector, LoadingCover, MapPopup, MenuBar, PageContainer, TextInfoPopup } from "../HelperFiles/CompIndex";
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 import { extractKeywords, getCompressedImage, prefetchImages } from "../HelperFiles/ClientFunctions";
 import * as pluralize from "pluralize"
@@ -28,9 +28,9 @@ type BusinessEditInfoProps = {
 
 type State = {
     publicData?: PublicBusinessData,
-    newImages: string[],
-    deletedImages: string[],
     imagesLoaded: boolean,
+    infoPopupText?: string,
+    showSavePopup: boolean,
     saved: boolean
 }
 
@@ -40,27 +40,70 @@ export default class BusinessEditInfoPage extends CustomComponent<BusinessEditIn
         super(props)
         this.state = {
           publicData: undefined,
-          newImages: [],
-          deletedImages: [],
           imagesLoaded: false,
+          infoPopupText: undefined,
+          showSavePopup: false,
           saved: true
         }
+        props.navigation.addListener("focus", () => this.refreshData())
     }
 
     componentDidMount() {
       this.refreshData()
     }
 
-    refreshData() {
-      this.props.businessFuncs.getPublicData().then((publicData) => {
-        this.setState({publicData: publicData})
-      })
+    async refreshData() {
+      const publicData = await this.props.businessFuncs.getPublicData()
+      this.setState({publicData: publicData})
     }
 
-    renderLoadScreen() {
-      if (!this.state.publicData || !this.state.imagesLoaded) {
+    updatePublicData(publicData: Partial<PublicBusinessData>, stateUpdates?: Partial<State>, callback?: () => void) {
+      let newPublicData = {...this.state.publicData} as PublicBusinessData | undefined
+      if (newPublicData) {
+        newPublicData = {
+          ...newPublicData,
+          ...publicData
+        }
+        let stateUpdate: Partial<State> = {
+          ...stateUpdates,
+          publicData: newPublicData,
+          saved: false
+        }
+        this.setState(stateUpdate, callback)
+      }
+    }
+
+    renderInfoPopup() {
+      if (this.state.infoPopupText) {
         return (
-          <LoadingCover/>
+          <TextInfoPopup
+          headerText={"Edit Public Info"}
+            onExit={() => this.setState({infoPopupText: undefined})}
+          >{this.state.infoPopupText}</TextInfoPopup>
+        )
+      }
+    }
+
+    renderSavePopup() {
+      if (this.state.showSavePopup) {
+        return (
+          <ConfirmationPopup
+            type={"save"}
+            onExit={() => this.setState({showSavePopup: false})}
+            onDeny={() => {
+              this.setState({saved: true, showSavePopup: false}, () => {
+                this.props.navigation.goBack()
+              })
+            }}
+            onConfirm={async () => {
+              if (this.state.publicData) {
+                await this.props.businessFuncs.updatePublicData(this.state.publicData)
+              }
+              this.setState({showSavePopup: false, saved: true}, () => {
+                this.props.navigation.goBack()
+              })
+            }}
+          />
         )
       }
     }
@@ -68,11 +111,17 @@ export default class BusinessEditInfoPage extends CustomComponent<BusinessEditIn
     renderUI() {
       if (this.state.publicData) {
         return (
-          <View style={{alignItems: "center", paddingTop: styleValues.mediumPadding}}>
+          <View style={{
+            alignItems: "center",
+            paddingTop: styleValues.mediumPadding,
+            width: styleValues.winWidth,
+            paddingHorizontal: styleValues.mediumPadding
+            }}
+          >
           <ImageSliderSelector
             uris={this.state.publicData ? this.state.publicData.galleryImages: []}
             onChange={(uris) => {
-              this.setState({newImages: uris.new, deletedImages: uris.deleted, saved: false})
+              this.updatePublicData({galleryImages: uris.all})
             }}
             onImagesLoaded={() => {
               this.setState({imagesLoaded: true})
@@ -81,15 +130,9 @@ export default class BusinessEditInfoPage extends CustomComponent<BusinessEditIn
           {/* Title */}
           <TextInputBox
             textProps={{
-                defaultValue: this.state.publicData?.name,
-                placeholder: "Business Title",
-                onChangeText: (text) => {
-                  let newPublicData = this.state.publicData
-                  if (newPublicData) {
-                    newPublicData.name = text
-                  }
-                  this.setState({publicData: newPublicData, saved: false})
-                }
+              defaultValue: this.state.publicData?.name,
+              placeholder: "Business Title",
+              onChangeText: (text) => this.updatePublicData({name: text})
             }}
             avoidKeyboard={true}
           ></TextInputBox>
@@ -98,35 +141,31 @@ export default class BusinessEditInfoPage extends CustomComponent<BusinessEditIn
             textProps={{
                 defaultValue: this.state.publicData?.businessType,
                 placeholder: "Business Type (ex. 'Cafe')",
-                onChangeText: (text) => {
-                  let newPublicData = this.state.publicData
-                  if (newPublicData) {
-                    newPublicData.businessType = text
-                  }
-                  this.setState({publicData: newPublicData, saved: false})
-                }
+                onChangeText: (text) => this.updatePublicData({businessType: text})
             }}
             avoidKeyboard={true}
           ></TextInputBox>
           {/* Description */}
           <TextInputBox
-                  style={styles.descriptionBox}
-                  textStyle={{fontSize: styleValues.smallerTextSize}}
-                  textProps={{
-                      defaultValue: this.state.publicData?.description,
-                      placeholder: "Description",
-                      multiline: true,
-                      onChangeText: (text) => {
-                        let newPublicData = this.state.publicData
-                        if (newPublicData) {
-                          newPublicData.description = text
-                        }
-                        this.setState({publicData: newPublicData, saved: false})
-                      }
-                  }}
-                  avoidKeyboard={true}
-                ></TextInputBox>
+            style={styles.descriptionBox}
+            textStyle={{fontSize: styleValues.smallerTextSize}}
+            textProps={{
+                defaultValue: this.state.publicData?.description,
+                placeholder: "Description",
+                multiline: true,
+                onChangeText: (text) => this.updatePublicData({description: text})
+            }}
+            avoidKeyboard={true}
+          ></TextInputBox>
       </View>
+        )
+      }
+    }
+
+    renderLoading() {
+      if (!this.state.publicData || !this.state.imagesLoaded) {
+        return (
+          <LoadingCover size={"large"}/>
         )
       }
     }
@@ -135,42 +174,34 @@ export default class BusinessEditInfoPage extends CustomComponent<BusinessEditIn
     return (
       <PageContainer>
         {this.renderUI()}
-        {this.renderLoadScreen()}
+        {this.renderLoading()}
         <MenuBar
           buttonProps={[
-            {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
-            {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? colors.validColor : colors.invalidColor}, buttonFunc: async () => {
-              if (this.state.publicData) {
-                // Add new images
-                let downloadURLs: string[] = await this.props.businessFuncs.uploadImages(this.state.newImages)
-                // Delete images
-                await this.props.businessFuncs.deleteImages(this.state.deletedImages)
-                // Update public data
-                const newPublicData = this.state.publicData
-                // Delete URLs
-                let prevURLs: string[] = []
-                newPublicData.galleryImages.forEach((url) => {
-                  if (!this.state.deletedImages.includes(url)) {
-                    prevURLs.push(url)
-                  }
-                })
-                // Add new URLs
-                newPublicData.galleryImages = prevURLs.concat(downloadURLs)
-                const keywordsSource = newPublicData.name.concat(" ").concat(newPublicData.description)
-                let keywords = extractKeywords(keywordsSource)
-                keywords = keywords.map((keyword) => {
-                  return pluralize.singular(keyword)
-                })
-                newPublicData.keywords = keywords
-                this.props.businessFuncs.updatePublicData(newPublicData).then(() => {
-                    this.setState({saved: true})
-                }, (e) => {
-                    throw e;
-                })
+            {
+              ...iconButtonTemplates.back,
+              buttonFunc: () => this.props.navigation.goBack()
+            },{
+              ...iconButtonTemplates.save,
+              iconStyle: {tintColor: this.state.saved ? colors.validColor : colors.invalidColor},
+              buttonFunc: async () => {
+                if (this.state.publicData) {
+                  const newPublicData = this.state.publicData
+                  // Extract keywords from title and description
+                  const keywordsSource = `${newPublicData.name} ${newPublicData.description}`
+                  let keywords = extractKeywords(keywordsSource)
+                  keywords = keywords.map((keyword) => {
+                    return pluralize.singular(keyword)
+                  })
+                  newPublicData.keywords = keywords
+                  await this.props.businessFuncs.updatePublicData(newPublicData)
+                  this.setState({saved: true})
+                }
               }
-            }}
+            }
           ]}
         ></MenuBar>
+        {this.renderInfoPopup()}
+        {this.renderSavePopup()}
       </PageContainer>
     )
   }

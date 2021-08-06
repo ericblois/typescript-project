@@ -72,10 +72,12 @@ export default class ImageSliderSelector extends CustomComponent<Props, State> {
             // Create a new image component
             Image.getSize(newURI, (height, width) => {
                 const ratio = height / width
+                const images = this.state.images
                 const newImages = this.state.newImages
+                images.push({uri: newURI, ratio: ratio})
                 newImages.push({uri: newURI, ratio: ratio})
                 // Update the URIs and images
-                this.setState({newImages: newImages}, () => {
+                this.setState({images: images, newImages: newImages}, () => {
                     // Check if this is the first image to be added
                     if (this.state.images.length === 0 && this.state.newImages.length === 1) {
                         // Update the gallery height
@@ -167,8 +169,8 @@ export default class ImageSliderSelector extends CustomComponent<Props, State> {
                     iconSource={icons.minus}
                     buttonStyle={{
                         position: "absolute",
-                        width: styleValues.iconSmallSize,
-                        height: styleValues.iconSmallSize,
+                        width: styleValues.iconMediumSize,
+                        height: styleValues.iconMediumSize,
                         margin: styleValues.mediumPadding,
                         top: 0,
                         right: 0,
@@ -179,6 +181,11 @@ export default class ImageSliderSelector extends CustomComponent<Props, State> {
                     buttonFunc={() => {
                         this.removeImage(item.uri)
                     }}
+                    infoProps={{
+                        text: "Remove image",
+                        positionHorizontal: "left",
+                        positionVertical: "beside"
+                    }}
                 />
                 </View>
             </TouchableWithoutFeedback>
@@ -186,7 +193,7 @@ export default class ImageSliderSelector extends CustomComponent<Props, State> {
     }
 
     renderGallery() {
-        const imagesToRender = this.state.images.concat(this.state.newImages)
+        const imagesToRender = this.state.images
         if (imagesToRender.length > 0) {
             return (
                 <FlatList
@@ -236,6 +243,10 @@ export default class ImageSliderSelector extends CustomComponent<Props, State> {
                         this.addImage(result)
                     }
                 }}
+                infoProps={{
+                    text: "Add new image",
+                    positionHorizontal: "right"
+                }}
             />
         )
     }
@@ -263,8 +274,8 @@ const styles = StyleSheet.create({
         width: "100%",
     },
     addImageButton: {
-        width: styleValues.iconMediumSize,
-        height: styleValues.iconMediumSize,
+        width: styleValues.iconLargeSize,
+        height: styleValues.iconLargeSize,
         position: "absolute",
         margin: styleValues.mediumPadding,
         bottom: 0,

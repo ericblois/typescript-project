@@ -4,14 +4,14 @@ import { View, Text, StyleSheet, ImageURISource, ScrollView, ActivityIndicator }
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import TextButton from "../CustomComponents/TextButton";
-import { auth } from "../HelperFiles/Constants";
+import { auth, iconButtonTemplates } from "../HelperFiles/Constants";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { BusinessEditStackParamList, BusinessMainStackParamList } from "../HelperFiles/Navigation"
 import TextInputBox from "../CustomComponents/TextInputBox";
 import { DefaultProductCategory, ProductCategory, PublicBusinessData } from "../HelperFiles/DataTypes";
 import * as Permissions from 'expo-permissions';
-import { GradientView, ImageSliderSelector, ItemList, LoadingCover, MapPopup, MenuBar, PageContainer, TextHeader, TextInputPopup } from "../HelperFiles/CompIndex";
+import { ConfirmationPopup, GradientView, ImageSliderSelector, ItemList, LoadingCover, MapPopup, MenuBar, PageContainer, TextHeader, TextInfoPopup, TextInputPopup } from "../HelperFiles/CompIndex";
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 import { FlatList, TextInput } from "react-native-gesture-handler";
 import DraggableFlatList, { RenderItemParams } from 'react-native-draggable-flatlist'
@@ -31,7 +31,9 @@ type BusinessEditProductListProps = {
 
 type State = {
     publicData?: PublicBusinessData,
-    showPopup: boolean,
+    infoPopupText?: string,
+    showNameInputPopup: boolean,
+    showSavePopup: boolean,
     saved: boolean
 }
 
@@ -41,7 +43,9 @@ export default class BusinessEditProductListPage extends CustomComponent<Busines
         super(props)
         this.state = {
           publicData: undefined,
-          showPopup: false,
+          infoPopupText: undefined,
+          showNameInputPopup: false,
+          showSavePopup: false,
           saved: true
         }
         props.navigation.addListener("focus", (event) => {
@@ -53,10 +57,60 @@ export default class BusinessEditProductListPage extends CustomComponent<Busines
       this.refreshData()
   }
 
-    refreshData() {
-      this.props.businessFuncs.getPublicData().then((publicData) => {
-        this.setState({publicData: publicData})
-      })
+    async refreshData() {
+      const publicData = await this.props.businessFuncs.getPublicData()
+      this.setState({publicData: publicData})
+    }
+
+    updatePublicData(publicData: Partial<PublicBusinessData>, stateUpdates?: Partial<State>, callback?: () => void) {
+      let newPublicData = {...this.state.publicData} as PublicBusinessData | undefined
+      if (newPublicData) {
+        newPublicData = {
+          ...newPublicData,
+          ...publicData
+        }
+        let stateUpdate: Partial<State> = {
+          ...stateUpdates,
+          publicData: newPublicData,
+          saved: false
+        }
+        this.setState(stateUpdate, callback)
+      }
+    }
+
+    renderInfoPopup() {
+      if (this.state.infoPopupText) {
+        return (
+          <TextInfoPopup
+          headerText={"Edit Product List"}
+            onExit={() => this.setState({infoPopupText: undefined})}
+          >{this.state.infoPopupText}</TextInfoPopup>
+        )
+      }
+    }
+
+    renderSavePopup() {
+      if (this.state.showSavePopup) {
+        return (
+          <ConfirmationPopup
+            type={"save"}
+            onExit={() => this.setState({showSavePopup: false})}
+            onDeny={() => {
+              this.setState({saved: true, showSavePopup: false}, () => {
+                this.props.navigation.goBack()
+              })
+            }}
+            onConfirm={async () => {
+              if (this.state.publicData) {
+                await this.props.businessFuncs.updatePublicData(this.state.publicData)
+              }
+              this.setState({showSavePopup: false, saved: true}, () => {
+                this.props.navigation.goBack()
+              })
+            }}
+          />
+        )
+      }
     }
 
     renderAddButton() {
@@ -66,29 +120,25 @@ export default class BusinessEditProductListPage extends CustomComponent<Busines
           appearance={"light"}
           rightIconSource={icons.plus}
           buttonFunc={async () => {
-              this.setState({showPopup: true})
+              this.setState({showNameInputPopup: true})
           }}
         />
       )
     }
 
-    renderTextPopup() {
-      if (this.state.showPopup) {
+    renderNameInput() {
+      if (this.state.showNameInputPopup) {
         return (
           <TextInputPopup
-            onTapAway={() => {this.setState({showPopup: false})}}
+            onTapAway={() => {this.setState({showNameInputPopup: false})}}
             onSaveText={(text) => {
-              let newPublicData = this.state.publicData
-              if (newPublicData) {
-                newPublicData.productList.push({
+              let newProductList = this.state.publicData?.productList
+              if (newProductList) {
+                newProductList.push({
                   ...DefaultProductCategory,
                   name: text,
                 })
-                this.setState({
-                  publicData: newPublicData,
-                  showPopup: false,
-                  saved: false
-                })
+                this.updatePublicData({productList: newProductList}, {showNameInputPopup: false})
               }
             }}
             textInputProps={{
@@ -113,7 +163,7 @@ export default class BusinessEditProductListPage extends CustomComponent<Busines
               await this.props.businessFuncs.updatePublicData(this.state.publicData)
               this.setState({saved: true})
             }
-            this.props.navigation.navigate("editProductCat", {productCategory: params.item.name})
+            this.props.navigation.navigate("editProductCat", {productCategoryName: params.item.name})
           }}
           touchableProps={{
             onLongPress: params.drag
@@ -132,22 +182,20 @@ export default class BusinessEditProductListPage extends CustomComponent<Busines
               data={this.state.publicData ? this.state.publicData.productList : []}
               keyExtractor={(item, index) => index.toString()}
               renderItem={(params) => {return this.renderCategoryCard(params)}}
-              onDragEnd={(params) => {
-                let publicData = this.state.publicData
-                if (publicData) {
-                  publicData.productList = params.data
-                }
-                this.setState({publicData: publicData, saved: false})
-              }}
+              onDragEnd={(params) => this.updatePublicData({productList: params.data})}
               ListHeaderComponent={() => this.renderAddButton()}
             />
-            <TextHeader>Categories</TextHeader>
+            <TextHeader
+              infoButtonFunc={() => {
+                this.setState({infoPopupText: "Product categories organize your products into groups. Press and hold on a category to rearrange their order."})
+              }}
+            >Categories</TextHeader>
           </View>
         )
       }
     }
     // Render a loading indicator over the UI while images and data load
-    renderLoadScreen() {
+    renderLoading() {
       if (!this.state.publicData) {
         return (
           <LoadingCover size={"large"}/>
@@ -159,22 +207,33 @@ export default class BusinessEditProductListPage extends CustomComponent<Busines
       return (
         <PageContainer>
           {this.renderUI()}
-          {this.renderLoadScreen()}
+          {this.renderLoading()}
           <MenuBar
             buttonProps={[
-              {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.goBack()}},
-              {iconSource: icons.checkBox, iconStyle: {tintColor: this.state.saved ? colors.validColor : colors.invalidColor}, buttonFunc: () => {
-                  if (this.state.publicData) {
-                      this.props.businessFuncs.updatePublicData(this.state.publicData).then(() => {
-                          this.setState({saved: true})
-                      }, (e) => {
-                          throw e;
-                      })
+              {
+                ...iconButtonTemplates.back,
+                buttonFunc: () => {
+                  if (!this.state.saved) {
+                    this.setState({showSavePopup: true})
+                  } else {
+                    this.props.navigation.goBack()
                   }
-              }}
+                }
+              }, {
+                ...iconButtonTemplates.save,
+                iconStyle: {tintColor: this.state.saved ? colors.validColor : colors.invalidColor},
+                buttonFunc: async () => {
+                  if (this.state.publicData && !this.state.saved) {
+                    await this.props.businessFuncs.updatePublicData(this.state.publicData)
+                    this.setState({saved: true})
+                  }
+                }
+              }
             ]}
           ></MenuBar>
-          {this.renderTextPopup()}
+          {this.renderInfoPopup()}
+          {this.renderNameInput()}
+          {this.renderSavePopup()}
         </PageContainer>
       )
     }

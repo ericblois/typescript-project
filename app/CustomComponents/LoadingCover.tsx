@@ -1,7 +1,7 @@
 
 import React, { Component } from "react";
 import CustomComponent from "./CustomComponent"
-import { View, TouchableOpacity, Image, Text, StyleSheet, GestureResponderEvent, ActivityIndicator, ViewStyle } from "react-native";
+import { View, TouchableOpacity, Image, Text, StyleSheet, GestureResponderEvent, ActivityIndicator, ViewStyle, ActivityIndicatorProps } from "react-native";
 import { defaults, textStyles, buttonStyles, styleValues, colors, icons } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { productPropType, currency, currencyFormatter } from "../HelperFiles/Constants";
@@ -13,7 +13,8 @@ import { color } from "react-native-elements/dist/helpers";
 
 type Props = {
     style?: ViewStyle,
-    size?: "small" | "large"
+    size?: "small" | "large",
+    indicatorProps?: ActivityIndicatorProps
 }
 
 type State = {
@@ -39,6 +40,7 @@ export default class LoadingCover extends CustomComponent<Props, State> {
             >
                 <ActivityIndicator
                     size={this.props.size}
+                    {...this.props.indicatorProps}
                 />
             </View>
         )
