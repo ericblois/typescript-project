@@ -11,7 +11,7 @@ import { BusinessEditStackParamList, BusinessMainStackParamList } from "../Helpe
 import TextInputBox from "../CustomComponents/TextInputBox";
 import { PublicBusinessData } from "../HelperFiles/DataTypes";
 import * as Permissions from 'expo-permissions';
-import { ConfirmationPopup, ImageSliderSelector, LoadingCover, MapPopup, MenuBar, PageContainer, TextInfoPopup } from "../HelperFiles/CompIndex";
+import { ConfirmationPopup, ImageSliderSelector, LoadingCover, MapPopup, MenuBar, PageContainer, TextHeader, TextInfoPopup } from "../HelperFiles/CompIndex";
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 import { extractKeywords, getCompressedImage, prefetchImages } from "../HelperFiles/ClientFunctions";
 import * as pluralize from "pluralize"
@@ -113,51 +113,59 @@ export default class BusinessEditInfoPage extends CustomComponent<BusinessEditIn
         return (
           <View style={{
             alignItems: "center",
-            paddingTop: styleValues.mediumPadding,
+            paddingTop: defaults.textHeaderBox.height+ styleValues.mediumPadding,
             width: styleValues.winWidth,
             paddingHorizontal: styleValues.mediumPadding
             }}
           >
-          <ImageSliderSelector
-            uris={this.state.publicData ? this.state.publicData.galleryImages: []}
-            onChange={(uris) => {
-              this.updatePublicData({galleryImages: uris.all})
-            }}
-            onImagesLoaded={() => {
-              this.setState({imagesLoaded: true})
-            }}
-          ></ImageSliderSelector>
-          {/* Title */}
-          <TextInputBox
-            textProps={{
-              defaultValue: this.state.publicData?.name,
-              placeholder: "Business Title",
-              onChangeText: (text) => this.updatePublicData({name: text})
-            }}
-            avoidKeyboard={true}
-          ></TextInputBox>
-          {/* Business Type */}
-          <TextInputBox
-            textProps={{
-                defaultValue: this.state.publicData?.businessType,
-                placeholder: "Business Type (ex. 'Cafe')",
-                onChangeText: (text) => this.updatePublicData({businessType: text})
-            }}
-            avoidKeyboard={true}
-          ></TextInputBox>
-          {/* Description */}
-          <TextInputBox
-            style={styles.descriptionBox}
-            textStyle={{fontSize: styleValues.smallerTextSize}}
-            textProps={{
-                defaultValue: this.state.publicData?.description,
-                placeholder: "Description",
-                multiline: true,
-                onChangeText: (text) => this.updatePublicData({description: text})
-            }}
-            avoidKeyboard={true}
-          ></TextInputBox>
-      </View>
+            <ImageSliderSelector
+              uris={this.state.publicData ? this.state.publicData.galleryImages: []}
+              onChange={(uris) => {
+                this.updatePublicData({galleryImages: uris.all})
+              }}
+              onImagesLoaded={() => {
+                this.setState({imagesLoaded: true})
+              }}
+            ></ImageSliderSelector>
+            {/* Title */}
+            <TextInputBox
+              textProps={{
+                defaultValue: this.state.publicData?.name,
+                placeholder: "Business Title",
+                onChangeText: (text) => this.updatePublicData({name: text})
+              }}
+              validateFunc={(text) => (text.length > 2)}
+              avoidKeyboard={true}
+            ></TextInputBox>
+            {/* Business Type */}
+            <TextInputBox
+              textProps={{
+                  defaultValue: this.state.publicData?.businessType,
+                  placeholder: "Business Type (ex. 'Cafe')",
+                  onChangeText: (text) => this.updatePublicData({businessType: text})
+              }}
+              validateFunc={(text) => (text.length > 2)}
+              avoidKeyboard={true}
+            ></TextInputBox>
+            {/* Description */}
+            <TextInputBox
+              style={styles.descriptionBox}
+              textStyle={{fontSize: styleValues.smallerTextSize}}
+              textProps={{
+                  defaultValue: this.state.publicData?.description,
+                  placeholder: "Description",
+                  multiline: true,
+                  onChangeText: (text) => this.updatePublicData({description: text})
+              }}
+              validateFunc={(text) => (text.length > 2)}
+              avoidKeyboard={true}
+            ></TextInputBox>
+            <TextHeader
+              infoButtonFunc={() => {
+                this.setState({infoPopupText: "Your business' info is the first thing a customer will see when they view your page."})
+              }}
+            >Business Info</TextHeader>
+          </View>
         )
       }
     }

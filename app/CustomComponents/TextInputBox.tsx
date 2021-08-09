@@ -12,11 +12,14 @@ type TextInputBoxProps = {
     textProps?: TextInput['props'],
     avoidKeyboard?: boolean,
     focusOnStart?: boolean,
-    shadow?: boolean
+    shadow?: boolean,
+    validateFunc?: (text: string) => boolean
 }
 
 type State = {
-    shouldAvoid: boolean
+    text: string,
+    isValid: boolean,
+    shouldAvoid: boolean,
 }
 
 export default class TextInputBox extends CustomComponent<TextInputBoxProps, State> {
@@ -25,8 +28,16 @@ export default class TextInputBox extends CustomComponent<TextInputBoxProps, Sta
 
     constructor(props: TextInputBoxProps) {
         super(props)
+        let isValid = false
+        if (props.validateFunc) {
+            if (props.textProps?.defaultValue) {
+                isValid = props.validateFunc(props.textProps?.defaultValue)
+            }
+        }
         this.state = {
-            shouldAvoid: false
+            text: "",
+            isValid: isValid,
+            shouldAvoid: false,
         }
     }
 
@@ -37,7 +48,8 @@ export default class TextInputBox extends CustomComponent<TextInputBoxProps, Sta
                 style={{width: "100%"}}
                 contentContainerStyle={{
                     ...defaults.inputBox,
-                    //...(this.props.shadow !== false ? defaults.smallShadow : undefined),
+                    borderColor: this.state.isValid ? colors.mainColor : colors.lighterGrayColor,
+                    ...(this.props.shadow !== false ? defaults.smallShadow : undefined),
                     ...this.props.style
                 }}
                 behavior={"position"}
@@ -68,6 +80,16 @@ export default class TextInputBox extends CustomComponent<TextInputBoxProps, Sta
                         this.setState({shouldAvoid: false})
                         if (this.props.textProps?.onEndEditing) {
                             this.props.textProps.onEndEditing(e)
+                        }
+                    }}
+                    onChangeText={(text) => {
+                        let validText = false
+                        if (this.props.validateFunc) {
+                            validText = this.props.validateFunc(text)
+                        }
+                        this.setState({text: text, isValid: validText})
+                        if (this.props.textProps?.onChangeText) {
+                            this.props.textProps.onChangeText(text)
                         }
                     }}
                 >

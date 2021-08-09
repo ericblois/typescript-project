@@ -10,6 +10,7 @@ import { Icon } from "react-native-elements";
 import MapView, { LatLng, Marker, Overlay, Region } from "react-native-maps"
 import IconButton from "../CustomComponents/IconButton"
 import TextInputBox from "../CustomComponents/TextInputBox"
+import { BlurView } from "expo-blur"
 
 type Props = {
     initialText?: string,
@@ -49,8 +50,9 @@ export default class TextInputPopup extends CustomComponent<Props, State> {
 
     render() {
         return (
-            <View
+            <BlurView
                 style={styles.container}
+                intensity={50}
             >
                 <TouchableOpacity
                     style={styles.outsideTouchable}
@@ -74,7 +76,7 @@ export default class TextInputPopup extends CustomComponent<Props, State> {
                     />
                 </TouchableOpacity>
                 {this.renderSaveButton()}
-            </View>
+            </BlurView>
         )
     }
 }
@@ -87,7 +89,6 @@ const styles = StyleSheet.create({
         padding: styleValues.mediumPadding,
         top: 0,
         left:  0,
-        backgroundColor: "rgba(0,0,0,0.3)",
     },
     outsideTouchable: {
         width: "100%",

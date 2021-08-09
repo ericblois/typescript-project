@@ -153,7 +153,11 @@ export default class ImageSliderSelector extends CustomComponent<Props, State> {
                     source={{uri: item.uri}}
                     resizeMethod={"scale"}
                     resizeMode={"cover"}
-                    style={{width: item.ratio * this.state.galleryHeight, height: this.state.galleryHeight, borderRadius: styleValues.mediumPadding,}}
+                    style={{
+                        width: item.ratio * this.state.galleryHeight,
+                        height: this.state.galleryHeight,
+                        borderRadius: styleValues.mediumPadding,
+                    }}
                     onLoadEnd={() => {
                         if (this.props.onImagesLoaded) {
                             this.loadCount += 1
