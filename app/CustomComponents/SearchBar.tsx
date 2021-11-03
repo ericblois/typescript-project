@@ -38,6 +38,8 @@ export default class SearchBar extends CustomComponent<SearchBarProps, State> {
                 style={{
                     ...defaults.inputBox,
                     ...defaults.mediumShadow,
+                    position: "absolute",
+                    top: styleValues.mediumPadding,
                     elevation: 10,
                     flexDirection: "row",
                     padding: styleValues.minorPadding,

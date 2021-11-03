@@ -5,8 +5,8 @@ import { View, TouchableOpacity, Image, Text, StyleSheet, ActivityIndicator } fr
 import { icons, styleValues, colors, defaults, textStyles, buttonStyles, } from "../HelperFiles/StyleSheet";
 import {  useNavigation } from "@react-navigation/native";
 import { PublicBusinessData } from "../HelperFiles/DataTypes";
-import { IconButton } from "../HelperFiles/CompIndex";
 import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
+import LoadingCover from "./LoadingCover";
 
 type Props = {
   businessID: string,
@@ -32,7 +32,6 @@ export default class BusinessCard extends CustomComponent<Props, State> {
 
     async refreshData() {
       const publicData = await CustomerFunctions.getPublicBusinessData(this.props.businessID)
-      console.log(this.props.businessID)
       this.setState({businessData: publicData})
     }
 
@@ -65,23 +64,7 @@ export default class BusinessCard extends CustomComponent<Props, State> {
     renderLoading() {
       if (!this.state.businessData || !this.state.imageLoaded) {
         return (
-          <View
-            style={{
-              position: "absolute",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: styleValues.bordRadius,
-              top: 0, 
-              bottom: 0,
-              left: 0,
-              right: 0,
-              backgroundColor: colors.whiteColor
-            }}
-          >
-            <ActivityIndicator
-              size={"small"}
-            />
-          </View>
+          <LoadingCover style={{backgroundColor: colors.whiteColor}}/>
         )
       }
     }
@@ -101,9 +84,11 @@ export default class BusinessCard extends CustomComponent<Props, State> {
 
 const styles = StyleSheet.create({
     cardContainer: {
-      backgroundColor: "#fff",
+      height: "100%",
+      backgroundColor: colors.whiteColor,
       borderRadius: styleValues.bordRadius,
-      padding: styleValues.minorPadding,
+      padding: styleValues.mediumPadding,
+      marginRight: styleValues.mediumPadding,
       justifyContent: "space-between",
     },
     galleryImage: {

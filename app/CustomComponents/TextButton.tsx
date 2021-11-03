@@ -61,7 +61,11 @@ export default class TextButton extends CustomComponent<Props, State> {
             return (
                 <Image
                     source={this.props.leftIconSource}
-                    style = {{...defaultIconStyle, ...this.props.leftIconStyle}}
+                    style = {{
+                        ...defaultIconStyle,
+                        ...(this.props.textStyle?.color ? {tintColor: this.props.textStyle?.color} : undefined),
+                        ...this.props.leftIconStyle,
+                    }}
                     resizeMethod={"scale"}
                     resizeMode={"contain"}
                 />
@@ -82,7 +86,11 @@ export default class TextButton extends CustomComponent<Props, State> {
             return (
                 <Image
                     source={this.props.rightIconSource}
-                    style = {{...defaultIconStyle, ...this.props.rightIconStyle}}
+                    style = {{
+                        ...defaultIconStyle,
+                        ...(this.props.textStyle?.color ? {tintColor: this.props.textStyle?.color} : undefined),
+                        ...this.props.rightIconStyle,
+                    }}
                     resizeMethod={"scale"}
                     resizeMode={"contain"}
                 />

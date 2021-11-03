@@ -1,4 +1,69 @@
 export type Country = "canada" | "united_states" | ""
+export const possibleRegions = [
+  "alberta",
+  "british_columbia",
+  "manitoba",
+  "new_brunswick",
+  "newfoundland_and_labrador",
+  "northwest_territories",
+  "nova_scotia",
+  "nunavut",
+  "ontario",
+  "prince_edward_island",
+  "quebec",
+  "saskatchewan",
+  "yukon",
+  "alabama",
+  "alaska",
+  "arizona",
+  "arkansas",
+  "california",
+  "colorado",
+  "connecticut",
+  "delaware",
+  "florida",
+  "georgia",
+  "hawaii",
+  "idaho",
+  "illinois",
+  "indiana",
+  "iowa",
+  "kansas",
+  "kentucky",
+  "louisana",
+  "maine",
+  "maryland",
+  "massachusetts",
+  "michigan",
+  "minnesota",
+  "mississippi",
+  "missouri",
+  "montana",
+  "nebraska",
+  "nevada",
+  "new_hampshire",
+  "new_jersey",
+  "new_mexico",
+  "new_york",
+  "north_carolina",
+  "north_dakota",
+  "ohio",
+  "oklahoma",
+  "oregon",
+  "pennsylvania",
+  "rhode_island",
+  "south_carolina",
+  "south_dakota",
+  "tennessee",
+  "texas",
+  "utah",
+  "vermont",
+  "virginia",
+  "washington",
+  "west_virginia",
+  "wisconsin",
+  "wyoming"
+]
 
 export type ShippingInfo = {
     name: string,
@@ -120,7 +185,7 @@ export type ProductData = {
   optionTypes: ProductOptionType[],
   ratings: number[],
   extraInfo: string,
-  isVisible: boolean
+  isVisible: boolean,
 }
 
 export const DefaultProductData: Readonly<ProductData> = {
@@ -156,13 +221,13 @@ export type PublicBusinessData = {
   businessType: string,
   totalRating: number,
   description: string,
-  coords: {latitude: number | null, longitude: number | null},
+  coords: {latitude: number, longitude: number} | null,
   address: string,
   city: string,
   region: string,
   country: Country,
   postalCode: string,
-  geohash: string,
+  geohash: string | null,
   deliveryMethods: {
     pickup: boolean,
     local: boolean,
@@ -172,6 +237,7 @@ export type PublicBusinessData = {
   localDeliveryRange: number,
   keywords: string[],
   productList: ProductCategory[],
+  isValid: boolean
 }
 
 export const DefaultPublicBusinessData: Readonly<PublicBusinessData> = {
@@ -183,13 +249,13 @@ export const DefaultPublicBusinessData: Readonly<PublicBusinessData> = {
   businessType: "",
   totalRating: 0,
   description: "",
-  coords: {latitude: null, longitude: null},
+  coords: null,
   address: "",
   city: "",
   region: "",
   country: "",
   postalCode: "",
-  geohash: "",
+  geohash: null,
   deliveryMethods: {
     pickup: false,
     local: false,
@@ -199,13 +265,14 @@ export const DefaultPublicBusinessData: Readonly<PublicBusinessData> = {
   localDeliveryRange: 0,
   keywords: [],
   productList: [],
+  isValid: false
 }
 
 export type PrivateBusinessData = {
   userID: string,
   businessID: string,
   country: Country,
-  coords: {latitude: number, longitude: number},
+  coords: {latitude: number, longitude: number} | null,
 }
 
 export const DefaultPrivateBusinessData: Readonly<PrivateBusinessData> = {

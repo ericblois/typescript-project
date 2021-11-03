@@ -58,8 +58,9 @@ export default class CustomerEditAddressPage extends CustomComponent<CustomerEdi
               width: styleValues.winWidth
             }}
           >
+            <Text style={styles.descriptorText}>Name</Text>
             <TextInputBox
-                style={{...buttonStyles.noColor, ...{
+                boxStyle={{...buttonStyles.noColor, ...{
                     borderColor: colors.invalidColor
                 }}}
                 textProps={{
@@ -72,8 +73,9 @@ export default class CustomerEditAddressPage extends CustomComponent<CustomerEdi
                     },
                 }}
             ></TextInputBox>
+            <Text style={styles.descriptorText}>Street Address</Text>
             <TextInputBox
-                style={{...buttonStyles.noColor, ...{
+                boxStyle={{...buttonStyles.noColor, ...{
                     borderColor: colors.invalidColor
                 }}}
                 textProps={{
@@ -86,8 +88,9 @@ export default class CustomerEditAddressPage extends CustomComponent<CustomerEdi
                     },
                 }}
             ></TextInputBox>
+            <Text style={styles.descriptorText}>City</Text>
             <TextInputBox
-                style={{...buttonStyles.noColor, ...{
+                boxStyle={{...buttonStyles.noColor, ...{
                     borderColor: colors.invalidColor
                 }}}
                 textProps={{
@@ -100,8 +103,9 @@ export default class CustomerEditAddressPage extends CustomComponent<CustomerEdi
                     },
                 }}
             ></TextInputBox>
+            <Text style={styles.descriptorText}>Province / State</Text>
             <TextInputBox
-                style={{...buttonStyles.noColor, ...{
+                boxStyle={{...buttonStyles.noColor, ...{
                     borderColor: colors.invalidColor
                 }}}
                 textProps={{
@@ -114,8 +118,9 @@ export default class CustomerEditAddressPage extends CustomComponent<CustomerEdi
                     },
                 }}
             ></TextInputBox>
+            <Text style={styles.descriptorText}>Country</Text>
             <TextInputBox
-                style={{...buttonStyles.noColor, ...{
+                boxStyle={{...buttonStyles.noColor, ...{
                     borderColor: colors.invalidColor
                 }}}
                 textProps={{
@@ -128,8 +133,9 @@ export default class CustomerEditAddressPage extends CustomComponent<CustomerEdi
                     },
                 }}
             ></TextInputBox>
+            <Text style={styles.descriptorText}>Postal / ZIP code</Text>
             <TextInputBox
-                style={{...buttonStyles.noColor, ...{
+                boxStyle={{...buttonStyles.noColor, ...{
                     borderColor: colors.invalidColor
                 }}}
                 textProps={{
@@ -142,8 +148,9 @@ export default class CustomerEditAddressPage extends CustomComponent<CustomerEdi
                     },
                 }}
             ></TextInputBox>
+            <Text style={styles.descriptorText}>Apartment / Suite Number</Text>
             <TextInputBox
-                style={{...buttonStyles.noColor, ...{
+                boxStyle={{...buttonStyles.noColor, ...{
                     borderColor: colors.validColor
                 }}}
                 textProps={{
@@ -156,8 +163,9 @@ export default class CustomerEditAddressPage extends CustomComponent<CustomerEdi
                     },
                 }}
             ></TextInputBox>
+            <Text style={styles.descriptorText}>Delivery Instructions</Text>
             <TextInputBox
-                style={{...buttonStyles.noColor, ...{
+                boxStyle={{...buttonStyles.noColor, ...{
                     borderColor: colors.validColor,
                     height: styleValues.winWidth*0.25
                 }}}
@@ -228,8 +236,14 @@ export default class CustomerEditAddressPage extends CustomComponent<CustomerEdi
 }
 
 const styles = StyleSheet.create({
-  signout: {
-    color: "red",
-    fontSize: styleValues.largeTextSize,
-  }
+    descriptorText: {
+        ...textStyles.small,
+        width: "100%",
+        marginBottom: styleValues.minorPadding,
+        textAlign: "left"
+    },
+    signout: {
+        color: "red",
+        fontSize: styleValues.largeTextSize,
+    }
 })

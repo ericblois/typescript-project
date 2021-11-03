@@ -21,6 +21,10 @@ export default class TextDropdown extends CustomComponent<TextDropdownProps, Sta
         return (
             <DropDownPicker
                 containerStyle={[defaults.dropdownContainer, this.props.style]}
+                style={{
+                    borderWidth: 0,
+                    margin: 0
+                }}
                 // Text Styles
                 placeholderStyle={[defaults.dropdownText, {color: styleValues.minorTextColor}]}
                 labelStyle={defaults.dropdownText}

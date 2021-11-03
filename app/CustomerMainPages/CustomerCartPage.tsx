@@ -12,7 +12,7 @@ import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 import UserFunctions from "../HelperFiles/UserFunctions";
 import { StackNavigationProp } from "@react-navigation/stack";
 import PageContainer from "../CustomComponents/PageContainer";
-import { ScrollView } from "react-native-gesture-handler";
+import { ScrollView, TouchableWithoutFeedback } from "react-native-gesture-handler";
 import { CartItem, PublicBusinessData, ShippingInfo } from "../HelperFiles/DataTypes";
 import ProductCartCard from "../CustomComponents/ProductCartCard";
 import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
@@ -113,7 +113,14 @@ export default class CustomerCartPage extends CustomComponent<CustomerCartProps,
                     style={styles.businessContainer}
                     key={businessID}
                 >
-                    <Text style={textStyles.large}>{this.state.businesses![businessID].name}</Text>
+                    <TouchableWithoutFeedback
+                      onPress={async () => {
+                        const businessData = await CustomerFunctions.getPublicBusinessData(businessID)
+                        this.props.navigation.navigate("businessShop", {businessData: businessData})
+                      }}
+                    >
+                      <Text style={textStyles.large}>{this.state.businesses![businessID].name}</Text>
+                    </TouchableWithoutFeedback>
                     <ProductCardList
                         products={items}
                         showLoading={true}

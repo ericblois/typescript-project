@@ -25,7 +25,7 @@ type BusinessEditLocationProps = {
 type State = {
     privateData?: PrivateBusinessData,
     publicData?: PublicBusinessData,
-    currentLocation?: {latitude: number, longitude: number},
+    userLocation?: {latitude: number, longitude: number},
     infoPopupText?: string,
     showCurrentLocationPopup: boolean,
     showChooseLocationPopup: boolean,
@@ -40,7 +40,7 @@ export default class BusinessEditLocationPage extends CustomComponent<BusinessEd
         this.state = {
             privateData: undefined,
             publicData: undefined,
-            currentLocation: undefined,
+            userLocation: undefined,
             infoPopupText: undefined,
             showCurrentLocationPopup: false,
             showChooseLocationPopup: false,
@@ -59,22 +59,18 @@ export default class BusinessEditLocationPage extends CustomComponent<BusinessEd
         this.setState({privateData: privateData, publicData: publicData})
     }
     // Update the location and hash in private and public data
-    updateLocation(lat: number, long: number) {
+    updateLocation(coords: {latitude: number, longitude: number} | null) {
         let newPrivateData = this.state.privateData
-        if (newPrivateData) {
-            newPrivateData.coords = {latitude: lat, longitude: long}
-        }
         let newPublicData = this.state.publicData
-        if (newPublicData) {
-            const hash = geofire.geohashForLocation([
-                lat,
-                long
-            ])
-            newPublicData.geohash = hash
-            newPublicData.coords = {latitude: lat, longitude: long}
+        if (!newPrivateData || !newPublicData) {
+            throw new Error("Business' data has not loaded")
         }
+        newPrivateData.coords = coords
+        const hash = coords ? geofire.geohashForLocation([coords.latitude, coords.longitude]) : null
+        newPublicData.geohash = hash
+        newPublicData.coords = coords
         this.setState({
-            showChooseLocationPopup: false, 
+            showChooseLocationPopup: false,
             privateData: newPrivateData,
             publicData: newPublicData,
             saved: false
@@ -149,23 +145,6 @@ export default class BusinessEditLocationPage extends CustomComponent<BusinessEd
     }
     }
 
-    renderViewLocationButton() {
-        if (this.state.privateData?.coords) {
-            return (
-                <TextButton
-                    text={"View current location"}
-                    rightIconSource={icons.chevron}
-                    rightIconStyle={{transform: [{scaleX: -1}]}}
-                    buttonFunc={() => {
-                        this.setState({showCurrentLocationPopup: true})
-                    }}
-                />
-            )
-        } else {
-            return undefined
-        }
-    }
-
     renderCurrentLocationMap() {
         if (this.state.showCurrentLocationPopup) {
             return (
@@ -183,13 +162,20 @@ export default class BusinessEditLocationPage extends CustomComponent<BusinessEd
     }
 
     renderChooseLocationMap() {
-        if (this.state.showChooseLocationPopup && this.state.currentLocation) {
+        if (this.state.showChooseLocationPopup && this.state.privateData && this.state.publicData) {
+            let initialLocation = this.state.userLocation
+            if (this.state.privateData.coords) {
+                initialLocation = this.state.privateData.coords
+            }
             return (
                 <MapPopup
-                    initialLocation={{latitude: this.state.currentLocation.latitude, longitude: this.state.currentLocation.longitude}}
+                    initialLocation={{latitude: initialLocation!.latitude, longitude: initialLocation!.longitude}}
                     movableMarker={true}
                     onSaveLocation={(region) => {
-                        this.updateLocation(region.latitude, region.longitude)
+                        this.updateLocation({
+                            latitude: region.latitude,
+                            longitude: region.longitude
+                        })
                     }}
                     onTapAway={() => {
                         this.setState({showChooseLocationPopup: false})
@@ -198,6 +184,19 @@ export default class BusinessEditLocationPage extends CustomComponent<BusinessEd
             )
         }
         return undefined
+    }
+
+    renderDeleteLocationButton() {
+        return (
+            <TextButton
+                text={"Delete location"}
+                rightIconSource={icons.minus}
+                textStyle={{color: "red"}}
+                buttonFunc={() => {
+                    this.updateLocation(null)
+                }}
+            />
+        )
     }
 
     renderUI() {
@@ -209,22 +208,23 @@ export default class BusinessEditLocationPage extends CustomComponent<BusinessEd
                         width: styleValues.winWidth,
                         marginTop: defaults.textHeaderBox.height
                     }}
+                    fadeTop={false}
                     avoidKeyboard
                 >
-                    {this.renderViewLocationButton()}
-                    <Text style={textStyles.mediumHeader}>Edit your location</Text>
-                    {/* Get current location */}
+                    <Text style={{...textStyles.mediumHeader, marginBottom: styleValues.mediumPadding*2}}>Edit your location</Text>
+                    {/* View current location */}
                     <TextButton
-                        text={"Current location"}
-                        buttonStyle={{marginTop: styleValues.mediumPadding}}
-                        rightIconSource={icons.location}
+                        text={"View current location"}
+                        textStyle={!this.state.privateData?.coords ? {
+                            color: colors.lightGrayColor
+                        } : undefined}
+                        rightIconSource={icons.chevron}
                         rightIconStyle={{transform: [{scaleX: -1}]}}
                         buttonFunc={() => {
-                            navigator.geolocation.getCurrentPosition((position) => {
-                                this.updateLocation(position.coords.latitude, position.coords.longitude)
-                            }, (e) => {
-                                throw e;
-                            })
+                            this.setState({showCurrentLocationPopup: true})
+                        }}
+                        touchableProps={{
+                            disabled: !this.state.privateData?.coords
                         }}
                     ></TextButton>
                     {/* Choose location */}
@@ -233,21 +233,25 @@ export default class BusinessEditLocationPage extends CustomComponent<BusinessEd
                         rightIconSource={icons.chevron}
                         rightIconStyle={{transform: [{scaleX: -1}]}}
                         buttonFunc={() => {
-                            if (this.state.currentLocation) {
-                                this.setState({showChooseLocationPopup: true})
-                            } else {
+                            return new Promise((resolve, reject) => {
+                                if (this.state.privateData?.coords || this.state.userLocation) {
+                                    this.setState({showChooseLocationPopup: true})
+                                    resolve(this.state.userLocation)
+                                    return
+                                }
                                 navigator.geolocation.getCurrentPosition((position) => {
-                                    this.setState({
-                                        showChooseLocationPopup: true,
-                                        currentLocation: {
-                                            latitude: position.coords.latitude,
-                                            longitude: position.coords.longitude
-                                        }
-                                    })
+                                    this.setState({userLocation: position.coords, showChooseLocationPopup: true})
+                                    resolve(position.coords)
+                                    return
+                                }, (e) => {
+                                    reject(e)
                                 })
-                            }
+                            })
+                            
                         }}
+                        showLoading
                     ></TextButton>
+                    {this.renderDeleteLocationButton()}
                     <Text style={textStyles.mediumHeader}>Delivery Methods</Text>
                     {/* In store pickup */}
                     <ToggleSwitch
@@ -316,7 +320,7 @@ export default class BusinessEditLocationPage extends CustomComponent<BusinessEd
                     <Text style={textStyles.mediumHeader}>Edit Your Public Address</Text>
                     {/* Street Address */}
                     <TextInputBox
-                        style={{marginTop: styleValues.mediumPadding}}
+                        boxStyle={{marginTop: styleValues.mediumPadding}}
                         textProps={{
                             placeholder: "Street address",
                             defaultValue: this.state.publicData?.address,
@@ -341,24 +345,15 @@ export default class BusinessEditLocationPage extends CustomComponent<BusinessEd
                     ></TextInputBox>
                     {/* Province */}
                     <TextInputBox
+                        boxStyle={{
+                            borderColor: this.state.publicData.region === "" ? colors.invalidColor : colors.validColor
+                        }}
                         textProps={{
                             placeholder: "Province / State",
                             defaultValue: this.state.publicData?.region,
                             onChangeText: (text) => this.updatePublicData({region: text})
                         }}
                     ></TextInputBox>
-                    {/* Country */}
-                    <TextDropdown
-                        items={[
-                            {label: "Canada", value: "canada"},
-                            {label: "United States", value: "united_states"}
-                        ]}
-                        dropdownProps={{
-                            placeholder: "Country",
-                            defaultValue: this.state.publicData?.country,
-                            onChangeItem: (item) => this.updatePublicData({country: item.value})
-                        }}
-                    ></TextDropdown>
                 </ScrollContainer>
                 <TextHeader
                     infoButtonFunc={() => {

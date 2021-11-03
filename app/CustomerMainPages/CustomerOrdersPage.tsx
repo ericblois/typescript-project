@@ -30,7 +30,8 @@ type Props = {
 
 type State = {
     activeOrders?: OrderData[],
-    previousOrders?: OrderData[]
+    previousOrders?: OrderData[],
+    numCartItems: number
 }
 
 export default class CustomerOrdersPage extends CustomComponent<Props, State> {
@@ -40,22 +41,31 @@ export default class CustomerOrdersPage extends CustomComponent<Props, State> {
     this.state = {
       activeOrders: undefined,
       previousOrders: undefined,
+      numCartItems: 0
     }
     props.navigation.addListener("focus", () => this.refreshData())
     this.refreshData()
   }
 
   async refreshData() {
-    const activeOrders = await CustomerFunctions.getOrders(["pending", "accepted", "shipped"])
-    const prevOrders = await CustomerFunctions.getOrders(["completed", "rejected"])
-    this.setState({activeOrders: activeOrders, previousOrders: prevOrders})
+    const activeOrders = await CustomerFunctions.getOrders(["pending", "accepted"])
+    const prevOrders = await CustomerFunctions.getOrders(["completed", "rejected", "received"])
+    const cartItems = (await CustomerFunctions.getCart()).map((cartItem) => (cartItem.quantity))
+    let numCartItems = 0
+    for (const quantity of cartItems) {
+      numCartItems += quantity
+    }
+    this.setState({activeOrders: activeOrders, previousOrders: prevOrders, numCartItems: numCartItems})
   }
 
   renderOrders(header: string, orders?: OrderData[]) {
     if (orders) {
       return (
-        <View style={{flex: 1}}>
+        <View style={{flex: 1, marginBottom: styleValues.mediumPadding}}>
           <Text style={{...textStyles.large, marginBottom: styleValues.mediumPadding}}>{header}</Text>
+          {orders.length > 0 ? undefined : (
+            <Text style={{...textStyles.small, color: styleValues.minorTextColor}}>{`You do not have any ${header.toLowerCase()}.`}</Text>
+          )}
           {orders.map((orderData) => {
             return (
               <CustomerOrderCard
@@ -70,6 +80,37 @@ export default class CustomerOrdersPage extends CustomComponent<Props, State> {
     }
   }
 
+  renderUI() {
+    let cartText = "View your cart"
+    if (this.state.numCartItems > 0) {
+      cartText += ` (${this.state.numCartItems})`
+    }
+    return (
+      <View style={{width: "100%", height: "100%", alignItems: "center"}}>
+        <Text style={textStyles.largerHeader}>Your Orders</Text>
+        <ScrollContainer
+          containerStyle={{width: styleValues.winWidth}}
+        >
+          {this.renderOrders("Current Orders", this.state.activeOrders)}
+          {this.renderOrders("Previous Orders", this.state.previousOrders)}
+        </ScrollContainer>
+
+        <TextButton
+          text={cartText}
+          appearance={"color"}
+          buttonStyle={{
+            marginBottom: menuBarHeight + styleValues.mediumPadding*2,
+            width: styleValues.winWidth - styleValues.mediumPadding*2
+          }}
+          buttonFunc={() => this.props.navigation.navigate("cart")}
+          rightIconSource={icons.chevron}
+          rightIconStyle={{transform: [{scaleX: -1}]}}
+          leftIconSource={icons.shoppingCart}
+        />
+      </View>
+    )
+  }
+
   renderLoading() {
     if (!this.state.activeOrders || !this.state.previousOrders) {
       return (
@@ -81,26 +122,8 @@ export default class CustomerOrdersPage extends CustomComponent<Props, State> {
   render() {
     return (
       <PageContainer>
-        <Text style={textStyles.largerHeader}>Your Orders</Text>
-        <ScrollContainer
-          containerStyle={{width: styleValues.winWidth}}
-        >
-          {this.renderOrders("Current Orders", this.state.activeOrders)}
-          {this.renderOrders("Previous Orders", this.state.previousOrders)}
-        </ScrollContainer>
+        {this.renderUI()}
         {this.renderLoading()}
-        <TextButton
-          text={"View your cart"}
-          appearance={"color"}
-          buttonStyle={{
-            marginBottom: menuBarHeight + styleValues.mediumPadding*2,
-            width: styleValues.winWidth - styleValues.mediumPadding*2
-          }}
-          buttonFunc={() => this.props.navigation.navigate("cart")}
-          rightIconSource={icons.chevron}
-          rightIconStyle={{transform: [{scaleX: -1}]}}
-          leftIconSource={icons.shoppingCart}
-        />
       </PageContainer>
     );
   }

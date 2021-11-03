@@ -2,19 +2,23 @@ import React, { Component } from "react";
 import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, Text, StyleSheet, ActivityIndicator, ScrollView } from "react-native";
 import PropTypes from 'prop-types';
-import { defaults, textStyles, buttonStyles, icons, styleValues, colors } from "../HelperFiles/StyleSheet";
-import { IconButton, ImageSlider, MenuBar, PageContainer, RatingVisual, ScrollContainer } from "../HelperFiles/CompIndex";
+import { defaults, textStyles, buttonStyles, icons, styleValues, colors, fonts } from "../HelperFiles/StyleSheet";
+import { IconButton, ImageSlider, LoadingCover, MenuBar, PageContainer, RatingVisual, ScrollContainer } from "../HelperFiles/CompIndex";
 import { businessPropType, formatText } from "../HelperFiles/Constants";
-import { PublicBusinessData } from "../HelperFiles/DataTypes"
+import { PublicBusinessData, UserData } from "../HelperFiles/DataTypes"
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { BusinessShopStackParamList, CustomerMainStackParamList, CustomerTabParamList } from "../HelperFiles/Navigation";
 import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from "@react-navigation/stack";
 import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
+import UserFunctions from "../HelperFiles/UserFunctions";
 
 type BusinessInfoNavigationProp = CompositeNavigationProp<
     StackNavigationProp<BusinessShopStackParamList, "info">,
-    BottomTabNavigationProp<CustomerTabParamList>
+    CompositeNavigationProp<
+        BottomTabNavigationProp<CustomerTabParamList>,
+        StackNavigationProp<CustomerMainStackParamList>
+    >
 >
 
 type BusinessInfoRouteProp = RouteProp<BusinessShopStackParamList, "info">;
@@ -26,8 +30,10 @@ type Props = {
 }
 
 type State = {
+    userData?: UserData,
     loaded: boolean,
-    favorited: boolean
+    favorited: boolean,
+    cartQuantity: number
 }
 
 export default class BusinessInfoPage extends CustomComponent<Props, State> {
@@ -37,34 +43,105 @@ export default class BusinessInfoPage extends CustomComponent<Props, State> {
     constructor(props: Props) {
         super(props)
         this.state = {
+            userData: undefined,
             loaded: false,
-            favorited: false
+            favorited: false,
+            cartQuantity: 0
         }
     }
 
-
-
-    displayLoadingScreen() {
-        if (!this.state.loaded) {
-            return (
-                <View 
-                    style={{...defaults.pageContainer, ...{
-                        justifyContent: "center",
-                        position: "absolute",
-                        top: 0,
-                        left: 0
-                     }}}
-                >
-                    <ActivityIndicator size={"large"}/>
-                </View>
-            );
+    async refreshData() {
+        const data = await UserFunctions.getUserDoc()
+        const cart = await CustomerFunctions.getCart()
+        let quantity = 0
+        for (const item of cart) {
+            if (item.businessID === this.props.businessData.businessID) {
+                quantity += item.quantity
+            }
         }
-        return <></>
+        this.setState({
+            userData: data,
+            favorited: data.favorites.includes(this.props.businessData.businessID),
+            cartQuantity: quantity
+        })
     }
 
-    render() {
+    componentDidMount() {
+        this.refreshData()
+    }
+
+    renderInfo() {
+        let regionString = this.props.businessData.city === ""
+            ? this.props.businessData.region
+            : this.props.businessData.city + ", " + this.props.businessData.region
         return (
-        <PageContainer>
+            <View
+                style={{
+                    backgroundColor: colors.whiteColor,
+                    borderRadius: styleValues.bordRadius,
+                    padding: styleValues.mediumPadding,
+                    width: "100%",
+                    ...defaults.smallShadow
+                }}
+            >
+                <View style={styles.descriptionHeader}>
+                    <View style={{
+                        flexDirection: "row",
+                        alignItems: "flex-start",
+                        justifyContent: "space-between",
+                        width: "100%",
+                    }}>
+                        <Text style={styles.businessTitle}>{this.props.businessData.name}</Text>
+                        <IconButton
+                            iconSource={this.state.favorited ? icons.star : icons.hollowStar}
+                            buttonStyle={styles.favButton}
+                            iconStyle={{tintColor: this.state.favorited ? colors.mainColor : colors.grayColor}}
+                            buttonFunc={async () => {
+                                try {
+                                    const newUserData = this.state.userData
+                                    if (newUserData) {
+                                        if (newUserData.favorites.includes(this.props.businessData.businessID)) {
+                                            this.setState({favorited: false})
+                                            await CustomerFunctions.deleteFavorite(this.props.businessData.businessID)
+                                            await this.refreshData()
+                                        } else {
+                                            this.setState({favorited: true})
+                                            await CustomerFunctions.addToFavorites(this.props.businessData.businessID)
+                                            await this.refreshData()
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.error(e)
+                                    this.setState({favorited: !this.state.favorited})
+                                }
+                            }}
+                            iconProps={{
+                                resizeMode: "contain"
+                            }}
+                        />
+                    </View>
+                    <Text style={styles.businessType}>{this.props.businessData.businessType}</Text>
+                    <View style={styles.subHeader}>
+                        <View style={{
+                            alignItems: "flex-start"
+                        }}>
+                        <Text style={styles.businessLocation}>{regionString}</Text>
+                        {this.props.businessData.address !== ""
+                        ? <Text style={styles.businessLocation}>{this.props.businessData.address}</Text>
+                        : undefined}
+                        </View>
+                        <RatingVisual rating={this.props.businessData.totalRating}/>
+                    </View>
+                </View>
+                <View style={styles.descriptionBody}>
+                    <Text style={styles.description}>{formatText(this.props.businessData.description)}</Text>
+                </View>
+            </View>
+        )
+    }
+
+    renderUI() {
+        return (
             <ScrollContainer>
                 <ImageSlider
                     uris={this.props.businessData.galleryImages}
@@ -72,42 +149,39 @@ export default class BusinessInfoPage extends CustomComponent<Props, State> {
                         this.setState({loaded: true})
                     }}
                 />
-                <View style={styles.descriptionHeader}>
-                    <Text style={styles.businessTitle} numberOfLines={2}>{this.props.businessData.name}</Text>
-                    <Text style={styles.businessType}>{this.props.businessData.businessType}</Text>
-                    <View style={styles.subHeader}>
-                        <Text style={styles.businessLocation}>{this.props.businessData.city + ", " + this.props.businessData.region}</Text>
-                        <RatingVisual rating={this.props.businessData.totalRating}/>
-                        <IconButton
-                            iconSource={this.state.favorited ? icons.star : icons.hollowStar}
-                            buttonStyle={styles.favButton}
-                            iconStyle={{tintColor: this.state.favorited ? colors.mainColor : colors.grayColor}}
-                            buttonFunc={async () => {
-                            if (!this.state.favorited) {
-                                await CustomerFunctions.addToFavorites(this.props.businessData.businessID)
-                                this.setState({favorited: true})
-                            } else {
-                                await CustomerFunctions.deleteFavorite(this.props.businessData.businessID)
-                                this.setState({favorited: false})
-                            }
-                            }}
-                        />
-                    </View>
-                </View>
-                <View style={styles.descriptionBody}>
-                    <Text style={styles.description}>{formatText(this.props.businessData.description)}</Text>
-                </View>
-                {this.displayLoadingScreen()}
+                {this.renderInfo()}
             </ScrollContainer>
+        )
+    }
+
+    renderLoading() {
+        if (!this.state.loaded || !this.state.userData) {
+            return (
+                <LoadingCover size={"large"}/>
+            );
+        }
+    }
+
+    render() {
+        return (
+        <PageContainer>
+            {this.renderUI()}
+            {this.renderLoading()}
             <MenuBar
                 buttonProps={[
-                    {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.navigate("browse")}},
+                    {iconSource: icons.chevron, buttonFunc: () => {this.props.navigation.dangerouslyGetParent()?.goBack()}},
                     {
                         iconSource: icons.document,
                         buttonFunc: () => {this.props.navigation.navigate("info")},
                         iconStyle: {tintColor: colors.mainColor}
                     },
-                    {iconSource: icons.shoppingCart, buttonFunc: () => {this.props.navigation.navigate("products")}},
+                    {iconSource: icons.shoppingBag, buttonFunc: () => {this.props.navigation.navigate("products")}},
+                    {
+                        iconSource: icons.shoppingCart,
+                        showBadge: this.state.cartQuantity > 0,
+                        badgeNumber: this.state.cartQuantity,
+                        buttonFunc: () => this.props.navigation.navigate("cart")
+                    },
                 ]}
             />
         </PageContainer>
@@ -130,9 +204,8 @@ const styles = StyleSheet.create({
         height: "100%",
     },
     descriptionHeader: {
-        width: styleValues.winWidth - styleValues.mediumPadding*2,
+        width: "100%",
         alignItems: "flex-start",
-        padding: styleValues.minorPadding,
         paddingBottom: styleValues.mediumPadding,
         marginBottom: styleValues.mediumPadding,
         borderBottomWidth: styleValues.minorBorderWidth,
@@ -142,28 +215,31 @@ const styles = StyleSheet.create({
         width: "100%",
         flexDirection: "row",
         justifyContent: "space-between",
-        alignItems: "center"
+        alignItems: "flex-end"
     },
     descriptionBody: {
-        width: styleValues.winWidth - styleValues.mediumPadding*2,
+        width: "100%",
         alignItems: "flex-start",
         padding: styleValues.minorPadding
     },
     businessTitle: {
-        ...textStyles.larger
+        ...textStyles.larger,
+        textAlign: "left",
+        flex: 1,
     },
     businessType: {
-        ...textStyles.medium,
+        ...textStyles.large,
         color: styleValues.minorTextColor,
         marginBottom: styleValues.minorPadding,
     },
     businessLocation: {
-        ...textStyles.medium,
+        ...textStyles.small,
         color: styleValues.minorTextColor,
     },
     favButton: {
-        width: "15%",
+        width: textStyles.larger.fontSize*4/3,
         aspectRatio: 1,
+        marginLeft: styleValues.minorPadding
     },
     description: {
         ...textStyles.small,

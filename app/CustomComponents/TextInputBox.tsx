@@ -6,7 +6,7 @@ import { NavigationProp, useNavigation } from "@react-navigation/native"
 import { styleValues, colors, defaults, textStyles, buttonStyles, } from "../HelperFiles/StyleSheet";
 
 type TextInputBoxProps = {
-    style?: ViewStyle,
+    boxStyle?: ViewStyle,
     textStyle?: TextStyle,
     boxProps?: KeyboardAvoidingView['props'],
     textProps?: TextInput['props'],
@@ -50,7 +50,7 @@ export default class TextInputBox extends CustomComponent<TextInputBoxProps, Sta
                     ...defaults.inputBox,
                     borderColor: this.state.isValid ? colors.mainColor : colors.lighterGrayColor,
                     ...(this.props.shadow !== false ? defaults.smallShadow : undefined),
-                    ...this.props.style
+                    ...this.props.boxStyle
                 }}
                 behavior={"position"}
                 enabled={this.state.shouldAvoid && this.props.avoidKeyboard === true}

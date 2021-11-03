@@ -14,7 +14,6 @@ export abstract class CustomerFunctions {
             const docSnap = await publicDocRef.get()
             if (!docSnap.exists) {
                 await CustomerFunctions.removeBusinessReferences(businessID)
-                console.log(businessID)
                 throw new Error(`Could not find business ID: ${businessID}`)
             }
             return {...docSnap.data()} as PublicBusinessData
@@ -76,7 +75,7 @@ export abstract class CustomerFunctions {
             if (country === undefined) {
                 throw new Error("Tried to retrieve product ID '".concat(productID).concat("', could not find business' country."))
             }
-            const productDocRef = firestore.doc(`${getPublicBusinessRef(publicData.country, businessID).path}/products/${productID}`)
+            const productDocRef = firestore.doc(`${getPublicBusinessRef(businessID, publicData.country).path}/products/${productID}`)
             const productDoc = (await ServerData.getDoc(productDocRef)) as ProductData
             return productDoc
         } catch(e) {
@@ -311,6 +310,7 @@ export abstract class CustomerFunctions {
             .startAt(bound[0])
             .endAt(bound[1])
             .where("keywords", "array-contains-any", tenKeywords)
+            .where("isValid", "==", true)
             .limit(10)
           promises.push(query.get())
         }
@@ -322,8 +322,8 @@ export abstract class CustomerFunctions {
             // Get data as public business data
             const publicData = docSnap.data() as PublicBusinessData
             // Check if the business's location is within range
-            if (publicData.coords.latitude && publicData.coords.longitude) {
-              const distanceInKm = geofire.distanceBetween([publicData.coords.latitude, publicData.coords.longitude], currentLoc);
+            if (publicData.coords!.latitude && publicData.coords!.longitude) {
+              const distanceInKm = geofire.distanceBetween([publicData.coords!.latitude, publicData.coords!.longitude], currentLoc);
               const distanceInM = distanceInKm * 1000;
               if (distanceInM <= rangeInM) {
                 matchingBusinesses.push(publicData);

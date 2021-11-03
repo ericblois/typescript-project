@@ -17,7 +17,8 @@ type Props = {
     mapProps?: Partial<MapView["props"]>,
     markerProps?: Partial<Marker["props"]>,
     onTapAway?: () => void,
-    onSaveLocation?: (region: Region) => void
+    onSaveLocation?: (region: Region) => void,
+    initialDelta?: number
 }
 
 type State = {
@@ -106,7 +107,13 @@ export default class MapPopup extends CustomComponent<Props, State> {
                             followsUserLocation={true}
                             mapType={"standard"}
                             showsMyLocationButton={true}
-                            region={this.props.initialLocation ? {...this.props.initialLocation, ...{latitudeDelta: 0.01, longitudeDelta: 0.01}} as Region : undefined}
+                            region={this.props.initialLocation ? {
+                                ...this.props.initialLocation,
+                                ...{
+                                    latitudeDelta: this.props.initialDelta ? this.props.initialDelta : 0.01,
+                                    longitudeDelta: this.props.initialDelta ? this.props.initialDelta : 0.01
+                                }
+                            } as Region : undefined}
                             onRegionChange={(region) => {
                                 this.currentRegion = region
                                 if (this.props.mapMoveCallback) {

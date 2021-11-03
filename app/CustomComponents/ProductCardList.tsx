@@ -1,7 +1,7 @@
 
 import React, { Component } from "react";
 import CustomComponent from "./CustomComponent"
-import { View, TouchableOpacity, Image, Text, StyleSheet, GestureResponderEvent, FlatList, ActivityIndicator } from "react-native";
+import { View, TouchableOpacity, Image, Text, StyleSheet, GestureResponderEvent, FlatList, ActivityIndicator, ViewStyle } from "react-native";
 import { defaults, textStyles, buttonStyles, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { productPropType, currency } from "../HelperFiles/Constants";
@@ -19,6 +19,7 @@ type ProductInfo = {
 }
 
 type Props = {
+    style?: ViewStyle,
     products: (ProductInfo | CartItem)[],
     editable?: boolean,
     showLoading?: boolean,

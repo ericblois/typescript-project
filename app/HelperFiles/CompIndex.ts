@@ -30,6 +30,7 @@ import LoadingCover from "../CustomComponents/LoadingCover";
 import TextHeader from "../CustomComponents/TextHeader";
 import TextInfoPopup from "../CustomComponents/TextInfoPopup";
 import ConfirmationPopup from "../CustomComponents/ConfirmationPopup";
+import TextDropdownAnimated from "../CustomComponents/TextDropdownAnimated";
 
 export {
     MenuBar,
@@ -63,5 +64,6 @@ export {
     LoadingCover,
     TextHeader,
     TextInfoPopup,
-    ConfirmationPopup
+    ConfirmationPopup,
+    TextDropdownAnimated
 };

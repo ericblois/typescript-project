@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, LogBox, ActivityIndicator } from "react-native";
+import { View, LogBox, ActivityIndicator, StatusBar } from "react-native";
 import * as firebase from "firebase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { auth, firestore } from "./app/HelperFiles/Constants";
@@ -108,6 +108,8 @@ export default class App extends Component<Props, State> {
   render() {
     if (this.state.fontsLoaded) {
       return (
+        <>
+          <StatusBar barStyle={"dark-content"}/>
           <NavigationContainer
             theme={{
               ...DefaultTheme,
@@ -129,6 +131,7 @@ export default class App extends Component<Props, State> {
                 <RootStack.Screen name={"businessMain"} component={BusinessMainScreen}/>
               </RootStack.Navigator>
           </NavigationContainer>
+        </>
       );
     } else {
       return (

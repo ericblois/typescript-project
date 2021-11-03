@@ -11,6 +11,7 @@ import { CartItem, ProductCategory, ProductData, PublicBusinessData } from "../H
 import ProductCard from "./ProductCard";
 import BusinessCard from "./BusinessCard";
 import ScrollContainer from "./ScrollContainer";
+import LoadingCover from "./LoadingCover";
 
 type Props = {
     businessIDs: string[],
@@ -89,6 +90,7 @@ export default class BusinessCardBrowseList extends CustomComponent<Props, State
                 {this.props.businessIDs.map((id) => {
                     return this.renderBusinessCard(id)
                 })}
+                {this.renderBusinessCard("XOtV6IlwDiw5EEobwBg0")}
             </ScrollContainer>
         )
     }
@@ -96,16 +98,7 @@ export default class BusinessCardBrowseList extends CustomComponent<Props, State
     renderLoading() {
         if (this.props.showLoading === true && !this.state.cardsLoaded) {
             return (
-                <View style={{
-                    position: "absolute",
-                    width: "100%",
-                    height: styleValues.winWidth*0.6,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: colors.backgroundColor
-                }}>
-                    <ActivityIndicator size={"large"}/>
-                </View>
+                <LoadingCover size={"large"}/>
             )
         }
     }
@@ -113,7 +106,7 @@ export default class BusinessCardBrowseList extends CustomComponent<Props, State
     render() {
         return (
             <View style={{
-                width: "100%",
+                width: styleValues.winWidth,
                 height: styleValues.winWidth*0.6
             }}>
                 {this.renderUI()}

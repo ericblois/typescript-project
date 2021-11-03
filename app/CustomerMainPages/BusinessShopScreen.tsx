@@ -24,7 +24,7 @@ type Props = {
 }
 
 type State = {
-  businessData: PublicBusinessData
+  businessData: PublicBusinessData,
 }
 
 export default class BusinessShopScreen extends CustomComponent<Props, State> {

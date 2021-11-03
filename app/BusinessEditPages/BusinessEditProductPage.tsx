@@ -11,7 +11,7 @@ import { BusinessEditStackParamList, BusinessMainStackParamList } from "../Helpe
 import TextInputBox from "../CustomComponents/TextInputBox";
 import { DefaultProductOptionType, ProductCategory, ProductData, ProductOption, ProductOptionType, PublicBusinessData } from "../HelperFiles/DataTypes";
 import * as Permissions from 'expo-permissions';
-import { ConfirmationPopup, CurrencyInputBox, GradientView, IconButton, ImageSliderSelector, ItemList, LoadingCover, MapPopup, MenuBar, PageContainer, ScrollContainer, TextDropdown, TextHeader, TextInfoPopup, TextInputPopup } from "../HelperFiles/CompIndex";
+import { ConfirmationPopup, CurrencyInputBox, GradientView, IconButton, ImageSliderSelector, ItemList, LoadingCover, MapPopup, MenuBar, PageContainer, ScrollContainer, TextDropdown, TextHeader, TextInfoPopup, TextInputPopup, ToggleSwitch } from "../HelperFiles/CompIndex";
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 import { FlatList, TouchableWithoutFeedback } from "react-native-gesture-handler";
 import DraggableFlatList, { RenderItemParams} from "react-native-draggable-flatlist";
@@ -81,6 +81,9 @@ export default class BusinessEditProductPage extends CustomComponent<BusinessEdi
         newProduct = {
           ...newProduct,
           ...product
+        }
+        if (!this.props.businessFuncs.checkProductValidity(newProduct)) {
+          newProduct.isVisible = false
         }
         let stateUpdate: Partial<State> = {
           ...stateUpdates,
@@ -230,9 +233,27 @@ export default class BusinessEditProductPage extends CustomComponent<BusinessEdi
             fadeTop={false}
             ref={(scrollContainer) => {this.scrollContainer = scrollContainer}}
           >
+            {/* --- TOGGLE VISIBILITY --- */}
+            <ToggleSwitch
+              text={"Publicly visible"}
+              onToggle={(value) => this.updateProduct({isVisible: value})}
+              switchProps={{
+                value: this.state.productData.isVisible,
+                disabled: !this.props.businessFuncs.checkProductValidity(this.state.productData)
+              }}
+            >
+              <IconButton
+                iconSource={icons.info}
+                buttonStyle={{width: "8%"}}
+                buttonFunc={() => {
+                  this.setState({infoPopupText: "When you enable visibility for a product, it is shown publicly on your business page. Disable visibility to hide a product."})
+                }}
+              />
+            </ToggleSwitch>
             {/* --- IMAGES --- */}
             <ImageSliderSelector
               uris={this.state.productData ? this.state.productData.images : []}
+              showWarning={true}
               onChange={(uris) => this.updateProduct({images: uris.all})}
               onImagesLoaded={() => {
                 this.setState({imagesLoaded: true})
@@ -240,15 +261,18 @@ export default class BusinessEditProductPage extends CustomComponent<BusinessEdi
             ></ImageSliderSelector>
             {/* --- NAME --- */}
             <TextInputBox
+              boxStyle={{
+                borderColor: this.state.productData.name === "" ? colors.invalidColor : colors.lighterGrayColor
+              }}
               textProps={{
-                  defaultValue: this.state.productData?.name,
+                  defaultValue: this.state.productData.name,
                   placeholder: "Product Name",
                   onChangeText: (text) => this.updateProduct({name: text})
               }}
             ></TextInputBox>
            {/* --- DESCRIPTION --- */}
             <TextInputBox
-              style={{height: styleValues.winWidth*0.25}}
+              boxStyle={{height: styleValues.winWidth*0.25}}
               textStyle={{fontSize: styleValues.smallerTextSize}}
               textProps={{
                   defaultValue: this.state.productData?.description,

@@ -52,14 +52,29 @@ export default class ScrollContainer extends CustomComponent<Props, State> {
                         )}
                         contentContainerStyle={StyleSheet.compose({
                                 padding: styleValues.mediumPadding,
-                                paddingBottom: menuBarHeight + styleValues.mediumPadding*2
+                                paddingBottom: !this.props.horizontal ? menuBarHeight + styleValues.mediumPadding*2 : undefined,
                             },
                             this.props.contentContainerStyle
                         )}
                     >
                         <View
+                            style={{
+                                position: "absolute",
+                                top: 0,
+                                bottom: 0,
+                                left: 0,
+                                right: 0
+                            }}
                             onStartShouldSetResponder={() => (true)}
-                            style={{alignItems: "center"}}
+                        />
+                        <View
+                            onStartShouldSetResponder={() => (true)}
+                            style={{
+                                height: "100%",
+                                width: "100%",
+                                alignItems: "center",
+                                flexDirection: this.props.horizontal ? "row" : "column"
+                            }}
                         >
                             {this.props.children}
                         </View>

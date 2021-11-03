@@ -74,21 +74,30 @@ export default class ImageSlider extends CustomComponent<Props, State> {
     renderImage(item: ImageInfo) {
         return (
             <TouchableWithoutFeedback>
-                <Image
-                    source={{uri: item.uri}}
-                    resizeMethod={"scale"}
-                    resizeMode={"cover"}
-                    style={{width: item.ratio * this.state.galleryHeight, height: this.state.galleryHeight, borderRadius: styleValues.mediumPadding,}}
-                    onLoadEnd={() => {
-                        if (this.props.onImagesLoaded) {
-                            this.loadCount += 1
-                            if (this.loadCount === this.state.images.length) {
-                                this.props.onImagesLoaded()
-                                this.loadCount = 0
+                <View style={{
+                    ...defaults.smallShadow,
+                    marginVertical: styleValues.mediumPadding
+                    }}>
+                    <Image
+                        source={{uri: item.uri}}
+                        resizeMethod={"scale"}
+                        resizeMode={"cover"}
+                        style={{
+                            width: item.ratio * this.state.galleryHeight,
+                            height: this.state.galleryHeight,
+                            borderRadius: styleValues.mediumPadding,
+                        }}
+                        onLoadEnd={() => {
+                            if (this.props.onImagesLoaded) {
+                                this.loadCount += 1
+                                if (this.loadCount === this.state.images.length) {
+                                    this.props.onImagesLoaded()
+                                    this.loadCount = 0
+                                }
                             }
-                        }
-                    }}
-                />
+                        }}
+                    />
+                </View>
             </TouchableWithoutFeedback>
         )
     }
@@ -98,7 +107,7 @@ export default class ImageSlider extends CustomComponent<Props, State> {
         if (imagesToRender.length > 0) {
             return (
                 <FlatList
-                    style={[styles.gallery, {height: this.state.galleryHeight}]}
+                    style={[styles.gallery]}
                     data={imagesToRender}
                     keyExtractor={(item) => (item.uri)}
                     renderItem={({item}) => this.renderImage(item)}
@@ -140,8 +149,6 @@ export default class ImageSlider extends CustomComponent<Props, State> {
                 <View 
                     style={{...{
                         width: styleValues.winWidth,
-                        height: this.state.galleryHeight,
-                        marginBottom: styleValues.mediumPadding
                     }, ...this.props.style}}
                 >
                     {this.renderGallery()}

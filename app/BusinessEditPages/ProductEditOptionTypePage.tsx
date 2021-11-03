@@ -227,7 +227,7 @@ export default class ProductEditOptionTypePage extends CustomComponent<ProductEd
           }}
         >
             <TextInputBox
-            style={{width: styleValues.winWidth - 2*styleValues.mediumPadding, marginTop: styleValues.mediumPadding*2}}
+            boxStyle={{width: styleValues.winWidth - 2*styleValues.mediumPadding, marginTop: styleValues.mediumPadding*2}}
               textProps={{
                   defaultValue: this.state.optionType.name,
                   placeholder: "Option type name",

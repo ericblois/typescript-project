@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import CustomComponent from "./CustomComponent"
 import { TouchableOpacity, Image, StyleSheet, ViewStyle, GestureResponderEvent, ImageStyle, View, Text } from "react-native";
+import { Badge } from "react-native-elements"
 import { defaults, textStyles, buttonStyles, styleValues, colors } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
 import { Icon } from "react-native-elements";
@@ -14,6 +15,8 @@ type IconButtonProps = {
   buttonProps?: TouchableOpacity['props']
   iconProps?: Partial<Image['props']>,
   showLoading?: boolean,
+  showBadge?: boolean,
+  badgeNumber?: number,
   infoProps?: {
     text: string,
     positionHorizontal?: "center" | "left" | "right",
@@ -82,41 +85,57 @@ export default class IconButton extends CustomComponent<IconButtonProps, State> 
     return (
       <View style={[defaults.iconButton, this.props.buttonStyle]}>
         <TouchableOpacity
-        onPress={async () => {
-          if (this.props.buttonFunc) {
-            if (this.props.showLoading === true) {
-              this.setState({showLoading: true})
+          onPress={async () => {
+            if (this.props.buttonFunc) {
+              if (this.props.showLoading === true) {
+                this.setState({showLoading: true})
+              }
+              await this.props.buttonFunc()
+              if (this.props.showLoading === true) {
+                this.setState({showLoading: false})
+              }
             }
-            await this.props.buttonFunc()
-            if (this.props.showLoading === true) {
-              this.setState({showLoading: false})
-            }
+          }}
+          onLongPress={() => this.setState({showInfo: true})}
+          onPressOut={() => this.setState({showInfo: false})}
+          {...this.props.buttonProps}
+        >
+          {!this.state.showLoading ? 
+            <Image
+              style={{
+                ...defaults.iconImage,
+                ...this.props.iconStyle
+              }}
+              resizeMethod={"scale"}
+              resizeMode={"contain"}
+              source={this.props.iconSource}
+              {...this.props.iconProps}
+            /> :
+            <LoadingCover
+              size={"small"}
+              style={{
+                backgroundColor: "transparent"
+              }}
+            />
           }
-        }}
-        onLongPress={() => this.setState({showInfo: true})}
-        onPressOut={() => this.setState({showInfo: false})}
-        {...this.props.buttonProps}
-      >
-        {!this.state.showLoading ? 
-          <Image
-            style={{
-              ...defaults.iconImage,
-              ...this.props.iconStyle
-            }}
-            resizeMethod={"scale"}
-            resizeMode={"contain"}
-            source={this.props.iconSource}
-            {...this.props.iconProps}
-          /> :
-          <LoadingCover
-            size={"small"}
-            style={{
-              backgroundColor: "transparent"
-            }}
-          />
+        </TouchableOpacity>
+        {/* Icon Badge */}
+        {this.props.showBadge === true ? 
+          <View style={{
+            position: "absolute",
+            height: styleValues.smallTextSize*4/3,
+            minWidth: styleValues.smallTextSize*4/3,
+            borderRadius: styleValues.smallTextSize*4/3,
+            top: -styleValues.minorPadding,
+            right: -styleValues.minorPadding,
+            backgroundColor: colors.mainColor,
+            alignItems: "center",
+            justifyContent: "center"
+          }}>
+            <Text style={{...textStyles.smaller, color: colors.whiteColor, marginHorizontal: styleValues.minorPadding}}>{`${this.props.badgeNumber}`}</Text>
+          </View> : undefined
         }
-      </TouchableOpacity>
-      {this.renderInfo()}
+        {this.renderInfo()}
       </View>
     )
   }

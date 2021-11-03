@@ -107,6 +107,7 @@ export const styleValues = {
   majorTextColor: "#000",
   minorTextColor: "#777",
 };
+// A Text's height will be 1.333x its font size
 
 const defaultTemplates = StyleSheet.create({
   text: {
@@ -357,10 +358,11 @@ export const defaults = StyleSheet.create({
   },
   dropdownContainer: {
     width: "100%",
+    height: styleValues.winWidth*0.1,
     backgroundColor: "#fff",
     borderWidth: styleValues.minorBorderWidth,
     borderRadius: styleValues.bordRadius,
-    borderColor: colors.darkColor,
+    borderColor: colors.lighterGrayColor,
     marginBottom: styleValues.mediumPadding,
     alignItems: "center",
     justifyContent: "center",
@@ -400,5 +402,7 @@ export const icons = {
   image: require("../../assets/imageIcon.png"),
   trash: require("../../assets/trashIcon.png"),
   info: require("../../assets/infoIcon.png"),
-  cross: require("../../assets/crossIcon.png")
+  cross: require("../../assets/crossIcon.png"),
+  exclamation: require("../../assets/exclamationIcon.png"),
+  shoppingBag: require("../../assets/shoppingBagIcon.png")
 }

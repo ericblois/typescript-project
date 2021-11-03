@@ -9,6 +9,7 @@ import RatingVisual from "./RatingVisual";
 import { useNavigation } from "@react-navigation/native";
 import { ProductData } from "../HelperFiles/DataTypes";
 import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
+import LoadingCover from "./LoadingCover";
 
 type Props = {
     businessID: string,
@@ -34,14 +35,19 @@ export default class ProductCard extends CustomComponent<Props, State> {
         }
     }
 
-    componentDidMount() {
+    refreshData() {
         CustomerFunctions.getProduct(this.props.businessID, this.props.productID).then((productData) => {
             let totalRating = 0;
             productData.ratings.forEach((num) => {
                 totalRating += num
             })
-            this.setState({productData: productData, totalRating: totalRating / productData.ratings.length})
+            const isImage = productData.images.length > 0
+            this.setState({productData: productData, totalRating: totalRating / productData.ratings.length, imageLoaded: !isImage})
         })
+    }
+
+    componentDidMount() {
+        this.refreshData()
     }
 
     renderUI() {
@@ -74,13 +80,13 @@ export default class ProductCard extends CustomComponent<Props, State> {
                     <Text style={styles.productName}>{this.state.productData.name}</Text>
                     <Text
                     style={styles.productDescription}
-                    numberOfLines={3}
+                    numberOfLines={2}
                     >
                         {this.state.productData.description}
                     </Text>
                     <View style={styles.productSubInfoArea}>
-                        <Text style={styles.productPrice}>{this.state.productData.price ? currencyFormatter.format(this.state.productData.price) : "No price"}</Text>
                         <RatingVisual rating={this.state.totalRating} height={styleValues.smallTextSize}/>
+                        <Text style={styles.productPrice}>{this.state.productData.price ? currencyFormatter.format(this.state.productData.price) : "No price"}</Text>
                     </View>
                 </View>
             </TouchableOpacity>
@@ -91,30 +97,24 @@ export default class ProductCard extends CustomComponent<Props, State> {
     renderLoading() {
         if (this.state.productData === undefined || !this.state.imageLoaded) {
             return (
-                <View style={{
-                    position: "absolute",
-                    width: "100%",
-                    height: "100%",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: colors.whiteColor
-                }}>
-                    <ActivityIndicator size={"small"}/>
-                </View>
+                <LoadingCover style={{backgroundColor: colors.whiteColor}}/>
             )
         }
     }
 
     render() {
-        return (
-            <View style={{
-                ...styles.cardContainer,
-                ...defaults.smallShadow
-            }}>
-                {this.renderUI()}
-                {this.renderLoading()}
-            </View>
-        )
+        if (this.state.productData?.isVisible === true) {
+            return (
+                <View style={{
+                    ...styles.cardContainer,
+                    ...defaults.smallShadow
+                }}>
+                    {this.renderUI()}
+                    {this.renderLoading()}
+                </View>
+            )
+        }
+        return (<></>)
     }
 }
 
@@ -124,16 +124,16 @@ const styles = StyleSheet.create({
         borderRadius: styleValues.bordRadius,
         height: styleValues.winWidth * 0.3,
         width: styleValues.winWidth - styleValues.mediumPadding*2,
-        marginTop: styleValues.mediumPadding,
-        padding: styleValues.minorPadding,
+        marginBottom: styleValues.mediumPadding,
+        padding: styleValues.mediumPadding,
         flexDirection: "row",
         alignItems: "center",
     },
     productImage: {
         height: "100%",
         aspectRatio: 1,
-        borderRadius: styleValues.minorPadding,
-        marginRight: styleValues.minorPadding
+        borderRadius: styleValues.bordRadius,
+        marginRight: styleValues.mediumPadding
     },
     productInfoArea: {
         height: "100%",
@@ -144,9 +144,9 @@ const styles = StyleSheet.create({
         textAlign: "left",
     },
     productDescription: {
-        ...textStyles.small,
+        ...textStyles.smaller,
         textAlign: "left",
-        color: styleValues.minorTextColor
+        color: styleValues.minorTextColor,
     },
     productPrice: {
         ...textStyles.medium

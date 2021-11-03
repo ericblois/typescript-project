@@ -19,6 +19,7 @@ type ImageInfo = {
 type Props = {
     uris: string[],
     style?: ViewStyle,
+    showWarning?: boolean,
     onChange?: (uris: {
         all: string[],
         new: string[],
@@ -148,7 +149,12 @@ export default class ImageSliderSelector extends CustomComponent<Props, State> {
     renderImage(item: ImageInfo) {
         return (
             <TouchableWithoutFeedback>
-                <View>
+                <View style={
+                    {
+                        ...defaults.smallShadow,
+                        marginVertical: styleValues.mediumPadding
+                    }
+                }>
                 <Image
                     source={{uri: item.uri}}
                     resizeMethod={"scale"}
@@ -201,7 +207,7 @@ export default class ImageSliderSelector extends CustomComponent<Props, State> {
         if (imagesToRender.length > 0) {
             return (
                 <FlatList
-                    style={[styles.gallery, {height: this.state.galleryHeight}]}
+                    style={styles.gallery}
                     data={imagesToRender}
                     keyExtractor={(item) => (item.uri)}
                     renderItem={({item}) => this.renderImage(item)}
@@ -223,9 +229,19 @@ export default class ImageSliderSelector extends CustomComponent<Props, State> {
                     borderRadius: styleValues.bordRadius,
                     alignItems: "center",
                     justifyContent: "center",
+                    flexDirection: "row"
                 }]}>
+                    {this.props.showWarning === true ? <Image
+                        source={icons.exclamation}
+                        style={{
+                            width: styleValues.iconMediumSize,
+                            height: styleValues.iconMediumSize,
+                            marginRight: styleValues.mediumPadding,
+                            tintColor: colors.invalidColor
+                        }}
+                    /> : undefined}
                     <Text style={{...textStyles.small, ...{
-                        color: colors.darkGrayColor,
+                        color: this.props.showWarning === true ? colors.invalidColor : colors.darkGrayColor,
                     }}}>
                         There are no images to show.
                     </Text>
@@ -260,8 +276,6 @@ export default class ImageSliderSelector extends CustomComponent<Props, State> {
             <View 
                 style={{...{
                     width: styleValues.winWidth,
-                    height: this.state.galleryHeight,
-                    marginBottom: styleValues.mediumPadding
                 }, ...this.props.style}}
             >
                 {this.renderGallery()}
@@ -282,7 +296,7 @@ const styles = StyleSheet.create({
         height: styleValues.iconLargeSize,
         position: "absolute",
         margin: styleValues.mediumPadding,
-        bottom: 0,
+        bottom: styleValues.mediumPadding,
         left: styleValues.mediumPadding,
     },
     headerIcon: {

@@ -7,9 +7,10 @@ import { auth } from "../HelperFiles/Constants";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
 import { BusinessEditStackParamList, BusinessMainStackParamList, RootStackParamList } from "../HelperFiles/Navigation"
-import { ImageProfileSelector, TextButton, MenuBar, PageContainer } from "../HelperFiles/CompIndex";
+import { ImageProfileSelector, TextButton, MenuBar, PageContainer, LoadingCover, TextHeader } from "../HelperFiles/CompIndex";
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 import UserFunctions from "../HelperFiles/UserFunctions";
+import { PublicBusinessData } from "../HelperFiles/DataTypes";
 
 type BusinessEditMainNavigationProp = CompositeNavigationProp<
   CompositeNavigationProp<
@@ -28,74 +29,129 @@ type BusinessEditMainProps = {
 }
 
 type State = {
+  publicData?: PublicBusinessData
 }
 
 export default class BusinessEditMainPage extends CustomComponent<BusinessEditMainProps, State> {
 
+  constructor(props: BusinessEditMainProps) {
+    super(props)
+    this.state = {
+      publicData: undefined
+    }
+    props.navigation.addListener("focus", () => this.refreshData())
+    this.refreshData()
+  }
+
+  async refreshData() {
+    const newPublicData = await this.props.businessFuncs.getPublicData()
+    this.setState({publicData: newPublicData})
+  }
+
+  renderUI() {
+    if (this.state.publicData) {
+      const infoValid = this.props.businessFuncs.checkInfoValidity(this.state.publicData)
+      const productsValid = this.props.businessFuncs.checkProductsValidity(this.state.publicData)
+      const locationValid = this.props.businessFuncs.checkLocationValidity(this.state.publicData)
+      return (
+        <View
+          style={{
+            width: "100%",
+            paddingTop: defaults.textHeaderBox.height + styleValues.mediumPadding,
+            alignItems: "center"
+          }}
+        >
+          <ImageProfileSelector
+          ></ImageProfileSelector>
+          <TextButton
+              text={"Edit your info page"}
+              buttonStyle={buttonStyles.noColor}
+              leftIconSource={infoValid ? icons.checkBox : icons.cross}
+              leftIconStyle={{
+                tintColor: infoValid ? colors.validColor : colors.invalidColor
+              }}
+              rightIconSource={icons.chevron}
+              rightIconStyle={{transform: [{scaleX: -1}]}}
+              buttonFunc={() => {
+                  this.props.navigation.navigate("editInfo")
+              }}
+          ></TextButton>
+          <TextButton
+              text={"Edit your products / services"}
+              buttonStyle={buttonStyles.noColor}
+              textStyle={{fontSize: styleValues.smallTextSize}}
+              leftIconSource={productsValid ? icons.checkBox : icons.cross}
+              leftIconStyle={{
+                tintColor: productsValid ? colors.validColor : colors.invalidColor
+              }}
+              rightIconSource={icons.chevron}
+              rightIconStyle={{transform: [{scaleX: -1}]}}
+              buttonFunc={() => {
+                this.props.navigation.navigate("editProductList")
+            }}
+          ></TextButton>
+          <TextButton
+              text={"Location & delivery options"}
+              buttonStyle={buttonStyles.noColor}
+              textStyle={{fontSize: styleValues.smallTextSize}}
+              leftIconSource={locationValid ? icons.checkBox : icons.cross}
+              leftIconStyle={{
+                tintColor: locationValid ? colors.validColor : colors.invalidColor
+              }}
+              rightIconSource={icons.chevron}
+              rightIconStyle={{transform: [{scaleX: -1}]}}
+              buttonFunc={() => {
+                this.props.navigation.navigate("editLocation")
+              }}
+          ></TextButton>
+          <TextButton
+              text={"Delete this business"}
+              buttonStyle={buttonStyles.noColor}
+              textStyle={{fontSize: styleValues.smallTextSize, color: "red"}}
+              buttonFunc={async () => {
+                await UserFunctions.deleteBusiness(this.props.businessFuncs.businessID)
+                this.props.navigation.navigate("customerMain")
+              }}
+              showLoading={true}
+          ></TextButton>
+          <TextHeader>Your Business Page</TextHeader>
+        </View>
+      );
+    }
+  }
+
+  renderLoading() {
+    if (!this.state.publicData) {
+      return (
+        <LoadingCover size={"large"}/>
+      )
+    }
+  }
+
   render() {
     return (
       <PageContainer>
-        <Text style={{...textStyles.large, ...{marginBottom: styleValues.mediumPadding}}}>Your Business Page</Text>
-        <ImageProfileSelector></ImageProfileSelector>
-        <TextButton
-            text={"Edit your info page"}
-            buttonStyle={buttonStyles.noColor}
-            textStyle={{}}
-            rightIconSource={icons.chevron}
-            rightIconStyle={{transform: [{scaleX: -1}]}}
-            buttonFunc={() => {
-                this.props.navigation.navigate("editInfo")
-            }}
-        ></TextButton>
-        <TextButton
-            text={"Edit your products / services"}
-            buttonStyle={buttonStyles.noColor}
-            textStyle={{fontSize: styleValues.smallTextSize}}
-            rightIconSource={icons.chevron}
-            rightIconStyle={{transform: [{scaleX: -1}]}}
-            buttonFunc={() => {
-              this.props.navigation.navigate("editProductList")
-          }}
-        ></TextButton>
-        <TextButton
-            text={"Location & delivery options"}
-            buttonStyle={buttonStyles.noColor}
-            textStyle={{fontSize: styleValues.smallTextSize}}
-            rightIconSource={icons.chevron}
-            rightIconStyle={{transform: [{scaleX: -1}]}}
-            buttonFunc={() => {
-              this.props.navigation.navigate("editLocation")
-            }}
-        ></TextButton>
-        <TextButton
-            text={"Delete this business"}
-            buttonStyle={buttonStyles.noColor}
-            textStyle={{fontSize: styleValues.smallTextSize, color: "red"}}
-            buttonFunc={async () => {
-              await UserFunctions.deleteBusiness(this.props.businessFuncs.businessID)
-              this.props.navigation.navigate("customerMain")
-            }}
-            showLoading={true}
-        ></TextButton>
+        {this.renderUI()}
+        {this.renderLoading()}
         <MenuBar
-            buttonProps={[
-                {
-                  iconSource: icons.store,
-                  buttonFunc: () => {this.props.navigation.navigate("businessEdit")},
-                  iconStyle: {tintColor: colors.mainColor}
-                },
-                {
-                    iconSource: icons.document,
-                    buttonFunc: () => {this.props.navigation.navigate("orders")},
-                },
-                {
-                  iconSource: icons.profile,
-                  buttonFunc: () => {this.props.navigation.navigate("account")}
-                },
-            ]}
+          buttonProps={[
+              {
+                iconSource: icons.store,
+                buttonFunc: () => {this.props.navigation.navigate("businessEdit")},
+                iconStyle: {tintColor: colors.mainColor}
+              },
+              {
+                  iconSource: icons.document,
+                  buttonFunc: () => {this.props.navigation.navigate("orders")},
+              },
+              {
+                iconSource: icons.profile,
+                buttonFunc: () => {this.props.navigation.navigate("account")}
+              },
+          ]}
         />
       </PageContainer>
-    );
+    )
   }
 }
 

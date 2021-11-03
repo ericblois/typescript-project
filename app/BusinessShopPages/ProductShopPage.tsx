@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, Image, Text, StyleSheet, ActivityIndicator, ScrollView, SafeAreaView } from "react-native";
-
+import { TextButton, TextDropdownAnimated } from "../HelperFiles/CompIndex"
 import PropTypes from 'prop-types';
-import { styleValues, colors, defaults, textStyles, buttonStyles, icons } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, textStyles, buttonStyles, icons, menuBarHeight } from "../HelperFiles/StyleSheet";
 import { ImageSlider, RatingVisual, MenuBar, IconButton, PageContainer, ScrollContainer, TextDropdown } from "../HelperFiles/CompIndex";
 import { productPropType, formatText, currency } from "../HelperFiles/Constants";
 import DropDownPicker from 'react-native-dropdown-picker';
@@ -12,6 +12,8 @@ import { BusinessShopStackParamList, CustomerMainStackParamList } from "../Helpe
 import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
 import { CartItem, OptionSelections, ProductData, ProductOptionType, PublicBusinessData } from "../HelperFiles/DataTypes";
 import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import ProductEditOptionTypePage from "../BusinessEditPages/ProductEditOptionTypePage";
 
 type ProductShopNavigationProp = CompositeNavigationProp<
     StackNavigationProp<BusinessShopStackParamList, "productInfo">,
@@ -29,7 +31,8 @@ type State = {
     productData?: ProductData,
     imagesLoaded: boolean,
     optionSelections: OptionSelections,
-    quantity: number,
+    cartQuantity: number,
+    productQuantity: number
 }
 
 export default class ProductShopPage extends CustomComponent<Props, State> {
@@ -40,17 +43,22 @@ export default class ProductShopPage extends CustomComponent<Props, State> {
             productData: undefined,
             imagesLoaded: false,
             optionSelections: {},
-            quantity: 1,
+            cartQuantity: 0,
+            productQuantity: 1
         }
         props.navigation.addListener("focus", () => this.refreshData())
     }
 
-    refreshData() {
-        CustomerFunctions.getProduct(
+    async refreshData() {
+        const productData = await CustomerFunctions.getProduct(
             this.props.route.params.businessID,
-            this.props.route.params.productID).then((productData) => {
-                this.setState({productData: productData})
+            this.props.route.params.productID
+        )
+        const cartItem = (await CustomerFunctions.getCart()).find((item) => {
+            return item.businessID == productData.businessID && item.productID == productData.productID
         })
+        const quantity = cartItem ? cartItem.quantity : 0
+        this.setState({productData: productData, cartQuantity: quantity})
     }
 
     componentDidMount() {
@@ -118,28 +126,130 @@ export default class ProductShopPage extends CustomComponent<Props, State> {
         }
     }
 
+    renderQuantity() {
+        return (
+            <View style={{
+                width: "100%",
+                alignItems: "center",
+                justifyContent: "center",
+                flexDirection: "row"
+            }}>
+                <IconButton
+                    iconSource={icons.minus}
+                    buttonStyle={{
+                        width: styleValues.winWidth*0.075,
+                        aspectRatio: 1,
+                    }}
+                    buttonFunc={async () => {
+                        if (this.state.productQuantity > 0) {
+                            this.setState({productQuantity: this.state.productQuantity - 1})
+                        }
+                    }}
+                />
+                <Text
+                    style={{
+                        ...textStyles.large,
+                        flex: 0.1
+                    }}
+                >{this.state.productQuantity}</Text>
+                <IconButton
+                    iconSource={icons.plus}
+                    buttonStyle={{
+                        width: styleValues.winWidth*0.075,
+                        aspectRatio: 1
+                    }}
+                    buttonFunc={async () => {
+                        if (this.state.productQuantity < 99) {
+                            this.setState({productQuantity: this.state.productQuantity + 1})
+                        }
+                    }}
+                />
+            </View>
+        )
+    }
+
+    renderAddButton() {
+        let barText = `Add ${this.state.productQuantity} to cart`
+        if (this.state.cartQuantity > 0) {
+            barText += ` (${this.state.cartQuantity})`
+        }
+        if (this.state.productQuantity > 0 && this.checkOptions()) {
+            return (
+                <TextButton
+                    text={barText}
+                    buttonStyle={styles.cartButton}
+                    appearance={"color"}
+                    showLoading={true}
+                    buttonFunc={async () => {
+                        if (this.state.productData && this.state.productData.price) {
+                            let totalPrice = this.state.productData.price
+                            for (const selection of Object.values(this.state.optionSelections)) {
+                                totalPrice += selection.priceChange
+                            }
+                            let newSelections: OptionSelections = {}
+                            // Make sure the cart item's option selections are in the same order as the product's option types
+                            this.state.productData.optionTypes.forEach((optionType) => {
+                                newSelections[optionType.name] = this.state.optionSelections[optionType.name]
+                            })
+                            const cartItem: CartItem = {
+                                businessID: this.state.productData.businessID,
+                                productID: this.state.productData.productID,
+                                productOptions: newSelections,
+                                basePrice: this.state.productData.price,
+                                totalPrice: totalPrice,
+                                quantity: this.state.productQuantity
+                            }
+                            await CustomerFunctions.addToCart(cartItem)
+                            this.props.navigation.goBack()
+                        }
+                    }}
+                />
+            )
+        }
+    }
+
     renderUI() {
         if (this.state.productData) {
             return (
-                <ScrollContainer>
-                    <ImageSlider
-                        uris={this.state.productData.images}
-                        onImagesLoaded={() => {
-                            this.setState({imagesLoaded: true})
-                        }}
-                    ></ImageSlider>
-                    <View style={styles.descriptionHeader}>
-                        <Text style={styles.productTitle} numberOfLines={2}>{this.state.productData.name}</Text>
-                        <View style={styles.subHeader}>
-                            <Text style={styles.productType}>{this.state.productData.category}</Text>
-                            <RatingVisual rating={4}/>
+                <>
+                    <ScrollContainer>
+                        <ImageSlider
+                            uris={this.state.productData.images}
+                            onImagesLoaded={() => {
+                                this.setState({imagesLoaded: true})
+                            }}
+                        ></ImageSlider>
+                        <View style={styles.descriptionHeader}>
+                            <Text style={styles.productTitle} numberOfLines={2}>{this.state.productData.name}</Text>
+                            <View style={styles.subHeader}>
+                                <Text style={styles.productType}>{this.state.productData.category}</Text>
+                                <RatingVisual rating={4}/>
+                            </View>
                         </View>
-                    </View>
-                    <View style={styles.descriptionBody}>
-                        <Text style={styles.description}>{formatText(this.state.productData.description)}</Text>
-                    </View>
-                    {this.renderOptions()}
-                </ScrollContainer>
+                        <View style={styles.descriptionBody}>
+                            <Text style={styles.description}>{formatText(this.state.productData.description)}</Text>
+                        </View>
+                        <TextDropdownAnimated
+                            placeholderText={"Select"}
+                            items={[
+                                {
+                                    text: "First",
+                                    value: 1
+                                }, {
+                                    text: "Second",
+                                    value: 1
+                                }, {
+                                    text: "Third",
+                                    value: 1
+                                }
+                            ]}
+                        />
+                        {this.renderOptions()}
+                        {/* Quantity buttons */}
+                        {this.renderQuantity()}
+                    </ScrollContainer>
+                    {this.renderAddButton()}
+                </>
             )
         }
     }
@@ -171,33 +281,12 @@ export default class ProductShopPage extends CustomComponent<Props, State> {
             <MenuBar
                 buttonProps={[
                     {iconSource: icons.backArrow, buttonFunc: () => this.props.navigation.goBack()},
-                    {iconSource: icons.plus, buttonFunc: () => {
-                        if (this.state.productData && this.state.productData.price) {
-                            let totalPrice = this.state.productData.price
-                            for (const selection of Object.values(this.state.optionSelections)) {
-                                totalPrice += selection.priceChange
-                            }
-                            let newSelections: OptionSelections = {}
-                            // Make sure the cart item's option selections are in the same order as the product's option types
-                            this.state.productData.optionTypes.forEach((optionType) => {
-                                newSelections[optionType.name] = this.state.optionSelections[optionType.name]
-                            })
-                            const cartItem: CartItem = {
-                                businessID: this.state.productData.businessID,
-                                productID: this.state.productData.productID,
-                                productOptions: newSelections,
-                                basePrice: this.state.productData.price,
-                                totalPrice: totalPrice,
-                                quantity: this.state.quantity
-                            }
-                            CustomerFunctions.addToCart(cartItem)
-                        }
-                    }, buttonProps: {
-                        disabled: !this.checkOptions(),
-                    }, iconStyle: {
-                        tintColor: this.checkOptions() ? colors.darkGrayColor : colors.lightGrayColor
-                    }},
-                    {iconSource: icons.shoppingCart, buttonFunc: () => this.props.navigation.navigate("cart")},
+                    {
+                        iconSource: icons.shoppingCart,
+                        showBadge: this.state.cartQuantity > 0,
+                        badgeNumber: this.state.cartQuantity,
+                        buttonFunc: () => this.props.navigation.navigate("cart")
+                    },
                 ]}
             />
         </PageContainer>
@@ -272,5 +361,9 @@ const styles = StyleSheet.create({
         borderWidth: 0,
         height: "100%",
         width: "100%",
+    },
+    cartButton: {
+        position: "absolute",
+        bottom: menuBarHeight + styleValues.mediumPadding
     }
-});
+})

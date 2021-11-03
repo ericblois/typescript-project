@@ -35,6 +35,50 @@ export class BusinessFunctions {
         }
     }
 
+    public checkInfoValidity(publicData: PublicBusinessData) {
+        if (
+            publicData.name === ""
+         || publicData.businessType === ""
+         || publicData.description === ""
+            ) {
+            return false
+        }
+        return true
+    }
+
+    public checkProductsValidity(publicData: PublicBusinessData) {
+        if (
+            publicData.productList.length < 1
+         || publicData.productList[0].productIDs.length < 1
+        ) {
+            return false
+        }
+        return true
+    }
+
+    public checkLocationValidity(publicData: PublicBusinessData) {
+        if (
+            publicData.region === ""
+         || publicData.country === ""
+            ) {
+            return false
+        }
+        return true
+    }
+
+    public checkProductValidity(productData: ProductData) {
+        if (
+            productData.name === ""
+         || productData.category === ""
+         || productData.images.length < 1
+         || productData.productID === ""
+         || productData.businessID === ""
+        ) {
+            return false
+        }
+        return true
+    }
+
     public async getPrivateData() {
         try {
             const userID = UserFunctions.getCurrentUser().uid
@@ -133,7 +177,6 @@ export class BusinessFunctions {
             await this.deleteImages(deletedImages)
             this.hasUpdatedPublic = true
             const updateData = {
-                businessID: this.businessID,
                 publicData: data
             }
             const updatePublicBusinessData = functions.httpsCallable("updatePublicBusinessData")
