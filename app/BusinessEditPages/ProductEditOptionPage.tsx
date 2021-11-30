@@ -161,7 +161,7 @@ export default class ProductEditOptionPage extends CustomComponent<ProductEditOp
           <View style={{flexDirection: "row", alignItems: "center", justifyContent: "space-between"}}>
             <Text style={{...textStyles.medium, width: "30%"}}>Amount:</Text>
             <TextInputBox
-              style={{width: "70%"}}
+              boxStyle={{width: "70%"}}
               textProps={{
                 value: this.state.editPriceMode ? this.state.priceChangeText : currencyFormatter.format(this.state.option!.priceChange),
                 keyboardType: "numeric",

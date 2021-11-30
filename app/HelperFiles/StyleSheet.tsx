@@ -238,6 +238,13 @@ export const tabBarStyles = StyleSheet.create({
 })
 
 export const defaults = StyleSheet.create({
+  roundedBox: {
+    width: "100%",
+    borderRadius: styleValues.bordRadius,
+    backgroundColor: colors.whiteColor,
+    padding: styleValues.mediumPadding,
+    marginBottom: styleValues.mediumPadding
+  },
   screenContainer: {
     paddingTop: topInset,
     paddingBottom: bottomInset,

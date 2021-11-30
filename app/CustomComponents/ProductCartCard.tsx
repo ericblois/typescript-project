@@ -65,24 +65,40 @@ export default class ProductCartCard extends CustomComponent<Props, State> {
         if (this.state.productData) {
             let optionRows: JSX.Element[] = []
             // Iterate through this product's option types to ensure option selections show up in order
-            this.state.productData.optionTypes.forEach((optionType) => {
-                const currentOption = this.state.cartItem.productOptions[optionType.name]
-                if (currentOption) {
+            for (const optionType of this.state.productData.optionTypes) {
+                const selections = this.state.cartItem.productOptions[optionType.name]
+                if (selections && selections.length > 0) {
                     optionRows.push((
                         <View
                             style={styles.textRow}
                             key={optionType.name}
                         >
                             <Text
-                                style={styles.optionText}
-                            >{currentOption.optionName}</Text>
-                            <Text
-                                style={styles.optionPriceText}
-                            >{currentOption.priceChange !== 0 ? currencyFormatter.format(currentOption.priceChange) : ""}</Text>
+                                style={styles.optionTypeText}
+                            >{`${optionType.name}: `}</Text>
+                            <View style={{flex: 1}}>
+                                {selections.map((selection, index) => {
+                                    return (
+                                        <View
+                                            style={{flexDirection: "row", width: "100%"}}
+                                            key={index.toString()}
+                                        >
+                                            {/* Option Name */}
+                                            <Text
+                                                style={styles.optionNameText}
+                                            >{selection.optionName}</Text>
+                                            {/* Option Price */}
+                                            <Text
+                                                style={styles.optionPriceText}
+                                            >{selection.priceChange !== 0 ? currencyFormatter.format(selection.priceChange) : ""}</Text>
+                                        </View>
+                                    )
+                                })}
+                            </View>
                         </View>
                     ))
                 }
-            })
+            }
             return optionRows
         }
     }
@@ -101,13 +117,14 @@ export default class ProductCartCard extends CustomComponent<Props, State> {
                     <IconButton
                         iconSource={icons.trash}
                         buttonStyle={styles.deleteButton}
-                        buttonFunc={() => {
-                            CustomerFunctions.deleteCartItem(this.state.cartItem).then(() => {
+                        buttonFunc={async () => {
+                            await CustomerFunctions.deleteCartItem(this.state.cartItem).then(() => {
                                 if (this.props.onDelete) {
                                     this.props.onDelete()
                                 }
                             })
                         }}
+                        showLoading={true}
                     />
                     <IconButton
                         iconSource={icons.minus}
@@ -116,15 +133,20 @@ export default class ProductCartCard extends CustomComponent<Props, State> {
                             aspectRatio: 1,
                         }}
                         buttonFunc={async () => {
-                            if (this.state.cartItem.quantity > 0) {
+                            if (this.state.cartItem.quantity > 1) {
                                 const newCartItem = this.state.cartItem
                                 newCartItem.quantity -= 1
                                 this.setState({cartItem: newCartItem})
-                                await CustomerFunctions.updateCartQuantity(this.state.cartItem, this.state.cartItem.quantity - 1).catch((e) => {
+                                await CustomerFunctions.updateCartItem(newCartItem).catch((e) => {
                                     // Undo the change if there is an error
                                     newCartItem.quantity += 1
                                     this.setState({cartItem: newCartItem})
                                 })
+                            } else {
+                                await CustomerFunctions.deleteCartItem(this.state.cartItem)
+                                if (this.props.onDelete) {
+                                    this.props.onDelete()
+                                }
                             }
                         }}
                     />
@@ -145,7 +167,7 @@ export default class ProductCartCard extends CustomComponent<Props, State> {
                                 const newCartItem = this.state.cartItem
                                 newCartItem.quantity += 1
                                 this.setState({cartItem: newCartItem})
-                                await CustomerFunctions.updateCartQuantity(this.state.cartItem, this.state.cartItem.quantity - 1).catch((e) => {
+                                await CustomerFunctions.updateCartItem(newCartItem).catch((e) => {
                                     // Undo the change if there is an error
                                     newCartItem.quantity -= 1
                                     this.setState({cartItem: newCartItem})
@@ -177,7 +199,7 @@ export default class ProductCartCard extends CustomComponent<Props, State> {
             return (
             <TouchableOpacity
                 style={{
-                    width: "100%"
+                    width: "100%",
                 }}
                 onPress={() => {
                     if (this.props.onPress) {
@@ -201,12 +223,12 @@ export default class ProductCartCard extends CustomComponent<Props, State> {
                         }}
                     />
                     <View style={styles.productInfoArea}>
-                        <View style={styles.textRow}>
+                        <View style={{flexDirection: "row", width: "100%"}}>
                             <Text
-                                style={styles.productName}
+                                style={styles.productNameText}
                                 numberOfLines={1}
                             >{this.state.productData.name}</Text>
-                            <Text style={styles.optionPriceText}>{currencyFormatter.format(this.state.cartItem.basePrice)}</Text>
+                            <Text style={styles.productPriceText}>{currencyFormatter.format(this.state.cartItem.basePrice)}</Text>
                         </View>
                         {this.renderOptionsText()}
                     </View>
@@ -260,37 +282,45 @@ const styles = StyleSheet.create({
         height: styleValues.winWidth*0.15,
         aspectRatio: 1,
         borderRadius: styleValues.minorPadding,
-        marginRight: styleValues.minorPadding
+        marginRight: styleValues.mediumPadding
     },
     productInfoArea: {
         flex: 1,
         marginTop: -styleValues.minorPadding
     },
     textRow: {
-        flexDirection: "row",
-        alignItems: "center",
+        alignItems: "flex-start",
         justifyContent: "space-between",
     },
-    productName: {
+    productNameText: {
         ...textStyles.medium,
         textAlign: "left",
         flex: 0.7,
     },
-    optionText: {
+    productPriceText: {
+        ...textStyles.medium,
+        textAlign: "right",
+        flex: 0.3,
+    },
+    optionTypeText: {
         ...textStyles.small,
         textAlign: "left",
-        color: colors.grayColor
+    },
+    optionNameText: {
+        ...textStyles.smaller,
+        textAlign: "left",
+        color: colors.grayColor,
+    },
+    optionPriceText: {
+        ...textStyles.smaller,
+        textAlign: "right",
+        color: colors.grayColor,
+        flex: 1,
     },
     mainPriceText: {
         ...textStyles.medium,
         textAlign: "right",
         flex: 0.5,
-    },
-    optionPriceText: {
-        ...textStyles.small,
-        textAlign: "right",
-        color: colors.grayColor,
-        flex: 0.3,
     },
     bottomContainer: {
         flexDirection: "row",

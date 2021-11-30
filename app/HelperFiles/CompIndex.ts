@@ -24,7 +24,8 @@ import BusinessResult from "../CustomComponents/BusinessResult";
 import ItemList from "../CustomComponents/ItemList";
 import CustomerOrderCard from "../CustomComponents/CustomerOrderCard";
 import BusinessOrderCard from "../CustomComponents/BusinessOrderCard";
-import ProductCardList from "../CustomComponents/ProductCardList";
+import CardProductList from "../CustomComponents/CardProductList";
+import CardCartList from "../CustomComponents/CardCartList";
 import SearchBar from "../CustomComponents/SearchBar";
 import LoadingCover from "../CustomComponents/LoadingCover";
 import TextHeader from "../CustomComponents/TextHeader";
@@ -59,7 +60,8 @@ export {
     ItemList,
     CustomerOrderCard,
     BusinessOrderCard,
-    ProductCardList,
+    CardProductList,
+    CardCartList,
     SearchBar,
     LoadingCover,
     TextHeader,

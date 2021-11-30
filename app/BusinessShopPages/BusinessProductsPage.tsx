@@ -7,7 +7,7 @@ import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { BusinessShopStackParamList, CustomerMainStackParamList, CustomerTabParamList } from "../HelperFiles/Navigation";
 import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
 import { ProductCategory, PublicBusinessData } from "../HelperFiles/DataTypes";
-import ProductCardList from "../CustomComponents/ProductCardList";
+import CardProductList from "../CustomComponents/CardProductList";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
 
@@ -114,7 +114,7 @@ export default class BusinessProducts extends CustomComponent<Props, State> {
                     )
                 })}
             </ScrollContainer>
-            {/*<ProductCardList
+            {/*<CardProductList
                 products={this.state.currentCategory.productIDs.map((productID) => {
                     return {
                         businessID: this.props.businessData.businessID,

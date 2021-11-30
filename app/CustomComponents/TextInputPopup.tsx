@@ -59,7 +59,7 @@ export default class TextInputPopup extends CustomComponent<Props, State> {
                     onPress={this.props.onTapAway}
                 >
                     <TextInputBox
-                        style={{...buttonStyles.noColor, ...styles.textInput}}
+                        boxStyle={{...buttonStyles.noColor, ...styles.textInput}}
                         focusOnStart={true}
                         {...this.props.textInputProps}
                         textProps={{

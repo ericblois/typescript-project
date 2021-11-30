@@ -6,12 +6,13 @@ import PropTypes from 'prop-types';
 import { BusinessMainStackParamList } from "../HelperFiles/Navigation";
 import { CompositeNavigationProp, RouteProp } from "@react-navigation/core";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { OrderData, PublicBusinessData } from "../HelperFiles/DataTypes";
+import { OrderData, PublicBusinessData, UserData } from "../HelperFiles/DataTypes";
 import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
 import { FlatList } from "react-native-gesture-handler";
-import { PageContainer, ScrollContainer, ProductCardList, MenuBar, TextButton, ItemList, LoadingCover } from "../HelperFiles/CompIndex"
+import { PageContainer, ScrollContainer, CardProductList, MenuBar, TextButton, ItemList, LoadingCover } from "../HelperFiles/CompIndex"
 import { currencyFormatter } from "../HelperFiles/Constants";
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
+import { capitalizeWords } from "../HelperFiles/ClientFunctions";
 
 type BusinessOrderNavigationProp = CompositeNavigationProp<
   StackNavigationProp<BusinessMainStackParamList, "order">,
@@ -48,10 +49,38 @@ export default class BusinessOrderPage extends CustomComponent<Props, State> {
   }
 
   async refreshData() {
-    const newOrderData = await CustomerFunctions.getOrder(this.state.orderData.orderID)
-    const publicData = await CustomerFunctions.getPublicBusinessData(this.state.orderData.businessID)
+    const newOrderData = await this.props.businessFuncs.getOrder(this.state.orderData.orderID)
+    const publicData = await this.props.businessFuncs.getPublicData()
     this.setState({orderData: newOrderData, businessData: publicData})
   }
+
+  renderExtraCostsCard() {
+    return (
+        <View style={{
+            ...defaults.roundedBox,
+            ...defaults.smallShadow,
+            height: undefined,
+        }}>
+              <View style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  width: "100%",
+                  marginBottom: styleValues.minorPadding,
+              }}>
+                  <Text style={textStyles.medium}>{"Tax:"}</Text>
+                  <Text style={textStyles.medium}>{currencyFormatter.format(this.state.orderData.totalPrice - this.state.orderData.subtotalPrice)}</Text>
+              </View>
+              <View style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  width: "100%"
+              }}>
+                  <Text style={textStyles.medium}>{"Shipping/Delivery:"}</Text>
+                  <Text style={textStyles.medium}>{currencyFormatter.format(this.state.orderData.deliveryPrice)}</Text>
+              </View>
+        </View>
+    )
+}
 
   renderOrderInfo() {
       if (this.state.businessData) {
@@ -82,7 +111,7 @@ export default class BusinessOrderPage extends CustomComponent<Props, State> {
                         resizeMode={this.state.businessData.profileImage === "" ? "contain" : "cover"}
                     />
                     <View style={{alignItems: "flex-start"}}>
-                        <Text style={textStyles.large}>{this.state.businessData.name}</Text>
+                        <Text style={textStyles.large}>{this.state.orderData.shippingInfo.name}</Text>
                         <Text style={{...textStyles.medium, ...{color: colors.grayColor}}}>{`Order ID: #${this.state.orderData.orderID}`}</Text>
                     </View>
                 </View>
@@ -98,17 +127,18 @@ export default class BusinessOrderPage extends CustomComponent<Props, State> {
                 >
                     <Text
                         style={textStyles.medium}
-                    >{`Status: ${this.state.orderData.status}`}</Text>
+                    >{`Status: ${capitalizeWords(this.state.orderData.status)}`}</Text>
                     <Text
                         style={textStyles.medium}
                     >{currencyFormatter.format(this.state.orderData.totalPrice)}</Text>
                 </View>
-                <ProductCardList
+                <CardProductList
                     products={this.state.orderData.cartItems}
                     editable={false}
                     scrollable={false}
                     onLoadEnd={() => this.setState({productImagesLoaded: true})}
                 />
+                {this.renderExtraCostsCard()}
                 <TextButton
                     text={"Cancel order"}
                     buttonStyle={{...buttonStyles.noColor, ...{

@@ -178,7 +178,7 @@ export default class CustomerInfoPage extends CustomComponent<Props, State> {
                     This will be used when messaging businesses.
                 </Text>
                 <TextInputBox
-                    style={{borderColor: this.state.validName ? colors.validColor : colors.invalidColor}}
+                    boxStyle={{borderColor: this.state.validName ? colors.validColor : colors.invalidColor}}
                     textProps={{...this.defaultTextProps, ...{
                         onChangeText: async (text) => {
                             let validName = text.length > 0
@@ -196,7 +196,7 @@ export default class CustomerInfoPage extends CustomComponent<Props, State> {
                     This will be used to sign in to your account.
                 </Text>
                 <TextInputBox
-                    style={{borderColor: this.state.validEmail ? colors.validColor : colors.invalidColor}}
+                    boxStyle={{borderColor: this.state.validEmail ? colors.validColor : colors.invalidColor}}
                     textProps={{...this.defaultTextProps, ...{
                         onChangeText: (text) => {
                             // Regular expression for an email
@@ -214,7 +214,7 @@ export default class CustomerInfoPage extends CustomComponent<Props, State> {
                     Use at least 6 characters in your password.
                 </Text>
                 <TextInputBox
-                    style={{borderColor: this.state.validPass ? colors.validColor : colors.invalidColor}}
+                    boxStyle={{borderColor: this.state.validPass ? colors.validColor : colors.invalidColor}}
                     textProps={{...this.defaultTextProps, ...{
                         onChangeText: (text) => {
                             let validPass = text.length > 5
@@ -229,7 +229,7 @@ export default class CustomerInfoPage extends CustomComponent<Props, State> {
                     {this.state.passText}
                 </TextInputBox>
                 <TextInputBox
-                    style={{borderColor: this.state.validConfirm ? colors.validColor : colors.invalidColor}}
+                    boxStyle={{borderColor: this.state.validConfirm ? colors.validColor : colors.invalidColor}}
                     textProps={{...this.defaultTextProps, ...{
                         onChangeText: (text) => {
                             let validConfirm = text === this.state.passText
@@ -249,10 +249,11 @@ export default class CustomerInfoPage extends CustomComponent<Props, State> {
                     style={{borderColor: this.state.validBirthday ? colors.validColor : colors.invalidColor}}
                     extraProps={{
                         value: this.state.birthdayValue,
-                        onChange: (event, date) => {
-                            if (!date) {
+                        onChange: (_: any, dateValue: any) => {
+                            if (!dateValue) {
                                 throw new Error("No date object given when date changed");
                             }
+                            const date = dateValue as Date
                             const dateString = date.toLocaleDateString();
                             const dateDay = date.getDay().toString()
                             const dateMonth = date.getMonth().toString()

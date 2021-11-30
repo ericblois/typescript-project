@@ -3,7 +3,7 @@ import CustomComponent from "../CustomComponents/CustomComponent"
 import { View, Text, StyleSheet, FlatList, } from "react-native";
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons, menuBarHeight } from "../HelperFiles/StyleSheet";
 import PropTypes from 'prop-types';
-import TextButton from "../CustomComponents/TextButton";
+import { TextButton, CardCartList, TextDropdown, ScrollContainer, LoadingCover, PageContainer, MenuBar } from "../HelperFiles/CompIndex";
 import { auth } from "../HelperFiles/Constants";
 import { CustomerTabParamList, CustomerMainStackParamList, RootStackParamList, BusinessShopStackParamList } from "../HelperFiles/Navigation";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
@@ -11,16 +11,9 @@ import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
 import { BusinessFunctions } from "../HelperFiles/BusinessFunctions";
 import UserFunctions from "../HelperFiles/UserFunctions";
 import { StackNavigationProp } from "@react-navigation/stack";
-import PageContainer from "../CustomComponents/PageContainer";
 import { ScrollView, TouchableWithoutFeedback } from "react-native-gesture-handler";
 import { CartItem, PublicBusinessData, ShippingInfo } from "../HelperFiles/DataTypes";
-import ProductCartCard from "../CustomComponents/ProductCartCard";
 import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
-import ProductCardList from "../CustomComponents/ProductCardList";
-import MenuBar from "../CustomComponents/MenuBar";
-import TextDropdown from "../CustomComponents/TextDropdown";
-import ScrollContainer from "../CustomComponents/ScrollContainer";
-import LoadingCover from "../CustomComponents/LoadingCover";
 
 type CustomerCartNavigationProp = CompositeNavigationProp<
   StackNavigationProp<CustomerMainStackParamList, "cart">,
@@ -50,7 +43,6 @@ export default class CustomerCartPage extends CustomComponent<CustomerCartProps,
         cartsLoading: 1
     }
     props.navigation.addListener("focus", () => this.refreshData())
-    this.refreshData()
   }
 
   async refreshData() {
@@ -71,7 +63,8 @@ export default class CustomerCartPage extends CustomComponent<CustomerCartProps,
                 businesses[cartItem.businessID] = publicData
             }
         }
-        this.setState({businessCarts: businessCarts, businesses: businesses, cartsLoading: Object.keys(businessCarts).length})
+        const numCartsLoading = this.state.cartsLoading > 0 ? Object.keys(businessCarts).length : 0
+        this.setState({businessCarts: businessCarts, businesses: businesses, cartsLoading: numCartsLoading})
     }).catch((e) => {
       this.refreshData()
     })
@@ -106,7 +99,6 @@ export default class CustomerCartPage extends CustomComponent<CustomerCartProps,
 
   renderBusinessCarts() {
       if (this.state.businessCarts) {
-        
           return Object.entries(this.state.businessCarts).map(([businessID, items]) => {
               return (
                 <View
@@ -121,12 +113,14 @@ export default class CustomerCartPage extends CustomComponent<CustomerCartProps,
                     >
                       <Text style={textStyles.large}>{this.state.businesses![businessID].name}</Text>
                     </TouchableWithoutFeedback>
-                    <ProductCardList
+                    <CardCartList
                         products={items}
                         showLoading={true}
                         scrollable={false}
                         onDeleteItem={() => this.refreshData()}
-                        onLoadEnd={() => this.setState({cartsLoading: this.state.cartsLoading - 1})}
+                        onLoadEnd={() => {
+                          this.setState({cartsLoading: this.state.cartsLoading - 1})
+                        }}
                     />
                     <View
                         style={styles.checkoutBar}
@@ -142,7 +136,7 @@ export default class CustomerCartPage extends CustomComponent<CustomerCartProps,
                             text={"Checkout"}
                             buttonStyle={styles.checkoutButton}
                             appearance={"color"}
-                            buttonFunc={() => {
+                            buttonFunc={async () => {
                               const ship: ShippingInfo = {
                                 city: "Anyville",
                                 country: "Annation",
@@ -153,14 +147,32 @@ export default class CustomerCartPage extends CustomComponent<CustomerCartProps,
                                 apartment: null,
                                 message: null
                               }
-                              CustomerFunctions.placeOrder(businessID, items, ship, "local", 5)
+                              const newOrder = await CustomerFunctions.placeOrder(businessID, items, ship, "local", 5)
+                              this.props.navigation.navigate("order", {orderData: newOrder})
                             }}
+                            showLoading={true}
                         />
                     </View>
               </View>
               )
           })
       }
+  }
+
+  renderUI() {
+    return (
+      <>
+        <Text
+          style={textStyles.large}
+        >Your Cart</Text>
+        <ScrollContainer
+          containerStyle={{width: styleValues.winWidth}}
+          contentContainerStyle={{paddingBottom: menuBarHeight + styleValues.mediumPadding}}
+        >
+          {this.renderBusinessCarts()}
+        </ScrollContainer>
+      </>
+    )
   }
 
   renderLoading() {
@@ -174,15 +186,7 @@ export default class CustomerCartPage extends CustomComponent<CustomerCartProps,
   render() {
     return (
       <PageContainer>
-        <Text
-          style={textStyles.large}
-        >Your Cart</Text>
-        <ScrollContainer
-          containerStyle={{width: styleValues.winWidth}}
-          contentContainerStyle={{paddingBottom: menuBarHeight + styleValues.mediumPadding}}
-        >
-          {this.renderBusinessCarts()}
-        </ScrollContainer>
+        {this.renderUI()}
         {this.renderLoading()}
         <MenuBar
             buttonProps={[

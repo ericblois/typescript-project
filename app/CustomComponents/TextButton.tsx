@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from "react";
 import CustomComponent from "./CustomComponent"
-import { View, TouchableOpacity, Text, StyleSheet, TextStyle, ViewStyle, Image, GestureResponderEvent, ImageStyle, ActivityIndicatorProps } from "react-native";
+import { View, TouchableOpacity, Text, StyleSheet, TextStyle, ViewStyle, Image, GestureResponderEvent, ImageStyle, ActivityIndicatorProps, Animated } from "react-native";
 import PropTypes from 'prop-types';
 import { NavigationProp, useNavigation } from "@react-navigation/native"
 import { defaults, textStyles, buttonStyles, styleValues, colors, fonts } from "../HelperFiles/StyleSheet";
@@ -116,6 +116,7 @@ export default class TextButton extends CustomComponent<Props, State> {
         // Update default text style
         if (this.props.appearance === "light") {
             defaultTextStyle.color = colors.mainColor
+            defaultTextStyle.fontFamily = fonts.medium
         } else if (this.props.appearance === "color") {
             defaultTextStyle.color = colors.whiteColor
         }

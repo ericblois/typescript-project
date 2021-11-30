@@ -1,16 +1,12 @@
 import React, { Component, useRef } from "react";
 import CustomComponent from "./CustomComponent"
-import { TouchableOpacity, Text, StyleSheet, Animated, ViewStyle, View, GestureResponderEvent, Platform, UIManager, LayoutAnimation } from "react-native";
+import { TouchableOpacity, Text, StyleSheet, Animated, ViewStyle, View, GestureResponderEvent, Platform, UIManager, LayoutAnimation, TextStyle } from "react-native";
 import PropTypes from 'prop-types';
 import { NavigationProp, useNavigation } from "@react-navigation/native"
-import { styleValues, colors, defaults, textStyles, buttonStyles, } from "../HelperFiles/StyleSheet";
+import { styleValues, colors, defaults, textStyles, buttonStyles, fonts, } from "../HelperFiles/StyleSheet";
 import { TextInput } from "react-native-gesture-handler";
 import DropDownPicker, { DropDownPickerProps } from 'react-native-dropdown-picker';
 import TextButton from "./TextButton";
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-  }
 
 type TextDropdownAnimatedProps = {
     placeholderText: string,
@@ -18,15 +14,16 @@ type TextDropdownAnimatedProps = {
         text: string,
         value: any
     }[],
-    onSelect: (text: string, value: any) => void,
+    showValidSelection?: boolean,
+    enableMultiple?: boolean,
+    onSelect?: (selections: {text: string, value: any}[]) => void,
     style?: ViewStyle,
-    dropdownProps?: (typeof DropDownPicker)['defaultProps'],
+    textStyle?: TextStyle,
 }
 
 type State = {
     expanded: boolean,
-    selectedText?: string,
-    selectedValue?: any
+    selections: {text: string, value: any}[]
 }
 
 export default class TextDropdownAnimated extends CustomComponent<TextDropdownAnimatedProps, State> {
@@ -35,8 +32,7 @@ export default class TextDropdownAnimated extends CustomComponent<TextDropdownAn
         super(props)
         this.state = {
             expanded: false,
-            selectedText: undefined,
-            selectedValue: undefined
+            selections: []
         }
         
     }
@@ -75,34 +71,66 @@ export default class TextDropdownAnimated extends CustomComponent<TextDropdownAn
     }
 
     renderItems() {
+        const selectedNames = this.state.selections.map(({text}) => text)
         return (
             this.props.items.map(({text, value}, index) => {
                 return (
                     <Animated.View
                         style={{
                             height: this.dropdownHeight,
-                            opacity: this.dropdownOpacity
+                            opacity: this.dropdownOpacity,
                         }}
                         key={index.toString()}
                     >
                         <TextButton
                             text={text}
+                            appearance={selectedNames.includes(text) ? "light" : "no-color"}
                             buttonStyle={{
-                                ...defaults.inputBox,
-                                marginBottom: 0
+                                height: undefined,
+                                paddingVertical: 0,
+                                flex: 1,
+                                marginTop: styleValues.minorPadding,
+                                marginBottom: 0,
+                                borderColor: colors.mainColor,
+                                borderWidth: selectedNames.includes(text) ? styleValues.minorBorderWidth : 0
                             }}
-                            textStyle={{...textStyles.small}}
+                            textStyle={{
+                                ...textStyles.smaller,
+                                fontFamily: selectedNames.includes(text) ? fonts.medium : fonts.regular,
+                                ...this.props.textStyle
+                            }}
                             buttonFunc={() => {
-                                this.collapse()
-                                this.setState({
-                                    selectedText: text,
-                                    selectedValue: value,
-                                    expanded: false
-                                }, () => {
-                                    if (this.props.onSelect) {
-                                        this.props.onSelect(text, value)
+                                if (this.props.enableMultiple !== true) {
+                                    this.collapse()
+                                    this.setState({
+                                        selections: [{text: text, value: value}],
+                                        expanded: false
+                                    }, () => {
+                                        if (this.props.onSelect) {
+                                            this.props.onSelect(this.state.selections)
+                                        }
+                                    })
+                                } else {
+                                    let newSelections = this.state.selections
+                                    // Check if option was already selected
+                                    const optionIndex = this.state.selections.findIndex((selection) => {
+                                        return selection.text === text
+                                    })
+                                    if (optionIndex > -1) {
+                                        // Remove selection
+                                        newSelections.splice(optionIndex)
+                                    } else {
+                                        // Add selection
+                                        newSelections.push({text: text, value: value})
                                     }
-                                })
+                                    this.setState({
+                                        selections: newSelections
+                                    }, () => {
+                                        if (this.props.onSelect) {
+                                            this.props.onSelect(this.state.selections)
+                                        }
+                                    })
+                                }
                                 
                             }}
                         />
@@ -113,16 +141,26 @@ export default class TextDropdownAnimated extends CustomComponent<TextDropdownAn
     }
 
     render() {
+        let mainText = this.state.selections.length > 0 ? `${this.props.placeholderText}: ${this.state.selections[0].text}` : this.props.placeholderText
         return (
             <>
-            <View style={{width: "100%", marginBottom: styleValues.mediumPadding}}>
+            <View style={{
+                width: "100%",
+                marginBottom: styleValues.mediumPadding,
+                ...this.props.style
+            }}>
                 <TextButton
-                    text={this.props.placeholderText}
+                    text={mainText}
                     buttonStyle={{
                         ...defaults.inputBox,
                         marginBottom: 0,
                     }}
-                    textStyle={{...textStyles.small}}
+                    textStyle={{
+                        ...textStyles.small,
+                        ...this.props.textStyle,
+                        fontFamily: this.state.selections.length > 0 && this.props.showValidSelection === true ? fonts.medium : fonts.regular,
+                        color: this.state.selections.length > 0 && this.props.showValidSelection === true ? colors.mainColor : colors.blackColor
+                    }}
                     buttonFunc={() => {
                         if (this.state.expanded) {
                             this.collapse()

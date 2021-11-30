@@ -108,6 +108,16 @@ export function extractKeywords(text: string) {
     })
     return result
 }
+// Capitalize first letter of each word
+export function capitalizeWords(text: string) {
+    const words = text.toLowerCase().split(' ')
+    let newText = ""
+    for (const word of words) {
+        const newWord = word.charAt(0).toUpperCase() + word.substring(1)
+        newText += newWord
+    }
+    return newText
+}
 // Convert a hex color to an rgba string
 export function hexToRGBA(hex: string, alpha: number) {
     if (hex.length === 7) {

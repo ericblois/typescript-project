@@ -49,7 +49,7 @@ export default class CustomerOrdersPage extends CustomComponent<Props, State> {
 
   async refreshData() {
     const activeOrders = await CustomerFunctions.getOrders(["pending", "accepted"])
-    const prevOrders = await CustomerFunctions.getOrders(["completed", "rejected", "received"])
+    const prevOrders = await CustomerFunctions.getOrders(["completed", "cancelled", "received"])
     const cartItems = (await CustomerFunctions.getCart()).map((cartItem) => (cartItem.quantity))
     let numCartItems = 0
     for (const quantity of cartItems) {
@@ -69,10 +69,10 @@ export default class CustomerOrdersPage extends CustomComponent<Props, State> {
           {orders.map((orderData) => {
             return (
               <CustomerOrderCard
-                  orderData={orderData}
-                  key={orderData.orderID}
-                  onPress={() => this.props.navigation.navigate("order", {orderData: orderData})}
-                />
+                orderData={orderData}
+                key={orderData.orderID}
+                onPress={() => this.props.navigation.navigate("order", {orderData: orderData})}
+              />
             )
           })}
         </View>

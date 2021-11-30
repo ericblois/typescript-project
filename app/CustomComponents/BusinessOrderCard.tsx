@@ -10,6 +10,7 @@ import { useNavigation } from "@react-navigation/native";
 import { OrderData, ProductData, PublicBusinessData } from "../HelperFiles/DataTypes";
 import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
 import { color } from "react-native-elements/dist/helpers";
+import { capitalizeWords } from "../HelperFiles/ClientFunctions";
 
 type Props = {
     orderData: OrderData,
@@ -67,7 +68,7 @@ export default class BusinessOrderCard extends CustomComponent<Props, State> {
             }}>
                 <Text
                     style={{...textStyles.medium, ...{textAlign: "left"}}}
-                >{`Status: ${this.state.orderData.status}`}</Text>
+                >{`Status: ${capitalizeWords(this.state.orderData.status)}`}</Text>
                 <Text
                     style={{...textStyles.medium, ...{textAlign: "right"}}}
                 >{currencyFormatter.format(this.state.orderData.totalPrice)}</Text>

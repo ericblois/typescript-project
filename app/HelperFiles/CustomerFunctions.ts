@@ -1,9 +1,10 @@
-import { CartItem, OrderData, PrivateBusinessData, ProductCategory, ProductData, PublicBusinessData, ShippingInfo, UserData } from "./DataTypes"
+import { CartItem, OptionSelections, OrderData, PrivateBusinessData, ProductCategory, ProductData, PublicBusinessData, ShippingInfo, UserData } from "./DataTypes"
 import ServerData from "./ServerData"
 import UserFunctions from "./UserFunctions"
 import { firestore, functions, storage, geofire, getPublicBusinessRef } from "./Constants"
 import uuid from 'react-native-uuid';
 import { getCompressedImage } from "./ClientFunctions"
+import orderId from "order-id";
 
 export abstract class CustomerFunctions {
     /* ONLY FOR CANADA CURRENTLY */
@@ -137,33 +138,72 @@ export abstract class CustomerFunctions {
         }
     }
 
-    public static async addToCart(cartItem: CartItem) {
-        try {
-            const userDoc = await UserFunctions.getUserDoc()
-            const cart = userDoc.cartItems
-            let newItem = true
-            // Check if cart already contains this item
-            cart.forEach((item, index) => {
-                // Check if product has been added to cart already
-                if (item.businessID === cartItem.businessID && item.productID === cartItem.productID) {
-                    // Check if product's options are the same
-                    let sameOptions = true
-                    for (const [optionType, selection] of Object.entries(item.productOptions)) {
-                        const option = cartItem.productOptions[optionType]
-                        if (!option || option.optionName !== selection.optionName) {
-                            sameOptions = false
-                            break
+    public static createCartItem(productData: ProductData, selections: OptionSelections, quantity: number) {
+        const newCartItem: CartItem = {
+            basePrice: productData.price,
+            businessID: productData.businessID,
+            productID: productData.productID,
+            productOptions: selections,
+            quantity: quantity,
+            totalPrice: productData.price
+        }
+        // Option types
+        for (const optionType of Object.keys(selections)) {
+            // Selections
+            for (const selection of selections[optionType]) {
+                newCartItem.totalPrice += selection.priceChange
+            }
+        }
+        return newCartItem
+    }
+
+    public static compareCartItems(firstItem: CartItem, secondItem: CartItem) {
+        let sameItem = true
+        // Check if IDs match
+        if (firstItem.businessID === secondItem.businessID && firstItem.productID === secondItem.productID) {
+            const secondOptionTypes = Object.keys(secondItem.productOptions)
+            // Check if each item's options are the same
+            optionLoop: for (const firstOptionType of Object.keys(firstItem.productOptions)) {
+                // Check for matching option types
+                if (secondOptionTypes.includes(firstOptionType)) {
+                    // Check if same number of selections were made
+                    if (firstItem.productOptions[firstOptionType].length !== secondItem.productOptions[firstOptionType].length) {
+                        sameItem = false
+                        break
+                    }
+                    const secondSelectionNames = secondItem.productOptions[firstOptionType].map(({optionName}) => optionName)
+                    // Check option selections
+                    for (const firstSelection of firstItem.productOptions[firstOptionType]) {
+                        if (!secondSelectionNames.includes(firstSelection.optionName)) {
+                            sameItem = false
+                            break optionLoop
                         }
                     }
-                    // Add this cart item to the existing same cart item
-                    if (sameOptions) {
-                        cart[index].quantity = cart[index].quantity + cartItem.quantity
-                        newItem = false
-                    }
+                } else {
+                    sameItem = false
+                    break
                 }
+            }
+        } else {
+            sameItem = false
+        }
+        return sameItem
+    }
+
+    public static async addToCart(cartItem: CartItem) {
+        try {
+            // Get cart
+            const cart = await CustomerFunctions.getCart()
+            // Check if cart already contains this item
+            let itemIndex = cart.findIndex((item) => {
+                return CustomerFunctions.compareCartItems(cartItem, item)
             })
-            if (newItem) {
+            // Add to cart
+            if (itemIndex < 0) {
                 cart.push(cartItem)
+            } else {
+                // Update quantity
+                cart[itemIndex].quantity += cartItem.quantity
             }
             await UserFunctions.updateUserDoc({cartItems: cart})
         } catch (e) {
@@ -171,31 +211,24 @@ export abstract class CustomerFunctions {
         }
     }
 
-    public static async updateCartQuantity(cartItem: CartItem, newQuantity: number) {
+    public static async updateCartItem(cartItem: CartItem) {
         try {
+            if (cartItem.quantity <= 0) {
+                await CustomerFunctions.deleteCartItem(cartItem)
+                return
+            }
             let cart = await CustomerFunctions.getCart(cartItem.businessID)
             const itemIndex = cart.findIndex((item) => {
-                // Check if product is the same
-                if (cartItem.productID === item.productID) {
-                    // Check if options are the same
-                    let sameOptions = true
-                    for (const [type, selection] of Object.entries(item.productOptions)) {
-                        if (Object.keys(cartItem.productOptions).includes(type)) {
-                            if (cartItem.productOptions[type].optionName === selection.optionName) {
-                                continue
-                            }
-                        }
-                        sameOptions = false
-                        break
-                    }
-                    return sameOptions
-                }
-                return false
+                return CustomerFunctions.compareCartItems(cartItem, item)
             })
-            // Update the cart
-            cart[itemIndex].quantity = newQuantity
+            // Check if item exists in cart
+            if (itemIndex < 0) {
+                cart.push(cartItem)
+            } else {
+                // Update the cart
+                cart[itemIndex] = cartItem
+            }
             await UserFunctions.updateUserDoc({cartItems: cart})
-            return cart[itemIndex]
         } catch (e) {
             throw e
         }
@@ -205,26 +238,41 @@ export abstract class CustomerFunctions {
         try {
             let cart = await CustomerFunctions.getCart(cartItem.businessID)
             const itemIndex = cart.findIndex((item) => {
-                // Check if product is the same
-                if (cartItem.productID === item.productID) {
-                    // Check if options are the same
-                    let sameOptions = true
-                    for (const [type, selection] of Object.entries(item.productOptions)) {
-                        if (Object.keys(cartItem.productOptions).includes(type)) {
-                            if (cartItem.productOptions[type].optionName === selection.optionName) {
-                                continue
-                            }
-                        }
-                        sameOptions = false
-                        break
-                    }
-                    return sameOptions
-                }
-                return false
+                return CustomerFunctions.compareCartItems(cartItem, item)
             })
-            // Update the cart
-            cart.splice(itemIndex, 1)
-            UserFunctions.updateUserDoc({cartItems: cart})
+            if (itemIndex < 0) {
+                return
+            }
+            if (cartItem.quantity >= cart[itemIndex].quantity) {
+                // Update the cart
+                cart.splice(itemIndex, 1)
+            } else {
+                cart[itemIndex].quantity -= cartItem.quantity
+            }
+            await UserFunctions.updateUserDoc({cartItems: cart})
+        } catch (e) {
+            throw e
+        }
+    }
+    // Removes a quantity of cart items from cart
+    public static async deleteCartItems(cartItems: CartItem[]) {
+        try {
+            let cart = await CustomerFunctions.getCart()
+            for (const cartItem of cartItems) {
+                const itemIndex = cart.findIndex((item) => {
+                    return CustomerFunctions.compareCartItems(cartItem, item)
+                })
+                if (itemIndex < 0) {
+                    continue
+                }
+                if (cartItem.quantity >= cart[itemIndex].quantity) {
+                    // Update the cart
+                    cart.splice(itemIndex, 1)
+                } else {
+                    cart[itemIndex].quantity -= cartItem.quantity
+                }
+            }
+            await UserFunctions.updateUserDoc({cartItems: cart})
         } catch (e) {
             throw e
         }
@@ -279,14 +327,24 @@ export abstract class CustomerFunctions {
             }
             const createOrder = functions.httpsCallable("createOrder")
             const result = await createOrder(orderData)
-            return result.data
+            // Delete cart items
+            await CustomerFunctions.deleteCartItems(cartItems)
+            return result.data as OrderData
         } catch (e) {
             throw e
         }
     }
 
-    public static async deleteOrder() {
-
+    public static async cancelOrder(orderID: string, businessID: string) {
+        try {
+            const cancelOrder = functions.httpsCallable("cancelOrder")
+            await cancelOrder({
+                orderID: orderID,
+                businessID: businessID
+            })
+        } catch (e) {
+            throw e
+        }
     }
 
     // Find businesses that match keywords within a certain range

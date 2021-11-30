@@ -14,7 +14,7 @@ import { IconButton } from "./CompIndex";
 
 export const locationDocString = "/publicBusinessData/canada/regions/quebec/cities/montreal"
 
-export const googleAPIKey = "AIzaSyCaUD7QSZ1d_Mo4ygBA0BhMp7DYMIlu2vo";
+export const googleAPIKey = "";
 
 export const firebaseConfig = {
   apiKey: "AIzaSyBb7qoF1YQEAcovFU93LfVOI_JEFxPqB7o",

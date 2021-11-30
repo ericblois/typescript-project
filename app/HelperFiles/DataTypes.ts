@@ -88,7 +88,7 @@ export const DefaultShippingInfo: Readonly<ShippingInfo> = {
 }
 
 export type OptionSelections = {
-  [optionType: string]: {optionName: string, priceChange: number}
+  [optionType: string]: {optionName: string, priceChange: number}[]
 }
 
 export type CartItem = {
@@ -113,7 +113,7 @@ export type OrderData = {
   creationTime: string,
   responseTime: string | null,
   completionTime: string | null,
-  status: "pending" | "accepted" | "rejected" | "completed" | "received"
+  status: "pending" | "accepted" | "cancelled" | "completed" | "received"
 }
 
 export type UserData = {

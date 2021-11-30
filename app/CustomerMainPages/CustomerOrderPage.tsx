@@ -9,8 +9,9 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { OrderData, PublicBusinessData } from "../HelperFiles/DataTypes";
 import { CustomerFunctions } from "../HelperFiles/CustomerFunctions";
 import { FlatList } from "react-native-gesture-handler";
-import { PageContainer, ScrollContainer, ProductCardList, MenuBar, TextButton, ItemList, LoadingCover } from "../HelperFiles/CompIndex"
+import { PageContainer, ScrollContainer, CardCartList, MenuBar, TextButton, ItemList, LoadingCover } from "../HelperFiles/CompIndex"
 import { currencyFormatter } from "../HelperFiles/Constants";
+import { capitalizeWords } from "../HelperFiles/ClientFunctions";
 
 type CustomerOrderNavigationProp = CompositeNavigationProp<
   StackNavigationProp<CustomerMainStackParamList, "order">,
@@ -49,6 +50,34 @@ export default class CustomerOrderPage extends CustomComponent<Props, State> {
     const newOrderData = await CustomerFunctions.getOrder(this.state.orderData.orderID)
     const publicData = await CustomerFunctions.getPublicBusinessData(this.state.orderData.businessID)
     this.setState({orderData: newOrderData, businessData: publicData})
+  }
+
+  renderExtraCostsCard() {
+      return (
+          <View style={{
+              ...defaults.roundedBox,
+              ...defaults.smallShadow,
+              height: undefined,
+          }}>
+                <View style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    width: "100%",
+                    marginBottom: styleValues.minorPadding,
+                }}>
+                    <Text style={textStyles.medium}>{"Tax:"}</Text>
+                    <Text style={textStyles.medium}>{currencyFormatter.format(this.state.orderData.totalPrice - this.state.orderData.subtotalPrice)}</Text>
+                </View>
+                <View style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    width: "100%"
+                }}>
+                    <Text style={textStyles.medium}>{"Shipping/Delivery:"}</Text>
+                    <Text style={textStyles.medium}>{currencyFormatter.format(this.state.orderData.deliveryPrice)}</Text>
+                </View>
+          </View>
+      )
   }
 
   renderOrderInfo() {
@@ -96,24 +125,29 @@ export default class CustomerOrderPage extends CustomComponent<Props, State> {
                 >
                     <Text
                         style={textStyles.medium}
-                    >{`Status: ${this.state.orderData.status}`}</Text>
+                    >{`Status: ${capitalizeWords(this.state.orderData.status)}`}</Text>
                     <Text
                         style={textStyles.medium}
                     >{currencyFormatter.format(this.state.orderData.totalPrice)}</Text>
                 </View>
-                <ProductCardList
+                <CardCartList
                     products={this.state.orderData.cartItems}
                     editable={false}
                     scrollable={false}
                     onLoadEnd={() => this.setState({productImagesLoaded: true})}
                 />
+                {this.renderExtraCostsCard()}
                 <TextButton
                     text={"Cancel order"}
                     buttonStyle={{...buttonStyles.noColor, ...{
                         marginBottom: 0,
-                        marginTop: styleValues.mediumPadding
                     }}}
                     textStyle={{color: colors.invalidColor}}
+                    buttonFunc={async () => {
+                        await CustomerFunctions.cancelOrder(this.state.orderData.orderID, this.state.orderData.businessID)
+                        this.props.navigation.goBack()
+                    }}
+                    showLoading={true}
                 />
             </ScrollContainer>
         )

@@ -52,7 +52,7 @@ export default class BusinessOrdersPage extends CustomComponent<Props, State> {
     const newOrders = await this.props.businessFuncs.getOrders(["pending"])
     const activeOrders = await this.props.businessFuncs.getOrders(["accepted"])
     const readyOrders = await this.props.businessFuncs.getOrders(["completed"])
-    const prevOrders = await this.props.businessFuncs.getOrders(["received", "rejected"])
+    const prevOrders = await this.props.businessFuncs.getOrders(["received", "cancelled"])
     this.setState({
         ordersLoaded: true,
         newOrders: newOrders,

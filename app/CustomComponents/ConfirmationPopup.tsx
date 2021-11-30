@@ -85,9 +85,6 @@ export default class ConfirmationPopup extends CustomComponent<Props, State> {
                     }
                 }}
                 showLoading={this.props.showConfirmLoading ? this.props.showConfirmLoading : true}
-                loadIndicatorProps={{
-                    color: this.props.type === "save" ? colors.whiteColor : undefined
-                }}
             />
         )
     }

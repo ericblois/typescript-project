@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import CustomComponent from "../CustomComponents/CustomComponent"
-import { View, Image, Text, StyleSheet, ActivityIndicator, ScrollView, SafeAreaView } from "react-native";
+import { View, Image, Text, StyleSheet, ActivityIndicator, ScrollView, Animated } from "react-native";
 import { TextButton, TextDropdownAnimated } from "../HelperFiles/CompIndex"
 import PropTypes from 'prop-types';
 import { styleValues, colors, defaults, textStyles, buttonStyles, icons, menuBarHeight } from "../HelperFiles/StyleSheet";
@@ -30,7 +30,7 @@ type Props = {
 type State = {
     productData?: ProductData,
     imagesLoaded: boolean,
-    optionSelections: OptionSelections,
+    optionSelections?: OptionSelections,
     cartQuantity: number,
     productQuantity: number
 }
@@ -42,23 +42,34 @@ export default class ProductShopPage extends CustomComponent<Props, State> {
         this.state = {
             productData: undefined,
             imagesLoaded: false,
-            optionSelections: {},
+            optionSelections: undefined,
             cartQuantity: 0,
             productQuantity: 1
         }
         props.navigation.addListener("focus", () => this.refreshData())
     }
 
+    addButtonOpacity = new Animated.Value(0);
+
     async refreshData() {
+        // Get product data
         const productData = await CustomerFunctions.getProduct(
             this.props.route.params.businessID,
             this.props.route.params.productID
         )
+        // Get product's options
+        let newOptionSelections = this.state.optionSelections ? this.state.optionSelections : {}
+        if (!this.state.optionSelections) {
+            for (const optionType of productData.optionTypes) {
+                newOptionSelections[optionType.name] = []
+            }
+        }
+        // Get number of cart items
         const cartItem = (await CustomerFunctions.getCart()).find((item) => {
             return item.businessID == productData.businessID && item.productID == productData.productID
         })
         const quantity = cartItem ? cartItem.quantity : 0
-        this.setState({productData: productData, cartQuantity: quantity})
+        this.setState({productData: productData, optionSelections: newOptionSelections, cartQuantity: quantity})
     }
 
     componentDidMount() {
@@ -67,21 +78,18 @@ export default class ProductShopPage extends CustomComponent<Props, State> {
     // Check if all options have been given a value
     checkOptions() {
         let validOptions = true
-        if (this.state.productData) {
+        if (this.state.productData && this.state.optionSelections) {
             for (const optionType of this.state.productData.optionTypes) {
+                if (optionType.optional) {
+                    continue
+                }
                 // Check if this option type has been selected
                 const selection = this.state.optionSelections[optionType.name]
-                if (selection && optionType.options.map((option) => (option.name)).includes(selection.optionName)) {
-                        continue
-                }
-                //const selection = this.state.optionSelections.get(optionType.name)
-                // Check if this option has been selected
-                validOptions = false
+                validOptions = validOptions && selection && selection.length > 0
             }
         } else {
             return false
         }
-        //console.log(this.state.optionSelections)
         return validOptions
     }
 
@@ -89,38 +97,37 @@ export default class ProductShopPage extends CustomComponent<Props, State> {
         if (this.state.productData) {
             return (this.state.productData.optionTypes.map((optionType, index, array) => {
                 return (
-                    <View
-                        style={{
-                            zIndex: array.length - index
-                        }}
-                        key={optionType.name}
-                    >
-                        <TextDropdown
-                            items={optionType.options.map((option) => {
-                                return {
-                                    label: option.name,
-                                    value: option.name,
-                                }
-                            })}
-                            dropdownProps={{
-                                placeholder: optionType.name,
-                                onChangeItem: (item) => {
-                                    // Get option info
-                                    const option = optionType.options.find((option) => {
-                                        return option.name === item.value
-                                    })
-                                    if (option) {
-                                        let selections = this.state.optionSelections
-                                        selections[optionType.name] = {
-                                            optionName: option.name,
-                                            priceChange: option.priceChange ? option.priceChange : 0
-                                        }
-                                        this.setState({optionSelections: selections})
+                    <TextDropdownAnimated
+                        placeholderText={optionType.name}
+                        items={optionType.options.map((option) => {
+                            return {
+                                text: option.name,
+                                value: option.priceChange,
+                            }
+                        })}
+                        showValidSelection={!optionType.optional}
+                        enableMultiple={optionType.allowMultiple}
+                        onSelect={(selections) => {
+                            // Map dropdown's selections to product's options
+                            const newOptionSelections = selections.map(({text, value}) => {
+                                return {optionName: text, priceChange: value as number}
+                            })
+                            // Update product's option selections
+                            const newProductOptions = this.state.optionSelections
+                            if (newProductOptions) {
+                                newProductOptions[optionType.name] = newOptionSelections
+                                this.setState({optionSelections: newProductOptions}, () => {
+                                    if (this.state.productQuantity > 0 && this.checkOptions()) {
+                                        this.fadeInAddButton()
+                                    } else {
+                                        this.fadeOutAddButton()
                                     }
-                                },
-                            }}
-                        ></TextDropdown>
-                    </View>
+                                    this.refreshData()
+                                })
+                            }
+                        }}
+                        key={index.toString()}
+                    />
                 )
             }))
         }
@@ -142,7 +149,13 @@ export default class ProductShopPage extends CustomComponent<Props, State> {
                     }}
                     buttonFunc={async () => {
                         if (this.state.productQuantity > 0) {
-                            this.setState({productQuantity: this.state.productQuantity - 1})
+                            this.setState({productQuantity: this.state.productQuantity - 1}, () => {
+                                if (this.state.productQuantity > 0 && this.checkOptions()) {
+                                    this.fadeInAddButton()
+                                } else {
+                                    this.fadeOutAddButton()
+                                }
+                            })
                         }
                     }}
                 />
@@ -160,7 +173,13 @@ export default class ProductShopPage extends CustomComponent<Props, State> {
                     }}
                     buttonFunc={async () => {
                         if (this.state.productQuantity < 99) {
-                            this.setState({productQuantity: this.state.productQuantity + 1})
+                            this.setState({productQuantity: this.state.productQuantity + 1}, () => {
+                                if (this.checkOptions()) {
+                                    this.fadeInAddButton()
+                                } else {
+                                    this.fadeOutAddButton()
+                                }
+                            })
                         }
                     }}
                 />
@@ -168,51 +187,64 @@ export default class ProductShopPage extends CustomComponent<Props, State> {
         )
     }
 
+    fadeInAddButton() {
+        Animated.timing(this.addButtonOpacity, {
+            toValue: 1,
+            duration: 150,
+            useNativeDriver: false,
+        }).start()
+    }
+
+    fadeOutAddButton() {
+        Animated.timing(this.addButtonOpacity, {
+            toValue: 0,
+            duration: 150,
+            useNativeDriver: false
+        }).start()
+    }
+
     renderAddButton() {
-        let barText = `Add ${this.state.productQuantity} to cart`
+        let barText = `Add ${this.state.productQuantity > 0 ? this.state.productQuantity : 1} to cart`
         if (this.state.cartQuantity > 0) {
             barText += ` (${this.state.cartQuantity})`
         }
-        if (this.state.productQuantity > 0 && this.checkOptions()) {
-            return (
+        return (
+            <Animated.View
+                style={{
+                    ...styles.cartButton,
+                    opacity: this.addButtonOpacity
+                }}
+                pointerEvents={this.state.productQuantity > 0 && this.checkOptions() ? undefined : "none"}
+            >
                 <TextButton
                     text={barText}
-                    buttonStyle={styles.cartButton}
+                    touchableProps={{
+                        disabled: this.state.productQuantity <= 0 || !this.checkOptions()
+                    }}
                     appearance={"color"}
                     showLoading={true}
                     buttonFunc={async () => {
-                        if (this.state.productData && this.state.productData.price) {
-                            let totalPrice = this.state.productData.price
-                            for (const selection of Object.values(this.state.optionSelections)) {
-                                totalPrice += selection.priceChange
-                            }
-                            let newSelections: OptionSelections = {}
-                            // Make sure the cart item's option selections are in the same order as the product's option types
-                            this.state.productData.optionTypes.forEach((optionType) => {
-                                newSelections[optionType.name] = this.state.optionSelections[optionType.name]
-                            })
-                            const cartItem: CartItem = {
-                                businessID: this.state.productData.businessID,
-                                productID: this.state.productData.productID,
-                                productOptions: newSelections,
-                                basePrice: this.state.productData.price,
-                                totalPrice: totalPrice,
-                                quantity: this.state.productQuantity
-                            }
+                        if (this.state.productData && this.state.optionSelections) {
+                            // Calculate total price of item
+                            const cartItem = CustomerFunctions.createCartItem(this.state.productData, this.state.optionSelections, this.state.productQuantity)
                             await CustomerFunctions.addToCart(cartItem)
                             this.props.navigation.goBack()
+                        } else {
+                            console.error("Could not add to cart")
                         }
                     }}
                 />
-            )
-        }
+            </Animated.View>
+        )
     }
 
     renderUI() {
         if (this.state.productData) {
             return (
                 <>
-                    <ScrollContainer>
+                    <ScrollContainer
+                        contentContainerStyle={{paddingBottom: menuBarHeight*2 + styleValues.mediumPadding*2}}
+                    >
                         <ImageSlider
                             uris={this.state.productData.images}
                             onImagesLoaded={() => {
@@ -229,21 +261,6 @@ export default class ProductShopPage extends CustomComponent<Props, State> {
                         <View style={styles.descriptionBody}>
                             <Text style={styles.description}>{formatText(this.state.productData.description)}</Text>
                         </View>
-                        <TextDropdownAnimated
-                            placeholderText={"Select"}
-                            items={[
-                                {
-                                    text: "First",
-                                    value: 1
-                                }, {
-                                    text: "Second",
-                                    value: 1
-                                }, {
-                                    text: "Third",
-                                    value: 1
-                                }
-                            ]}
-                        />
                         {this.renderOptions()}
                         {/* Quantity buttons */}
                         {this.renderQuantity()}
@@ -364,6 +381,7 @@ const styles = StyleSheet.create({
     },
     cartButton: {
         position: "absolute",
-        bottom: menuBarHeight + styleValues.mediumPadding
+        bottom: menuBarHeight + styleValues.mediumPadding,
+        width: "100%",
     }
 })

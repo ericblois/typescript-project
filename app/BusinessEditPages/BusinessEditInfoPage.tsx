@@ -149,7 +149,7 @@ export default class BusinessEditInfoPage extends CustomComponent<BusinessEditIn
             ></TextInputBox>
             {/* Description */}
             <TextInputBox
-              style={styles.descriptionBox}
+              boxStyle={styles.descriptionBox}
               textStyle={{fontSize: styleValues.smallerTextSize}}
               textProps={{
                   defaultValue: this.state.publicData?.description,
